@@ -41,16 +41,21 @@ const BadgeShowcase = ({ userId }: BadgeShowcaseProps) => {
         .order("tier", { ascending: true });
 
       // Load user's earned badges
+      // Load user's earned badges
       const { data: userBadges } = await supabase
         .from("user_achievements")
         .select("badge_id, earned_at, progress")
         .eq("user_id", userId!);
 
-      // Merge the data
-      const earnedBadgeIds = new Set(userBadges?.map(b => b.badge_id) || []);
-      const badgeProgress = new Map(userBadges?.map(b => [b.badge_id, b]) || []);
+      // Type helper to avoid 'unknown' when generated DB types are out of sync
+      type UserAchievement = { badge_id: string; earned_at?: string; progress?: any };
+      const userBadgesArr = (userBadges as UserAchievement[]) || [];
 
-      const mergedBadges = allBadges?.map(badge => ({
+      // Merge the data
+      const earnedBadgeIds = new Set(userBadgesArr.map((b) => b.badge_id));
+      const badgeProgress = new Map<string, UserAchievement>(userBadgesArr.map((b) => [b.badge_id, b]));
+
+      const mergedBadges = (allBadges as any[])?.map((badge: any) => ({
         ...badge,
         earned: earnedBadgeIds.has(badge.id),
         earned_at: badgeProgress.get(badge.id)?.earned_at,
