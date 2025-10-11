@@ -2290,12 +2290,12 @@ export const PromptEngineer = () => {
                 />
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="icon"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full sm:w-auto"
+                  className="rounded-full"
+                  title="Upload files and images"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Upload Files and Images
+                  <Plus className="w-5 h-5" />
                 </Button>
                 
                 {/* Uploaded Files Preview */}
