@@ -2139,7 +2139,7 @@ export const PromptEngineer = () => {
                   </div>
                   
                   {/* Voice Input and Upload Buttons */}
-                  <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 z-10 flex items-center gap-2">
+                  <div className="absolute bottom-2 sm:bottom-2.5 right-3 sm:right-4 z-10 flex items-center gap-1">
                     {/* Plus Button for File Upload */}
                     <Button
                       variant="ghost"
