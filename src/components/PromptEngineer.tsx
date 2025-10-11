@@ -2138,8 +2138,20 @@ export const PromptEngineer = () => {
                     )}
                   </div>
                   
-                  {/* Voice Input Button - Enhanced with better mobile visibility */}
-                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-10">
+                  {/* Voice Input and Upload Buttons */}
+                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-10 flex items-center gap-2">
+                    {/* Plus Button for File Upload */}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="h-14 w-14 sm:h-12 sm:w-12 rounded-full shadow-lg hover:scale-110 transition-all duration-300 touch-manipulation"
+                      title="Upload files and images"
+                    >
+                      <Plus className="w-6 h-6 sm:w-5 sm:h-5" />
+                    </Button>
+                    
+                    {/* Voice Input Button */}
                     <div className="relative">
                       <Button
                         variant={isRecording ? "destructive" : "secondary"}
@@ -2278,7 +2290,7 @@ export const PromptEngineer = () => {
                 )}
               </div>
 
-              {/* File Upload Button and Preview */}
+              {/* File Upload Hidden Input and Preview */}
               <div className="mb-6">
                 <input
                   ref={fileInputRef}
@@ -2288,15 +2300,6 @@ export const PromptEngineer = () => {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="rounded-full"
-                  title="Upload files and images"
-                >
-                  <Plus className="w-5 h-5" />
-                </Button>
                 
                 {/* Uploaded Files Preview */}
                 {uploadedFiles.length > 0 && (
