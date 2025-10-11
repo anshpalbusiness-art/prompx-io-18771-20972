@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AICopilot } from "@/components/AICopilot";
-import { Copy, CheckCircle, Wand2, Sparkles, Code, Image, Music, Video, MessageSquare, Zap, Target, BookOpen, ArrowRight, Stars, Palette, Brain, Mic, MicOff, Volume2, Globe, Languages, Loader2, User, History, Briefcase } from "lucide-react";
+import { Copy, CheckCircle, Wand2, Sparkles, Code, Image, Music, Video, MessageSquare, Zap, Target, BookOpen, ArrowRight, Stars, Palette, Brain, Mic, MicOff, Volume2, Globe, Languages, Loader2, User, History, Briefcase, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PromptGenerator, type PromptTemplate } from "@/lib/promptGenerator";
 import { supabase } from "@/integrations/supabase/client";
@@ -2294,8 +2294,8 @@ export const PromptEngineer = () => {
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full sm:w-auto"
                 >
-                  <Image className="w-4 h-4 mr-2" />
-                  Upload Files/Images
+                  <Plus className="w-4 h-4 mr-2" />
+                  Upload Files and Images
                 </Button>
                 
                 {/* Uploaded Files Preview */}
