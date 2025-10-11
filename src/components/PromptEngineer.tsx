@@ -26,6 +26,7 @@ import LegalPromptPacks from "./LegalPromptPacks";
 import PricingPlans from "./PricingPlans";
 import ApiKeyManagement from "./ApiKeyManagement";
 import UsageDashboard from "./UsageDashboard";
+import { VisualPromptBuilder } from "./VisualPromptBuilder";
 
 // Language detection and translation
 const detectLanguage = async (text: string): Promise<string> => {
@@ -1646,6 +1647,7 @@ export const PromptEngineer = () => {
             <Tabs defaultValue="profile" className="w-full">
               <TabsList className="w-full mb-6">
                 <TabsTrigger value="profile">Profile</TabsTrigger>
+                <TabsTrigger value="visual">Visual Builder</TabsTrigger>
                 <TabsTrigger value="copilot">AI Co-Pilot</TabsTrigger>
                 <TabsTrigger value="templates">Templates</TabsTrigger>
                 <TabsTrigger value="history">History</TabsTrigger>
@@ -1666,6 +1668,18 @@ export const PromptEngineer = () => {
                   userId={user.id} 
                   onPreferencesUpdate={setUserPreferences}
                 />
+              </TabsContent>
+
+              <TabsContent value="visual">
+                <VisualPromptBuilder onPromptGenerated={(prompt) => {
+                  setUserInput(prompt);
+                  toast({
+                    title: "Prompt Generated",
+                    description: "Your visual prompt has been built! Scroll down to generate optimized versions.",
+                  });
+                  // Scroll to the main input area
+                  document.getElementById('tool-selector')?.scrollIntoView({ behavior: 'smooth' });
+                }} />
               </TabsContent>
 
               <TabsContent value="copilot">
