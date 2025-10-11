@@ -2148,7 +2148,7 @@ export const PromptEngineer = () => {
                       className="h-8 w-8 sm:h-9 sm:w-9 rounded-full hover:bg-accent transition-colors touch-manipulation"
                       title="Upload files and images"
                     >
-                      <Plus className="h-5 w-5 sm:h-5 sm:w-5 text-muted-foreground" />
+                      <Plus className="h-5 w-5 sm:h-5 sm:w-5 text-foreground" />
                     </Button>
                     
                     {/* Voice Input Button */}
@@ -2165,11 +2165,11 @@ export const PromptEngineer = () => {
                         disabled={isProcessingVoice}
                       >
                         {isProcessingVoice ? (
-                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                          <Loader2 className="h-5 w-5 animate-spin text-foreground" />
                         ) : isRecording ? (
                           <MicOff className="h-5 w-5 text-destructive-foreground" />
                         ) : (
-                          <Mic className="h-5 w-5 text-muted-foreground" />
+                          <Mic className="h-5 w-5 text-foreground" />
                         )}
                       </Button>
                       
