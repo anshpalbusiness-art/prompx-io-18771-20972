@@ -150,6 +150,11 @@ export const PromptEngineer = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isAnalyzingFile, setIsAnalyzingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   // Get current user
@@ -1384,6 +1389,125 @@ export const PromptEngineer = () => {
     }
   };
 
+  // File upload and analysis functions
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      handleFiles(Array.from(files));
+    }
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
+  };
+
+  const handleFiles = async (files: File[]) => {
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    // Store files
+    setUploadedFiles(prev => [...prev, ...files]);
+    
+    // Create image previews
+    for (const file of imageFiles) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setUploadedImages(prev => [...prev, e.target!.result as string]);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    
+    // Analyze with AI
+    await analyzeFiles(files);
+  };
+
+  const analyzeFiles = async (files: File[]) => {
+    setIsAnalyzingFile(true);
+    
+    try {
+      const fileDescriptions: string[] = [];
+      
+      for (const file of files) {
+        if (file.type.startsWith('image/')) {
+          // Analyze image with vision AI
+          const reader = new FileReader();
+          const base64 = await new Promise<string>((resolve) => {
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsDataURL(file);
+          });
+          
+          const { data, error } = await supabase.functions.invoke('analyze-vision', {
+            body: { image: base64 }
+          });
+          
+          if (data?.analysis) {
+            fileDescriptions.push(`📷 Image analysis: ${data.analysis}`);
+          }
+        } else {
+          // Describe non-image files
+          fileDescriptions.push(`📄 File: ${file.name} (${(file.size / 1024).toFixed(1)}KB, ${file.type || 'unknown type'})`);
+        }
+      }
+      
+      // Add analysis to textarea
+      const analysisText = fileDescriptions.join('\n');
+      const newInput = userInput 
+        ? `${userInput}\n\n${analysisText}`
+        : analysisText;
+      
+      setUserInput(newInput);
+      
+      toast({
+        title: "✅ Files Analyzed!",
+        description: `${files.length} file(s) analyzed and added to your prompt`,
+      });
+    } catch (error) {
+      console.error('Error analyzing files:', error);
+      
+      // Even if analysis fails, add file names
+      const fileList = files.map(f => `📄 ${f.name}`).join('\n');
+      const newInput = userInput 
+        ? `${userInput}\n\n${fileList}`
+        : fileList;
+      setUserInput(newInput);
+      
+      toast({
+        title: "Files Added",
+        description: "Files added to prompt. AI analysis not available.",
+      });
+    } finally {
+      setIsAnalyzingFile(false);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const executeWorkflow = async (steps: WorkflowStep[]) => {
     if (!userInput.trim()) {
       toast({
@@ -1976,13 +2100,43 @@ export const PromptEngineer = () => {
                 </div>
                 
                 <div className="relative">
-                  <Textarea
-                    placeholder="What would you like the AI to accomplish? Speak or type in any language - I'll auto-detect and enhance your prompt..."
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    className="min-h-[120px] sm:min-h-[140px] bg-background/70 backdrop-blur border-2 border-border/40 focus:border-primary/60 resize-none text-sm sm:text-base rounded-xl sm:rounded-2xl shadow-inner focus:shadow-lg transition-all duration-300 p-4 sm:p-6 pr-12 sm:pr-20 touch-manipulation"
-                    rows={5}
-                  />
+                  <div
+                    className={`relative transition-all duration-300 ${
+                      isDragging ? 'ring-4 ring-primary ring-offset-2 scale-[1.02]' : ''
+                    }`}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                  >
+                    <Textarea
+                      placeholder="What would you like the AI to accomplish? Speak, type, or drag & drop images/files here - I'll auto-detect and enhance your prompt..."
+                      value={userInput}
+                      onChange={(e) => setUserInput(e.target.value)}
+                      className="min-h-[120px] sm:min-h-[140px] bg-background/70 backdrop-blur border-2 border-border/40 focus:border-primary/60 resize-none text-sm sm:text-base rounded-xl sm:rounded-2xl shadow-inner focus:shadow-lg transition-all duration-300 p-4 sm:p-6 pr-12 sm:pr-20 touch-manipulation"
+                      rows={5}
+                    />
+                    
+                    {/* Drag overlay */}
+                    {isDragging && (
+                      <div className="absolute inset-0 bg-primary/10 backdrop-blur-sm border-4 border-dashed border-primary rounded-xl flex items-center justify-center z-20 pointer-events-none">
+                        <div className="text-center">
+                          <Image className="w-12 h-12 mx-auto mb-2 text-primary animate-bounce" />
+                          <p className="text-primary font-semibold">Drop files here to analyze</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* File analyzing overlay */}
+                    {isAnalyzingFile && (
+                      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-xl flex items-center justify-center z-20">
+                        <div className="text-center">
+                          <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin text-primary" />
+                          <p className="text-sm text-muted-foreground">Analyzing files with AI...</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   
                   {/* Voice Input Button - Enhanced with better mobile visibility */}
                   <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-10">
@@ -2119,6 +2273,68 @@ export const PromptEngineer = () => {
                       <span className="text-blue-600 dark:text-blue-400 font-semibold text-base sm:text-base">
                         🧠 Processing your voice input with AI...
                       </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* File Upload Button and Preview */}
+              <div className="mb-6">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*,.pdf,.doc,.docx,.txt"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full sm:w-auto"
+                >
+                  <Image className="w-4 h-4 mr-2" />
+                  Upload Files/Images
+                </Button>
+                
+                {/* Uploaded Files Preview */}
+                {uploadedFiles.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <p className="text-sm font-semibold text-muted-foreground">Uploaded Files:</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {uploadedFiles.map((file, index) => (
+                        <div key={index} className="relative group">
+                          {file.type.startsWith('image/') && uploadedImages[index] ? (
+                            <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-border">
+                              <img 
+                                src={uploadedImages[index]} 
+                                alt={file.name}
+                                className="w-full h-full object-cover"
+                              />
+                              <button
+                                onClick={() => removeFile(index)}
+                                className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <CheckCircle className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="relative aspect-square rounded-lg border-2 border-border bg-muted flex flex-col items-center justify-center p-2">
+                              <Image className="w-8 h-8 text-muted-foreground mb-1" />
+                              <p className="text-xs text-center text-muted-foreground truncate w-full px-1">
+                                {file.name}
+                              </p>
+                              <button
+                                onClick={() => removeFile(index)}
+                                className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <CheckCircle className="w-3 h-3" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

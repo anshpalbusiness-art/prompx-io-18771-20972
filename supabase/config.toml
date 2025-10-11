@@ -1,1 +1,4 @@
 project_id = "knldnlwpsrhcgvlbjsyx"
+
+[functions.analyze-vision]
+verify_jwt = false
