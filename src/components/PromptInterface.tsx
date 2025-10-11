@@ -6,9 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2, Sparkles, CheckCircle, Shield, AlertTriangle, User } from "lucide-react";
+import { Copy, Loader2, Sparkles, CheckCircle, Shield, AlertTriangle, User, Layout } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PersonaSelector } from "./PersonaSelector";
+import { VoiceInput } from "./VoiceInput";
+import { VisualPromptBuilder } from "./VisualPromptBuilder";
 
 export const PromptInterface = () => {
   const [prompt, setPrompt] = useState("");
@@ -22,6 +24,7 @@ export const PromptInterface = () => {
     issues: string[];
     sanitizedPrompt: string;
   } | null>(null);
+  const [showVisualBuilder, setShowVisualBuilder] = useState(false);
   const { toast } = useToast();
 
   const handlePersonaSelect = (personaId: string | null, prefix: string) => {
@@ -183,14 +186,18 @@ export const PromptInterface = () => {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="prompt" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-zinc-800/50">
+          <TabsList className="grid w-full grid-cols-3 bg-zinc-800/50">
             <TabsTrigger value="prompt" className="data-[state=active]:bg-zinc-700">
               <Sparkles className="w-4 h-4 mr-2" />
               Prompt
             </TabsTrigger>
+            <TabsTrigger value="visual" className="data-[state=active]:bg-zinc-700">
+              <Layout className="w-4 h-4 mr-2" />
+              Visual
+            </TabsTrigger>
             <TabsTrigger value="persona" className="data-[state=active]:bg-zinc-700">
               <User className="w-4 h-4 mr-2" />
-              AI Persona
+              Persona
             </TabsTrigger>
           </TabsList>
 
@@ -204,13 +211,19 @@ export const PromptInterface = () => {
 
             <div className="space-y-2">
               <label className="text-sm text-zinc-400">Your Prompt</label>
-              <Textarea
-                placeholder="Enter your prompt here... (e.g., 'Write a professional email about...')"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="min-h-[120px] bg-zinc-800/50 border-white/10 text-white placeholder:text-zinc-500 resize-none"
-                disabled={isLoading || isSanitizing}
-              />
+              <div className="flex gap-2">
+                <Textarea
+                  placeholder="Enter your prompt here or use voice input... (e.g., 'Write a professional email about...')"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="min-h-[120px] bg-zinc-800/50 border-white/10 text-white placeholder:text-zinc-500 resize-none flex-1"
+                  disabled={isLoading || isSanitizing}
+                />
+                <VoiceInput
+                  onTranscript={(text) => setPrompt(prompt + (prompt ? " " : "") + text)}
+                  disabled={isLoading || isSanitizing}
+                />
+              </div>
             </div>
 
             {safetyWarning && (
@@ -304,6 +317,10 @@ export const PromptInterface = () => {
                 </div>
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="visual" className="mt-4">
+            <VisualPromptBuilder onPromptGenerated={setPrompt} />
           </TabsContent>
 
           <TabsContent value="persona" className="mt-4">
