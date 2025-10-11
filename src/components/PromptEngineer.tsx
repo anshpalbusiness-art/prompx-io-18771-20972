@@ -2113,7 +2113,7 @@ export const PromptEngineer = () => {
                       placeholder="What would you like the AI to accomplish? Speak, type, or drag & drop images/files here - I'll auto-detect and enhance your prompt..."
                       value={userInput}
                       onChange={(e) => setUserInput(e.target.value)}
-                      className="min-h-[120px] sm:min-h-[140px] bg-background/70 backdrop-blur border-2 border-border/40 focus:border-primary/60 resize-none text-sm sm:text-base rounded-xl sm:rounded-2xl shadow-inner focus:shadow-lg transition-all duration-300 p-4 sm:p-6 pr-20 sm:pr-24 touch-manipulation"
+                      className="min-h-[120px] sm:min-h-[140px] bg-background/70 backdrop-blur border-2 border-border/40 focus:border-primary/60 resize-none text-sm sm:text-base rounded-xl sm:rounded-2xl shadow-inner focus:shadow-lg transition-all duration-300 p-4 sm:p-6 pr-24 sm:pr-28 pb-12 sm:pb-14 touch-manipulation"
                       rows={5}
                     />
                     
@@ -2145,7 +2145,7 @@ export const PromptEngineer = () => {
                       variant="outline"
                       size="icon"
                       onClick={() => fileInputRef.current?.click()}
-                      className="h-8 w-8 sm:h-9 sm:w-9 rounded-full shadow-md hover:scale-105 transition-all duration-300 touch-manipulation"
+                      className="h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-md hover:scale-105 transition-all duration-300 touch-manipulation"
                       title="Upload files and images"
                     >
                       <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
