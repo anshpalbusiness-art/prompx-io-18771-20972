@@ -2139,16 +2139,16 @@ export const PromptEngineer = () => {
                   </div>
                   
                   {/* Voice Input and Upload Buttons */}
-                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-10 flex items-center gap-2">
+                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-10 flex items-center gap-3 sm:gap-2">
                     {/* Plus Button for File Upload */}
                     <Button
                       variant="outline"
                       size="icon"
                       onClick={() => fileInputRef.current?.click()}
-                      className="h-14 w-14 sm:h-12 sm:w-12 rounded-full shadow-lg hover:scale-110 transition-all duration-300 touch-manipulation"
+                      className="h-12 w-12 sm:h-12 sm:w-12 rounded-full shadow-lg hover:scale-110 transition-all duration-300 touch-manipulation"
                       title="Upload files and images"
                     >
-                      <Plus className="w-6 h-6 sm:w-5 sm:h-5" />
+                      <Plus className="w-5 h-5 sm:w-5 sm:h-5" />
                     </Button>
                     
                     {/* Voice Input Button */}
@@ -2157,7 +2157,7 @@ export const PromptEngineer = () => {
                         variant={isRecording ? "destructive" : "secondary"}
                         size="sm"
                         onClick={isRecording ? stopVoiceInput : startVoiceInput}
-                        className={`h-14 w-14 sm:h-12 sm:w-12 p-0 rounded-full shadow-lg hover:scale-110 transition-all duration-300 touch-manipulation ${
+                        className={`h-12 w-12 sm:h-12 sm:w-12 p-0 rounded-full shadow-lg hover:scale-110 transition-all duration-300 touch-manipulation ${
                           isRecording 
                             ? 'bg-gradient-to-r from-red-500 to-pink-500 border-2 border-white dark:border-red-900 animate-pulse' 
                             : 'bg-gradient-to-r from-primary/90 to-primary backdrop-blur-sm border-2 border-primary/20'
@@ -2165,16 +2165,16 @@ export const PromptEngineer = () => {
                         disabled={isProcessingVoice}
                       >
                         {isProcessingVoice ? (
-                          <Loader2 className="w-6 h-6 sm:w-5 sm:h-5 animate-spin text-white" />
+                          <Loader2 className="w-5 h-5 sm:w-5 sm:h-5 animate-spin text-white" />
                         ) : isRecording ? (
                           <>
-                            <MicOff className="w-6 h-6 sm:w-5 sm:h-5 animate-pulse text-white" />
+                            <MicOff className="w-5 h-5 sm:w-5 sm:h-5 animate-pulse text-white" />
                             {/* Animated ring for recording state */}
                             <div className="absolute inset-0 rounded-full border-2 border-white animate-ping opacity-75" />
                             <div className="absolute inset-0 rounded-full border-4 border-red-300 animate-pulse" />
                           </>
                         ) : (
-                          <Mic className="w-6 h-6 sm:w-5 sm:h-5 text-white" />
+                          <Mic className="w-5 h-5 sm:w-5 sm:h-5 text-white" />
                         )}
                       </Button>
                       
