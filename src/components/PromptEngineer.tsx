@@ -2113,7 +2113,7 @@ export const PromptEngineer = () => {
                       placeholder="What would you like the AI to accomplish? Speak, type, or drag & drop images/files here - I'll auto-detect and enhance your prompt..."
                       value={userInput}
                       onChange={(e) => setUserInput(e.target.value)}
-                      className="min-h-[120px] sm:min-h-[140px] bg-background/70 backdrop-blur border-2 border-border/40 focus:border-primary/60 resize-none text-sm sm:text-base rounded-xl sm:rounded-2xl shadow-inner focus:shadow-lg transition-all duration-300 p-4 sm:p-6 pr-24 sm:pr-28 pb-12 sm:pb-14 touch-manipulation"
+                      className="min-h-[120px] sm:min-h-[140px] bg-background/70 backdrop-blur border-2 border-border/40 focus:border-primary/60 resize-none text-sm sm:text-base rounded-xl sm:rounded-2xl shadow-inner focus:shadow-lg transition-all duration-300 p-4 sm:p-6 pr-20 sm:pr-24 pb-3 sm:pb-4 touch-manipulation"
                       rows={5}
                     />
                     
@@ -2139,42 +2139,37 @@ export const PromptEngineer = () => {
                   </div>
                   
                   {/* Voice Input and Upload Buttons */}
-                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-10 flex items-center gap-2">
+                  <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 z-10 flex items-center gap-2">
                     {/* Plus Button for File Upload */}
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="icon"
                       onClick={() => fileInputRef.current?.click()}
-                      className="h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-md hover:scale-105 transition-all duration-300 touch-manipulation"
+                      className="h-8 w-8 sm:h-9 sm:w-9 rounded-full hover:bg-accent transition-colors touch-manipulation"
                       title="Upload files and images"
                     >
-                      <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <Plus className="h-5 w-5 sm:h-5 sm:w-5 text-muted-foreground" />
                     </Button>
                     
                     {/* Voice Input Button */}
                     <div className="relative">
                       <Button
-                        variant={isRecording ? "destructive" : "secondary"}
-                        size="sm"
+                        variant="ghost"
+                        size="icon"
                         onClick={isRecording ? stopVoiceInput : startVoiceInput}
-                        className={`h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full shadow-md hover:scale-105 transition-all duration-300 touch-manipulation ${
+                        className={`h-8 w-8 sm:h-9 sm:w-9 rounded-full transition-colors touch-manipulation ${
                           isRecording 
-                            ? 'bg-gradient-to-r from-red-500 to-pink-500 border-2 border-white dark:border-red-900 animate-pulse' 
-                            : 'bg-gradient-to-r from-primary/90 to-primary backdrop-blur-sm border-2 border-primary/20'
+                            ? 'bg-destructive hover:bg-destructive/90' 
+                            : 'hover:bg-accent'
                         }`}
                         disabled={isProcessingVoice}
                       >
                         {isProcessingVoice ? (
-                          <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin text-white" />
+                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                         ) : isRecording ? (
-                          <>
-                            <MicOff className="h-4 w-4 sm:h-5 sm:w-5 animate-pulse text-white" />
-                            {/* Animated ring for recording state */}
-                            <div className="absolute inset-0 rounded-full border-2 border-white animate-ping opacity-75" />
-                            <div className="absolute inset-0 rounded-full border-4 border-red-300 animate-pulse" />
-                          </>
+                          <MicOff className="h-5 w-5 text-destructive-foreground" />
                         ) : (
-                          <Mic className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                          <Mic className="h-5 w-5 text-muted-foreground" />
                         )}
                       </Button>
                       
