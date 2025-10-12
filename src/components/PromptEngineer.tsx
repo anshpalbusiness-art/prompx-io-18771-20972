@@ -1532,7 +1532,25 @@ export const PromptEngineer = () => {
         body: { url }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error messages
+        if (error.message.includes('blocking automated access')) {
+          toast({
+            title: "Site Protected",
+            description: "This website blocks automated access. Try a different site or copy & paste the content manually.",
+            variant: "destructive",
+          });
+        } else if (error.message.includes('timeout')) {
+          toast({
+            title: "Timeout",
+            description: "Website took too long to respond. Try again or use a faster loading site.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
 
       if (data?.analysis) {
         const analysisText = `🌐 Website Analysis (${url}):\n\n${data.analysis}`;
@@ -1552,7 +1570,7 @@ export const PromptEngineer = () => {
       
       toast({
         title: "Analysis Failed",
-        description: "Could not analyze website. Please check the URL and try again.",
+        description: "Could not analyze website. Some sites block automated access. Try simpler sites or paste HTML directly.",
         variant: "destructive",
       });
     } finally {
@@ -2209,7 +2227,11 @@ export const PromptEngineer = () => {
                         <DialogHeader>
                           <DialogTitle>Analyze Website</DialogTitle>
                           <DialogDescription>
-                            Enter a website URL to generate an AI prompt that can recreate a similar design or functionality
+                            Enter a website URL to generate an AI prompt that can recreate similar design or functionality.
+                            <br /><br />
+                            <span className="text-xs text-muted-foreground">
+                              Note: Some sites (like grok.com, chatgpt.com) block automated access. Simple sites work best!
+                            </span>
                           </DialogDescription>
                         </DialogHeader>
                         <div className="flex flex-col gap-4 py-4">

@@ -11,13 +11,18 @@ serve(async (req) => {
   }
 
   try {
-    const { url } = await req.json();
+    let { url } = await req.json();
 
     if (!url) {
       return new Response(
         JSON.stringify({ error: 'URL is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Auto-add https:// if missing
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -27,16 +32,46 @@ serve(async (req) => {
 
     console.log('Fetching website:', url);
     
-    // Fetch the website content
-    const websiteResponse = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    // Fetch the website content with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    let websiteResponse;
+    try {
+      websiteResponse = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+        },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      console.error('Fetch error:', fetchError);
+      
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        return new Response(
+          JSON.stringify({ error: 'Request timeout - website took too long to respond' }),
+          { status: 408, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
-    });
+      
+      return new Response(
+        JSON.stringify({ 
+          error: 'Could not connect to website. It may be blocking automated access or the URL is incorrect.' 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     if (!websiteResponse.ok) {
+      console.error('Website returned status:', websiteResponse.status);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch website' }),
+        JSON.stringify({ 
+          error: `Website returned error (${websiteResponse.status}). The site may be blocking automated access or require authentication.` 
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
