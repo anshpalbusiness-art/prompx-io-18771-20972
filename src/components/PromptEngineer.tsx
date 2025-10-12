@@ -2113,7 +2113,7 @@ export const PromptEngineer = () => {
                       placeholder="What would you like the AI to accomplish? Speak, type, or drag & drop images/files here - I'll auto-detect and enhance your prompt..."
                       value={userInput}
                       onChange={(e) => setUserInput(e.target.value)}
-                      className="min-h-[120px] sm:min-h-[140px] bg-background/70 backdrop-blur border-2 border-border/40 focus:border-primary/60 resize-none text-sm sm:text-base rounded-xl sm:rounded-2xl shadow-inner focus:shadow-lg transition-all duration-300 p-4 sm:p-6 pr-20 sm:pr-24 pb-3 sm:pb-4 touch-manipulation"
+                      className="min-h-[120px] sm:min-h-[140px] bg-background/70 backdrop-blur border-2 border-border/40 focus:border-primary/60 resize-none text-sm sm:text-base rounded-xl sm:rounded-2xl shadow-inner focus:shadow-lg transition-all duration-300 p-4 sm:p-6 pr-24 sm:pr-28 pb-3 sm:pb-4 touch-manipulation"
                       rows={5}
                     />
                     
@@ -2139,7 +2139,7 @@ export const PromptEngineer = () => {
                   </div>
                   
                   {/* Voice Input and Upload Buttons */}
-                  <div className="absolute bottom-2 sm:bottom-2.5 right-3 sm:right-4 z-10 flex items-center gap-1">
+                  <div className="absolute bottom-2 sm:bottom-2.5 right-2 sm:right-3 z-10 flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded-full p-1 shadow-sm border border-border/30">
                     {/* Plus Button for File Upload */}
                     <Button
                       variant="ghost"
