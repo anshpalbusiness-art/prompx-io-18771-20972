@@ -307,12 +307,51 @@ Return ONLY a JSON array with this exact structure:
       } else {
         prompts = JSON.parse(content);
       }
+      
+      // Validate that prompts is an array of objects with title and prompt
+      if (!Array.isArray(prompts) || prompts.length === 0) {
+        throw new Error("Invalid prompts array structure");
+      }
+      
+      // Ensure each prompt has the required structure
+      prompts = prompts.map((p, idx) => {
+        if (typeof p === 'string') {
+          // If prompt is a string, create proper structure
+          const titles = ["Quick & Direct", "Detailed & Professional", "Creative & Enhanced"];
+          return { title: titles[idx] || "Optimized Prompt", prompt: p };
+        }
+        
+        // Validate existing structure
+        if (!p.title || !p.prompt) {
+          throw new Error("Prompt missing title or prompt field");
+        }
+        
+        // Ensure prompt is a string, not nested JSON
+        if (typeof p.prompt !== 'string') {
+          p.prompt = JSON.stringify(p.prompt);
+        }
+        
+        return p;
+      });
+      
     } catch (parseError) {
       console.error("Failed to parse AI response:", parseError);
+      console.error("Raw content:", content);
+      
+      // Create meaningful fallback prompts based on original text
       prompts = [
-        { title: "Quick & Direct", prompt: content },
-        { title: "Detailed & Professional", prompt: content },
-        { title: "Creative & Enhanced", prompt: content }
+        { 
+          title: "Quick & Direct", 
+          prompt: `${text}\n\nPlease provide a concise, direct response optimized for ${modelInfo}.`
+        },
+        { 
+          title: "Detailed & Professional", 
+          prompt: `${text}\n\nPlease provide a comprehensive, professional response with detailed explanations, optimized for ${modelInfo}.`
+        },
+        { 
+          title: "Creative & Enhanced", 
+          prompt: `${text}\n\nPlease provide a creative, enhanced response that showcases the capabilities of ${modelInfo}.`
+        }
       ];
     }
 

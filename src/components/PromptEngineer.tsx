@@ -1281,8 +1281,36 @@ export const PromptEngineer = () => {
 
         const generatedPrompts = data?.prompts || [];
         
+        // Validate and clean prompts on frontend
+        const validPrompts = generatedPrompts.filter((p: any) => {
+          // Ensure prompt has required structure
+          if (!p || typeof p !== 'object') {
+            console.warn('Invalid prompt object:', p);
+            return false;
+          }
+          
+          // Ensure title and prompt are strings
+          if (typeof p.title !== 'string' || typeof p.prompt !== 'string') {
+            console.warn('Prompt missing title or prompt string:', p);
+            return false;
+          }
+          
+          // Check if prompt contains nested JSON (shouldn't happen now)
+          try {
+            const parsed = JSON.parse(p.prompt);
+            if (Array.isArray(parsed)) {
+              console.warn('Prompt contains array JSON - this should not happen:', p);
+              return false;
+            }
+          } catch {
+            // This is good - prompt is a regular string, not JSON
+          }
+          
+          return true;
+        });
+        
         // Add model metadata to each prompt
-        const modelPrompts = generatedPrompts.map((p: any) => ({
+        const modelPrompts = validPrompts.map((p: any) => ({
           ...p,
           title: compareMode ? `${model.name} - ${p.title}` : p.title,
           modelId: modelId,
