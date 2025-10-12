@@ -77,11 +77,15 @@ const Home = () => {
   const ctaRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Check for existing session first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Home - Initial session check:', session?.user?.email || 'No user');
       setUser(session?.user ?? null);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Then set up listener for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Home - Auth state changed:', event, session?.user?.email || 'No user');
       setUser(session?.user ?? null);
     });
 
