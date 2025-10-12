@@ -43,6 +43,8 @@ export const Header = ({ user }: HeaderProps) => {
     { name: 'AI AGENTS', path: '/agents' },
     { name: 'ANALYTICS', path: '/analytics' },
     { name: 'MARKETPLACE', path: '/marketplace' },
+    { name: 'INTEGRATIONS', path: '/integrations' },
+    { name: 'SETTINGS', path: '/settings' },
   ];
 
   // Additional items in "More" dropdown
@@ -51,9 +53,7 @@ export const Header = ({ user }: HeaderProps) => {
     { name: 'OPTIMIZATION LAB', path: '/optimization-lab' },
     { name: 'COMMUNITY', path: '/community' },
     { name: 'ENTERPRISE', path: '/enterprise' },
-    { name: 'INTEGRATIONS', path: '/integrations' },
     { name: 'TEAM', path: '/team' },
-    { name: 'SETTINGS', path: '/settings' },
   ];
 
   // All nav items for mobile menu
