@@ -98,7 +98,7 @@ export const Header = ({ user }: HeaderProps) => {
                 <button
                   key={link.path}
                   onClick={() => navigate(link.path)}
-                  className={`relative px-3 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap ${
+                  className={`relative px-3 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap ${
                     isActive
                       ? 'bg-white/[0.12] text-white shadow-[0_4px_16px_rgba(255,255,255,0.12)] scale-[1.02]'
                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100'
@@ -114,7 +114,7 @@ export const Header = ({ user }: HeaderProps) => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="relative px-3 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1">
+                  <button className="relative px-3 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1">
                     MORE
                     <ChevronDown className="w-4 h-4" />
                   </button>
@@ -197,7 +197,7 @@ export const Header = ({ user }: HeaderProps) => {
                             navigate(link.path);
                             setMobileMenuOpen(false);
                           }}
-                          className={`text-left px-5 py-3.5 text-sm font-semibold rounded-xl transition-all duration-300 ${
+                          className={`text-left px-5 py-3.5 text-sm font-semibold tracking-tight rounded-xl transition-all duration-300 ${
                             isActive
                               ? 'bg-white/[0.12] text-white shadow-[0_4px_12px_rgba(255,255,255,0.08)]'
                               : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] active:scale-[0.98]'
