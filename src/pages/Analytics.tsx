@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import { IntelligentInsights } from "@/components/IntelligentInsights";
+import { AutomationDashboard } from "@/components/AutomationDashboard";
 import Layout from "@/components/Layout";
 import { User } from "@supabase/supabase-js";
 
@@ -56,6 +57,11 @@ const Analytics = () => {
           {/* Intelligent Insights Section */}
           <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-14">
             <IntelligentInsights />
+          </div>
+
+          {/* Automation & Intelligence Dashboard */}
+          <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-14">
+            <AutomationDashboard user={user} />
           </div>
 
           {/* Traditional Analytics Dashboard */}

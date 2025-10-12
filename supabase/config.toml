@@ -5,3 +5,12 @@ verify_jwt = false
 
 [functions.analyze-website]
 verify_jwt = false
+
+[functions.auto-optimize-scheduler]
+verify_jwt = false
+
+[functions.compliance-scanner]
+verify_jwt = false
+
+[functions.ab-test-manager]
+verify_jwt = false
