@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      ab_test_experiments: {
+        Row: {
+          auto_declare_winner: boolean | null
+          confidence_level: number | null
+          control_conversions: number | null
+          control_variant: string
+          created_at: string | null
+          description: string | null
+          ended_at: string | null
+          id: string
+          metadata: Json | null
+          sample_size: number | null
+          started_at: string | null
+          statistical_significance: number | null
+          status: string
+          test_name: string
+          treatment_conversions: number | null
+          treatment_variant: string
+          updated_at: string | null
+          user_id: string
+          winner: string | null
+        }
+        Insert: {
+          auto_declare_winner?: boolean | null
+          confidence_level?: number | null
+          control_conversions?: number | null
+          control_variant: string
+          created_at?: string | null
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          sample_size?: number | null
+          started_at?: string | null
+          statistical_significance?: number | null
+          status?: string
+          test_name: string
+          treatment_conversions?: number | null
+          treatment_variant: string
+          updated_at?: string | null
+          user_id: string
+          winner?: string | null
+        }
+        Update: {
+          auto_declare_winner?: boolean | null
+          confidence_level?: number | null
+          control_conversions?: number | null
+          control_variant?: string
+          created_at?: string | null
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          sample_size?: number | null
+          started_at?: string | null
+          statistical_significance?: number | null
+          status?: string
+          test_name?: string
+          treatment_conversions?: number | null
+          treatment_variant?: string
+          updated_at?: string | null
+          user_id?: string
+          winner?: string | null
+        }
+        Relationships: []
+      }
       ab_test_results: {
         Row: {
           id: string
@@ -333,6 +399,59 @@ export type Database = {
         }
         Relationships: []
       }
+      auto_optimization_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          improvement_score: number | null
+          optimization_insights: Json | null
+          optimized_prompt: string | null
+          original_prompt: string
+          prompt_id: string | null
+          status: string
+          trigger_reason: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          improvement_score?: number | null
+          optimization_insights?: Json | null
+          optimized_prompt?: string | null
+          original_prompt: string
+          prompt_id?: string | null
+          status?: string
+          trigger_reason: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          improvement_score?: number | null
+          optimization_insights?: Json | null
+          optimized_prompt?: string | null
+          original_prompt?: string
+          prompt_id?: string | null
+          status?: string
+          trigger_reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_optimization_jobs_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompt_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       badges: {
         Row: {
           category: string
@@ -438,6 +557,60 @@ export type Database = {
           is_active?: boolean | null
           keywords?: string[]
           severity?: string
+        }
+        Relationships: []
+      }
+      compliance_monitoring: {
+        Row: {
+          agent_id: string | null
+          auto_remediation_applied: boolean | null
+          compliance_type: string
+          detected_at: string | null
+          detection_method: string | null
+          id: string
+          issue_description: string
+          metadata: Json | null
+          prompt_id: string | null
+          remediation_suggestion: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          agent_id?: string | null
+          auto_remediation_applied?: boolean | null
+          compliance_type: string
+          detected_at?: string | null
+          detection_method?: string | null
+          id?: string
+          issue_description: string
+          metadata?: Json | null
+          prompt_id?: string | null
+          remediation_suggestion?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          agent_id?: string | null
+          auto_remediation_applied?: boolean | null
+          compliance_type?: string
+          detected_at?: string | null
+          detection_method?: string | null
+          id?: string
+          issue_description?: string
+          metadata?: Json | null
+          prompt_id?: string | null
+          remediation_suggestion?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -972,6 +1145,57 @@ export type Database = {
           personality_traits?: Json
           prompt_prefix?: string
           title?: string
+        }
+        Relationships: []
+      }
+      predictive_alerts: {
+        Row: {
+          alert_type: string
+          confidence_score: number | null
+          created_at: string | null
+          description: string
+          expires_at: string | null
+          id: string
+          is_dismissed: boolean | null
+          is_read: boolean | null
+          metadata: Json | null
+          predicted_impact: number | null
+          recommended_actions: Json | null
+          severity: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          alert_type: string
+          confidence_score?: number | null
+          created_at?: string | null
+          description: string
+          expires_at?: string | null
+          id?: string
+          is_dismissed?: boolean | null
+          is_read?: boolean | null
+          metadata?: Json | null
+          predicted_impact?: number | null
+          recommended_actions?: Json | null
+          severity: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          alert_type?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          description?: string
+          expires_at?: string | null
+          id?: string
+          is_dismissed?: boolean | null
+          is_read?: boolean | null
+          metadata?: Json | null
+          predicted_impact?: number | null
+          recommended_actions?: Json | null
+          severity?: string
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }
