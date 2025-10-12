@@ -64,14 +64,14 @@ export const Header = ({ user }: HeaderProps) => {
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1.5 flex-1 min-w-0 max-w-[60%] justify-center px-4 overflow-x-auto">
+            <nav className="hidden lg:flex items-center gap-1.5 flex-1 min-w-0 justify-center px-4 overflow-x-auto whitespace-nowrap">
               {navItems.map((link) => {
                 const isActive = window.location.pathname === link.path;
                 return (
                 <button
                   key={link.path}
                   onClick={() => navigate(link.path)}
-                  className={`relative px-4 py-2.5 text-[0.8125rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap ${
+                  className={`relative px-4 py-2.5 text-[0.8125rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap shrink-0 ${
                     isActive
                       ? 'bg-white/[0.12] text-white shadow-[0_4px_16px_rgba(255,255,255,0.12)] scale-[1.02]'
                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100'
