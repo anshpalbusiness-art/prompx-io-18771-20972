@@ -73,40 +73,40 @@ export const Header = ({ user }: HeaderProps) => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] w-full">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-black/98 backdrop-blur-2xl border-b border-white/[0.1] shadow-[0_1px_0_0_rgba(255,255,255,0.05),0_2px_20px_-5px_rgba(0,0,0,0.8)] w-full">
       <div className="w-full">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1600px]">
-          <div className="flex items-center justify-between h-16 lg:h-20 gap-8">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-12 max-w-[1600px]">
+          <div className="flex items-center justify-between h-18 lg:h-[88px] gap-10">
             {/* Logo */}
             <button 
               onClick={() => navigate('/')}
-              className="flex items-center gap-3 flex-shrink-0 group relative z-10"
+              className="flex items-center gap-3.5 flex-shrink-0 group relative z-10"
             >
-              <div className="w-11 h-11 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-6 shadow-[0_4px_20px_rgba(255,255,255,0.15)] group-hover:shadow-[0_8px_30px_rgba(255,255,255,0.3)]">
-                <Sparkles className="w-5 h-5 text-black transition-transform duration-500 group-hover:rotate-12" strokeWidth={2.5} />
+              <div className="w-12 h-12 bg-gradient-to-br from-white to-zinc-100 rounded-[14px] flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.08] group-hover:rotate-3 shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_4px_24px_rgba(255,255,255,0.12)] group-hover:shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_8px_32px_rgba(255,255,255,0.25)]">
+                <Sparkles className="w-[22px] h-[22px] text-black transition-transform duration-500 ease-out group-hover:rotate-[8deg]" strokeWidth={2.5} />
               </div>
-              <span className="text-[1.4rem] font-extrabold text-white tracking-tight group-hover:text-zinc-100 transition-all duration-300 drop-shadow-sm">
+              <span className="text-[1.5rem] font-extrabold text-white tracking-[-0.02em] group-hover:tracking-[-0.015em] transition-all duration-300">
                 PrompX
               </span>
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-2 flex-1 justify-center px-4">
+            <nav className="hidden lg:flex items-center gap-1.5 flex-1 justify-center px-6">
               {primaryNavItems.map((link) => {
                 const isActive = window.location.pathname === link.path;
                 return (
                 <button
                   key={link.path}
                   onClick={() => navigate(link.path)}
-                  className={`relative px-5 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap ${
+                  className={`relative px-6 py-3 text-[0.8125rem] font-semibold rounded-[14px] transition-all duration-300 tracking-[0.02em] whitespace-nowrap ${
                     isActive
-                      ? 'bg-white/[0.12] text-white shadow-[0_4px_16px_rgba(255,255,255,0.12)] scale-[1.02]'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100'
+                      ? 'bg-white/[0.14] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_4px_20px_rgba(255,255,255,0.08)] scale-[1.01]'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.08] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.04)] hover:scale-[1.02] active:scale-[0.99]'
                   }`}
                 >
                     {link.name}
                     {isActive && (
-                      <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-white rounded-full shadow-[0_2px_8px_rgba(255,255,255,0.5)]" />
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-10 h-[3px] bg-white/90 rounded-full shadow-[0_2px_12px_rgba(255,255,255,0.6)]" />
                     )}
                   </button>
                 );
@@ -114,22 +114,20 @@ export const Header = ({ user }: HeaderProps) => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="relative px-5 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1">
+                  <button className="relative px-6 py-3 text-[0.8125rem] font-semibold rounded-[14px] transition-all duration-300 tracking-[0.02em] whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.08] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.04)] hover:scale-[1.02] active:scale-[0.99] flex items-center gap-1.5">
                     MORE
-                    <ChevronDown className="w-4 h-4" />
+                    <ChevronDown className="w-[15px] h-[15px] transition-transform duration-300 group-hover:translate-y-[1px]" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="!bg-black !text-white !border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.8)] min-w-[220px] !z-[200] p-2"
-                  style={{ backgroundColor: '#000', color: '#fff' }}
+                  className="min-w-[240px] p-2"
                 >
                   {moreNavItems.map((link) => (
                     <DropdownMenuItem
                       key={link.path}
                       onClick={() => navigate(link.path)}
-                      className="!text-white hover:!text-white hover:!bg-white/10 cursor-pointer font-semibold text-sm py-2.5 px-3 rounded-lg focus:!bg-white/10 focus:!text-white"
-                      style={{ color: '#fff' }}
+                      className="cursor-pointer font-semibold text-[0.8125rem] py-3 px-4 rounded-[10px] transition-all duration-200"
                     >
                       {link.name}
                     </DropdownMenuItem>
@@ -139,19 +137,19 @@ export const Header = ({ user }: HeaderProps) => {
             </nav>
 
             {/* User Section */}
-            <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
+            <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
               {user ? (
                 <>
-                  <div className="text-sm text-zinc-300 font-medium px-5 py-2.5 bg-white/[0.06] rounded-xl border border-white/[0.08] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.08] hover:border-white/[0.12] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
+                  <div className="text-[0.8125rem] text-zinc-300 font-medium px-5 py-3 bg-white/[0.06] rounded-[14px] border border-white/[0.08] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.07] hover:border-white/[0.1] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.05)] cursor-default max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
                     {user.email}
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleLogout}
-                    className="h-10 px-6 bg-transparent border-white/[0.12] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 rounded-xl font-semibold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
+                    className="h-11 px-6 bg-transparent border-white/[0.12] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/[0.15] rounded-[14px] font-semibold text-[0.8125rem] transition-all duration-300 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.08)] hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <LogOut className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-12" />
+                    <LogOut className="w-[15px] h-[15px] mr-2 transition-transform duration-300 group-hover:-rotate-6" />
                     Sign Out
                   </Button>
                 </>
@@ -159,7 +157,7 @@ export const Header = ({ user }: HeaderProps) => {
                 <Button
                   onClick={() => navigate("/auth")}
                   size="sm"
-                  className="bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-50 hover:to-white h-10 px-7 font-bold shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.35)] transition-all duration-300 rounded-xl hover:scale-105 active:scale-95"
+                  className="bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-50 hover:to-white h-11 px-8 font-bold text-[0.8125rem] shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_4px_24px_rgba(255,255,255,0.2)] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_8px_32px_rgba(255,255,255,0.35)] transition-all duration-300 rounded-[14px] hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Sign In
                 </Button>
@@ -172,12 +170,12 @@ export const Header = ({ user }: HeaderProps) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="lg:hidden text-white hover:bg-white/[0.08] rounded-xl h-10 w-10 p-0 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)]"
+                  className="lg:hidden text-white hover:bg-white/[0.08] rounded-[14px] h-11 w-11 p-0 transition-all duration-300 hover:scale-[1.05] active:scale-95 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.06)]"
                 >
                   <Menu className="w-5 h-5 transition-transform duration-300" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[320px] bg-black border-l border-white/[0.08] shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+              <SheetContent side="right" className="w-[340px] bg-black border-l border-white/[0.1] shadow-[0_0_60px_rgba(0,0,0,0.6)]">
                 <div className="flex flex-col gap-6 mt-8">
                   {/* Mobile Logo */}
                   <div className="flex items-center gap-3 px-2 mb-2">
