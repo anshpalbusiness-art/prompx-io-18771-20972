@@ -5,7 +5,7 @@ import Layout from "@/components/Layout";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Zap, Shield, Users, TrendingUp, Brain, Workflow } from "lucide-react";
+import { ArrowRight, Zap, Shield, Users, TrendingUp, Brain, Workflow, GitBranch, TestTube, FileText, Activity, Plug, Lock } from "lucide-react";
 
 // Memoized feature card for performance
 const FeatureCard = memo(({ feature, user, navigate }: any) => {
@@ -151,6 +151,42 @@ const Home = () => {
       title: "Prompt Marketplace",
       description: "Discover and share prompt templates",
       link: "/marketplace"
+    },
+    {
+      icon: GitBranch,
+      title: "Version Control",
+      description: "Track changes and manage prompt versions effortlessly",
+      link: "/dashboard"
+    },
+    {
+      icon: TestTube,
+      title: "A/B Testing",
+      description: "Test and compare prompt variations for optimal results",
+      link: "/optimization-lab"
+    },
+    {
+      icon: FileText,
+      title: "Prompt Templates",
+      description: "Access pre-built templates for common use cases",
+      link: "/marketplace"
+    },
+    {
+      icon: Activity,
+      title: "Real-time Monitoring",
+      description: "Monitor prompt performance and usage in real-time",
+      link: "/analytics"
+    },
+    {
+      icon: Plug,
+      title: "Integration Hub",
+      description: "Connect seamlessly with your favorite tools and platforms",
+      link: "/integrations"
+    },
+    {
+      icon: Lock,
+      title: "Enterprise Security",
+      description: "Advanced security features and compliance controls",
+      link: "/compliance"
     }
   ];
 
