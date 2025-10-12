@@ -112,7 +112,6 @@ export const Header = ({ user }: HeaderProps) => {
                 );
               })}
               
-              {/* More Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="relative px-5 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1">
@@ -120,12 +119,17 @@ export const Header = ({ user }: HeaderProps) => {
                     <ChevronDown className="w-4 h-4" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="!bg-black !border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.8)] min-w-[200px] !z-[100] backdrop-blur-xl p-2">
+                <DropdownMenuContent
+                  align="end"
+                  className="!bg-black !text-white !border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.8)] min-w-[220px] !z-[200] p-2"
+                  style={{ backgroundColor: '#000', color: '#fff' }}
+                >
                   {moreNavItems.map((link) => (
                     <DropdownMenuItem
                       key={link.path}
                       onClick={() => navigate(link.path)}
-                      className="!text-white hover:!text-white hover:!bg-white/[0.15] cursor-pointer font-semibold text-sm py-3 px-4 rounded-lg focus:!bg-white/[0.15] focus:!text-white"
+                      className="!text-white hover:!text-white hover:!bg-white/10 cursor-pointer font-semibold text-sm py-2.5 px-3 rounded-lg focus:!bg-white/10 focus:!text-white"
+                      style={{ color: '#fff' }}
                     >
                       {link.name}
                     </DropdownMenuItem>
