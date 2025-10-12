@@ -36,26 +36,26 @@ const FeatureCard = memo(({ feature, user, navigate }: any) => {
       className={`transition-opacity duration-700 ${isVisible ? "opacity-100" : "opacity-0"}`}
     >
       <Card 
-        className="group cursor-pointer border border-white/[0.08] bg-zinc-900/60 backdrop-blur-xl hover:bg-zinc-900/90 hover:border-white/20 transition-all duration-500 hover:shadow-2xl hover:shadow-white/[0.08] hover:-translate-y-1 sm:hover:-translate-y-2 active:translate-y-0 overflow-hidden touch-manipulation will-change-transform rounded-xl sm:rounded-2xl h-full flex flex-col" 
+        className="group cursor-pointer border border-white/[0.08] bg-zinc-900/60 backdrop-blur-xl hover:bg-zinc-900/90 hover:border-white/20 transition-all duration-500 hover:shadow-2xl hover:shadow-white/[0.08] hover:-translate-y-2 active:translate-y-0 overflow-hidden touch-manipulation will-change-transform rounded-2xl h-full flex flex-col" 
         onClick={() => user ? navigate(feature.link) : navigate("/auth")}
       >
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
-        <CardHeader className="pb-3 p-5 sm:p-6 flex-1">
-          <div className="p-3 bg-white/[0.06] rounded-xl sm:rounded-2xl w-fit mb-4 group-hover:bg-white/[0.12] transition-all duration-300 group-hover:scale-105 sm:group-hover:scale-110">
-            <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" strokeWidth={2} />
+        <CardHeader className="pb-4 p-6 sm:p-7 md:p-8 flex-1">
+          <div className="p-3.5 bg-white/[0.06] rounded-2xl w-fit mb-5 group-hover:bg-white/[0.12] transition-all duration-300 group-hover:scale-110">
+            <feature.icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" strokeWidth={2} />
           </div>
-          <CardTitle className="text-white text-lg sm:text-xl font-bold leading-tight mb-2">{feature.title}</CardTitle>
-          <CardDescription className="text-zinc-400 text-sm sm:text-base leading-relaxed">
+          <CardTitle className="text-white text-xl sm:text-2xl font-bold leading-tight mb-3">{feature.title}</CardTitle>
+          <CardDescription className="text-zinc-400 text-base sm:text-lg leading-relaxed">
             {feature.description}
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-5 sm:p-6 pt-0">
+        <CardContent className="p-6 sm:p-7 md:p-8 pt-0">
           <Button 
             variant="ghost" 
-            className="gap-2 p-0 text-zinc-300 hover:text-white hover:bg-transparent transition-all duration-300 text-sm sm:text-base font-medium group/btn h-auto"
+            className="gap-2 p-0 text-zinc-300 hover:text-white hover:bg-transparent transition-all duration-300 text-base sm:text-lg font-medium group/btn h-auto"
           >
-            Learn more <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+            Learn more <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-1 transition-transform duration-300" />
           </Button>
         </CardContent>
       </Card>
@@ -196,7 +196,7 @@ const Home = () => {
       <section 
         id="hero"
         ref={heroRef}
-        className={`relative px-4 py-12 sm:px-6 sm:py-20 md:py-24 lg:py-28 xl:py-36 overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-black min-h-[calc(100vh-4rem)] flex items-center transition-opacity duration-1000 ${sectionsVisible.hero ? 'opacity-100' : 'opacity-0'}`}
+        className={`relative px-4 sm:px-6 lg:px-8 py-20 sm:py-24 md:py-28 lg:py-32 xl:py-40 overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-black min-h-[calc(100vh-4rem)] flex items-center justify-center transition-opacity duration-1000 ${sectionsVisible.hero ? 'opacity-100' : 'opacity-0'}`}
         style={{ contentVisibility: 'auto' }}
       >
         {/* Animated PrompX background text - Enhanced like Auth page */}
@@ -232,37 +232,37 @@ const Home = () => {
           }}
         />
 
-        <div className="container mx-auto max-w-6xl relative z-10 w-full">
+        <div className="container mx-auto max-w-7xl relative z-10 w-full px-4 sm:px-6 lg:px-8">
           <div className={`text-center max-w-4xl mx-auto transition-all duration-1000 delay-300 ${sectionsVisible.hero ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h1 className="text-[1.75rem] leading-[2rem] sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-5 lg:mb-7 bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent px-2">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 sm:mb-7 lg:mb-8 bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent leading-tight">
               Professional Prompt Engineering Platform
             </h1>
-            <p className="text-[0.9375rem] leading-[1.4rem] sm:text-base md:text-lg lg:text-xl text-zinc-400 mb-6 sm:mb-8 lg:mb-10 font-light px-2 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 mb-8 sm:mb-10 lg:mb-12 font-light max-w-3xl mx-auto leading-relaxed">
               Create, optimize, and manage AI prompts with enterprise-grade tools
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-2">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center items-center max-w-xl mx-auto">
               {user ? (
                 <Button 
                   size="lg" 
                   onClick={() => navigate("/dashboard")} 
-                  className="gap-2 bg-gradient-to-r from-white to-zinc-100 text-zinc-900 hover:from-zinc-50 hover:to-white font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 h-[3.25rem] sm:h-14 lg:h-16 px-7 sm:px-8 lg:px-10 text-[0.95rem] sm:text-base lg:text-lg rounded-xl hover:scale-105 active:scale-95 w-full sm:w-auto touch-manipulation min-h-[3.25rem]"
+                  className="gap-2 bg-gradient-to-r from-white to-zinc-100 text-zinc-900 hover:from-zinc-50 hover:to-white font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 h-14 sm:h-16 lg:h-[4.5rem] px-8 sm:px-10 lg:px-12 text-base sm:text-lg lg:text-xl rounded-xl hover:scale-105 active:scale-95 w-full sm:w-auto touch-manipulation"
                 >
-                  Go to Dashboard <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Go to Dashboard <ArrowRight className="w-5 h-5" />
                 </Button>
               ) : (
                 <>
                   <Button 
                     size="lg" 
                     onClick={() => navigate("/auth")} 
-                    className="gap-2 bg-gradient-to-r from-white to-zinc-100 text-zinc-900 hover:from-zinc-50 hover:to-white font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 h-[3.25rem] sm:h-14 lg:h-16 px-7 sm:px-8 lg:px-10 text-[0.95rem] sm:text-base lg:text-lg rounded-xl hover:scale-105 active:scale-95 w-full sm:w-auto touch-manipulation min-h-[3.25rem]"
+                    className="gap-2 bg-gradient-to-r from-white to-zinc-100 text-zinc-900 hover:from-zinc-50 hover:to-white font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 h-14 sm:h-16 lg:h-[4.5rem] px-8 sm:px-10 lg:px-12 text-base sm:text-lg lg:text-xl rounded-xl hover:scale-105 active:scale-95 w-full sm:w-auto touch-manipulation"
                   >
-                    Get Started <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                    Get Started <ArrowRight className="w-5 h-5" />
                   </Button>
                   <Button 
                     size="lg" 
                     variant="outline" 
                     onClick={() => navigate("/auth")}
-                    className="h-[3.25rem] sm:h-14 lg:h-16 px-7 sm:px-8 lg:px-10 text-[0.95rem] sm:text-base lg:text-lg bg-zinc-900/50 border-white/10 text-white hover:bg-zinc-900/80 hover:border-white/30 backdrop-blur-xl rounded-xl hover:scale-105 active:scale-95 transition-all duration-300 w-full sm:w-auto touch-manipulation min-h-[3.25rem]"
+                    className="h-14 sm:h-16 lg:h-[4.5rem] px-8 sm:px-10 lg:px-12 text-base sm:text-lg lg:text-xl bg-zinc-900/50 border-white/10 text-white hover:bg-zinc-900/80 hover:border-white/30 backdrop-blur-xl rounded-xl hover:scale-105 active:scale-95 transition-all duration-300 w-full sm:w-auto touch-manipulation"
                   >
                     Sign In
                   </Button>
@@ -277,7 +277,7 @@ const Home = () => {
       <section 
         id="features" 
         ref={featuresRef}
-        className={`px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:py-24 relative bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-900 overflow-hidden transition-opacity duration-1000 ${sectionsVisible.features ? 'opacity-100' : 'opacity-0'}`}
+        className={`px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24 lg:py-32 relative bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-900 overflow-hidden transition-opacity duration-1000 ${sectionsVisible.features ? 'opacity-100' : 'opacity-0'}`}
         style={{ contentVisibility: 'auto' }}
       >
         {/* Lightweight background elements */}
@@ -288,16 +288,16 @@ const Home = () => {
           </>
         )}
         
-        <div className="container mx-auto max-w-6xl relative z-10">
-          <div className={`text-center mb-10 sm:mb-14 md:mb-16 transition-all duration-700 ${sectionsVisible.features ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h2 className="text-[1.75rem] leading-[2rem] sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent px-2">
+        <div className="container mx-auto max-w-7xl relative z-10 px-4 sm:px-6 lg:px-8">
+          <div className={`text-center mb-12 sm:mb-16 md:mb-20 transition-all duration-700 ${sectionsVisible.features ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-5 lg:mb-6 bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent leading-tight">
               Powerful Features
             </h2>
-            <p className="text-[0.9375rem] leading-[1.4rem] sm:text-base md:text-lg lg:text-xl text-zinc-400 font-light max-w-2xl mx-auto px-2">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 font-light max-w-3xl mx-auto leading-relaxed">
               Everything you need for professional prompt engineering
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
             {features.map((feature, index) => (
               <FeatureCard key={index} feature={feature} user={user} navigate={navigate} />
             ))}
@@ -309,7 +309,7 @@ const Home = () => {
       <section 
         id="cta"
         ref={ctaRef}
-        className={`relative px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:py-24 bg-gradient-to-b from-zinc-900 via-zinc-950 to-black overflow-hidden transition-opacity duration-1000 ${sectionsVisible.cta ? 'opacity-100' : 'opacity-0'}`}
+        className={`relative px-4 sm:px-6 lg:px-8 py-20 sm:py-24 md:py-28 lg:py-32 bg-gradient-to-b from-zinc-900 via-zinc-950 to-black overflow-hidden transition-opacity duration-1000 ${sectionsVisible.cta ? 'opacity-100' : 'opacity-0'}`}
         style={{ contentVisibility: 'auto' }}
       >
         {/* Lightweight background elements */}
@@ -328,19 +328,19 @@ const Home = () => {
           }}
         />
 
-        <div className="container mx-auto max-w-4xl text-center relative z-10">
-          <div className={`space-y-6 sm:space-y-8 transition-all duration-700 delay-200 ${sectionsVisible.cta ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h2 className="text-[1.75rem] leading-[2rem] sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent px-2">
+        <div className="container mx-auto max-w-5xl text-center relative z-10 px-4 sm:px-6 lg:px-8">
+          <div className={`space-y-8 sm:space-y-10 md:space-y-12 transition-all duration-700 delay-200 ${sectionsVisible.cta ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent leading-tight">
               Ready to Get Started?
             </h2>
-            <p className="text-[0.9375rem] leading-[1.4rem] sm:text-base md:text-lg lg:text-xl text-zinc-400 font-light max-w-2xl mx-auto px-2">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-zinc-400 font-light max-w-3xl mx-auto leading-relaxed">
               Join thousands of professionals using our platform to create better AI prompts
             </p>
-            <div className="pt-2 sm:pt-4">
+            <div className="pt-4 sm:pt-6 flex justify-center">
               <Button 
                 size="lg" 
                 onClick={() => navigate(user ? "/dashboard" : "/auth")} 
-                className="gap-2 bg-gradient-to-r from-white to-zinc-100 text-zinc-900 hover:from-zinc-50 hover:to-white font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 h-14 sm:h-16 md:h-[4.5rem] px-8 sm:px-10 md:px-12 text-base sm:text-lg md:text-xl rounded-xl hover:scale-105 active:scale-95 w-full sm:w-auto touch-manipulation"
+                className="gap-2 bg-gradient-to-r from-white to-zinc-100 text-zinc-900 hover:from-zinc-50 hover:to-white font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 h-14 sm:h-16 md:h-[4.5rem] px-8 sm:px-10 md:px-12 text-base sm:text-lg md:text-xl rounded-xl hover:scale-105 active:scale-95 w-full sm:w-auto max-w-md touch-manipulation"
               >
                 {user ? "Go to Dashboard" : "Start Free Trial"} <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
               </Button>

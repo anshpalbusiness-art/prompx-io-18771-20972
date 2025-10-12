@@ -75,8 +75,8 @@ export const Header = ({ user }: HeaderProps) => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] w-full">
       <div className="w-full">
-        <div className="container mx-auto px-3 sm:px-4 lg:px-6 max-w-[1600px]">
-          <div className="flex items-center justify-between h-16 lg:h-20 gap-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1600px]">
+          <div className="flex items-center justify-between h-16 lg:h-20 gap-4 lg:gap-8">
             {/* Logo */}
             <button 
               onClick={() => navigate('/')}
@@ -91,14 +91,14 @@ export const Header = ({ user }: HeaderProps) => {
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-6 flex-1 justify-center px-4">
+            <nav className="hidden lg:flex items-center gap-3 xl:gap-4 flex-1 justify-center">
               {primaryNavItems.map((link) => {
                 const isActive = window.location.pathname === link.path;
                 return (
                 <button
                   key={link.path}
                   onClick={() => navigate(link.path)}
-                  className={`relative px-4 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap ${
+                  className={`relative px-3 xl:px-4 py-2.5 text-[0.8125rem] xl:text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap ${
                     isActive
                       ? 'bg-white/[0.12] text-white shadow-[0_4px_16px_rgba(255,255,255,0.12)] scale-[1.02]'
                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100'
@@ -114,7 +114,7 @@ export const Header = ({ user }: HeaderProps) => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="relative px-4 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1">
+                  <button className="relative px-3 xl:px-4 py-2.5 text-[0.8125rem] xl:text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1">
                     MORE
                     <ChevronDown className="w-4 h-4" />
                   </button>
