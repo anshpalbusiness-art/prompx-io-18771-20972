@@ -2184,7 +2184,7 @@ export const PromptEngineer = () => {
                   </div>
                   
                   {/* Character count and language indicator - Fixed positioning */}
-                  <div className="absolute bottom-4 right-4 z-10 flex flex-wrap items-center gap-2">
+                  <div className="absolute bottom-3 sm:bottom-3.5 right-24 sm:right-28 z-10 pointer-events-none flex flex-wrap items-center gap-2">
                     {detectedLanguage && (
                       <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs">
                         <Globe className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
@@ -2193,7 +2193,7 @@ export const PromptEngineer = () => {
                       </Badge>
                     )}
                     {userInput.length > 0 && (
-                      <Badge className="bg-primary/90 text-primary-foreground shadow-md text-xs">
+                      <Badge className="bg-primary/90 text-primary-foreground shadow-md text-xs min-w-7 sm:min-w-8 justify-center px-2 py-1 tabular-nums">
                         {userInput.length}
                       </Badge>
                     )}
