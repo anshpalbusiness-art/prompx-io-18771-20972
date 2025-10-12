@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import { IntelligentInsights } from "@/components/IntelligentInsights";
 import { AutomationDashboard } from "@/components/AutomationDashboard";
+import { PersonalizationHub } from "@/components/PersonalizationHub";
 import Layout from "@/components/Layout";
 import { User } from "@supabase/supabase-js";
 
@@ -57,6 +58,11 @@ const Analytics = () => {
           {/* Intelligent Insights Section */}
           <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-14">
             <IntelligentInsights />
+          </div>
+
+          {/* Personalization Hub */}
+          <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-14">
+            <PersonalizationHub user={user} />
           </div>
 
           {/* Automation & Intelligence Dashboard */}

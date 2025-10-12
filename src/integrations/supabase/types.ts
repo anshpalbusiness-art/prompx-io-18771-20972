@@ -154,6 +154,48 @@ export type Database = {
         }
         Relationships: []
       }
+      adaptive_models: {
+        Row: {
+          accuracy_score: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_trained_at: string | null
+          metadata: Json | null
+          model_data: Json
+          model_type: string
+          model_version: number
+          training_samples: number | null
+          user_id: string
+        }
+        Insert: {
+          accuracy_score?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_trained_at?: string | null
+          metadata?: Json | null
+          model_data: Json
+          model_type: string
+          model_version?: number
+          training_samples?: number | null
+          user_id: string
+        }
+        Update: {
+          accuracy_score?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_trained_at?: string | null
+          metadata?: Json | null
+          model_data?: Json
+          model_type?: string
+          model_version?: number
+          training_samples?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       agent_analytics: {
         Row: {
           agent_id: string
@@ -695,6 +737,39 @@ export type Database = {
         }
         Relationships: []
       }
+      context_suggestions: {
+        Row: {
+          context_type: string
+          context_value: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          relevance_score: number
+          suggestions: Json
+          user_id: string
+        }
+        Insert: {
+          context_type: string
+          context_value: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          relevance_score: number
+          suggestions: Json
+          user_id: string
+        }
+        Update: {
+          context_type?: string
+          context_value?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          relevance_score?: number
+          suggestions?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       global_insights: {
         Row: {
           category: string | null
@@ -884,6 +959,51 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weekly_score?: number | null
+        }
+        Relationships: []
+      }
+      learned_patterns: {
+        Row: {
+          confidence_score: number
+          context_tags: Json | null
+          created_at: string | null
+          id: string
+          last_successful_at: string | null
+          pattern_data: Json
+          pattern_name: string
+          pattern_type: string
+          success_rate: number
+          updated_at: string | null
+          usage_count: number | null
+          user_id: string
+        }
+        Insert: {
+          confidence_score?: number
+          context_tags?: Json | null
+          created_at?: string | null
+          id?: string
+          last_successful_at?: string | null
+          pattern_data: Json
+          pattern_name: string
+          pattern_type: string
+          success_rate?: number
+          updated_at?: string | null
+          usage_count?: number | null
+          user_id: string
+        }
+        Update: {
+          confidence_score?: number
+          context_tags?: Json | null
+          created_at?: string | null
+          id?: string
+          last_successful_at?: string | null
+          pattern_data?: Json
+          pattern_name?: string
+          pattern_type?: string
+          success_rate?: number
+          updated_at?: string | null
+          usage_count?: number | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1145,6 +1265,60 @@ export type Database = {
           personality_traits?: Json
           prompt_prefix?: string
           title?: string
+        }
+        Relationships: []
+      }
+      personalized_recommendations: {
+        Row: {
+          based_on: Json | null
+          content: Json
+          created_at: string | null
+          description: string
+          expires_at: string | null
+          id: string
+          is_applied: boolean | null
+          is_dismissed: boolean | null
+          is_viewed: boolean | null
+          metadata: Json | null
+          reason: string | null
+          recommendation_type: string
+          relevance_score: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          based_on?: Json | null
+          content: Json
+          created_at?: string | null
+          description: string
+          expires_at?: string | null
+          id?: string
+          is_applied?: boolean | null
+          is_dismissed?: boolean | null
+          is_viewed?: boolean | null
+          metadata?: Json | null
+          reason?: string | null
+          recommendation_type: string
+          relevance_score: number
+          title: string
+          user_id: string
+        }
+        Update: {
+          based_on?: Json | null
+          content?: Json
+          created_at?: string | null
+          description?: string
+          expires_at?: string | null
+          id?: string
+          is_applied?: boolean | null
+          is_dismissed?: boolean | null
+          is_viewed?: boolean | null
+          metadata?: Json | null
+          reason?: string | null
+          recommendation_type?: string
+          relevance_score?: number
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -2372,6 +2546,36 @@ export type Database = {
           duration_seconds?: number | null
           id?: string
           metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_behavior: {
+        Row: {
+          behavior_type: string
+          context: Json
+          id: string
+          metadata: Json | null
+          recorded_at: string | null
+          success_score: number | null
+          user_id: string
+        }
+        Insert: {
+          behavior_type: string
+          context?: Json
+          id?: string
+          metadata?: Json | null
+          recorded_at?: string | null
+          success_score?: number | null
+          user_id: string
+        }
+        Update: {
+          behavior_type?: string
+          context?: Json
+          id?: string
+          metadata?: Json | null
+          recorded_at?: string | null
+          success_score?: number | null
           user_id?: string
         }
         Relationships: []

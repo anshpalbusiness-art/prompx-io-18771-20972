@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.ab-test-manager]
 verify_jwt = false
+
+[functions.personalization-engine]
+verify_jwt = false
+
+[functions.adaptive-learning]
+verify_jwt = false
