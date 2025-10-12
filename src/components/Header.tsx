@@ -64,7 +64,7 @@ export const Header = ({ user }: HeaderProps) => {
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1.5 flex-1 justify-center px-4">
+            <nav className="hidden lg:flex items-center gap-1.5 flex-1 min-w-0 max-w-[60%] justify-center px-4 overflow-x-auto">
               {navItems.map((link) => {
                 const isActive = window.location.pathname === link.path;
                 return (
@@ -90,7 +90,7 @@ export const Header = ({ user }: HeaderProps) => {
             <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
               {user ? (
                 <>
-                  <div className="text-sm text-zinc-300 font-medium px-5 py-2.5 bg-white/[0.06] rounded-xl border border-white/[0.08] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.08] hover:border-white/[0.12] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default">
+                  <div className="text-sm text-zinc-300 font-medium px-5 py-2.5 bg-white/[0.06] rounded-xl border border-white/[0.08] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.08] hover:border-white/[0.12] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
                     {user.email}
                   </div>
                   <Button
