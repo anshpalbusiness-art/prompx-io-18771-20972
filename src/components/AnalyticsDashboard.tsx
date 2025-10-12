@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Clock, Target, Users } from "lucide-react";
+import { TrendingUp, Clock, Target, Users, AlertTriangle, TrendingDown, Sparkles } from "lucide-react";
 import { User } from "@supabase/supabase-js";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, Area, AreaChart } from "recharts";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 interface AnalyticsDashboardProps {
   user: User;
@@ -17,6 +19,13 @@ interface MetricSummary {
   totalActivities: number;
 }
 
+interface PredictiveData {
+  predictions?: any;
+  anomalies?: any[];
+  trends?: any;
+  confidence?: number;
+}
+
 export default function AnalyticsDashboard({ user }: AnalyticsDashboardProps) {
   const [metrics, setMetrics] = useState<MetricSummary>({
     timeSaved: 0,
@@ -26,11 +35,61 @@ export default function AnalyticsDashboard({ user }: AnalyticsDashboardProps) {
   });
   const [chartData, setChartData] = useState<any[]>([]);
   const [activityData, setActivityData] = useState<any[]>([]);
+  const [predictiveData, setPredictiveData] = useState<PredictiveData>({});
+  const [anomalies, setAnomalies] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchAnalytics();
+    fetchPredictiveInsights();
+    fetchAnomalies();
   }, [user]);
+
+  const fetchPredictiveInsights = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('predictive-insights', {
+        body: {
+          userId: user.id,
+          predictionType: 'performance',
+          timeframe: '30d',
+          includeConfidence: true
+        }
+      });
+
+      if (error) throw error;
+      setPredictiveData(data);
+    } catch (error: any) {
+      console.error('Predictive insights error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAnomalies = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('predictive-insights', {
+        body: {
+          userId: user.id,
+          predictionType: 'anomalies',
+          timeframe: '7d'
+        }
+      });
+
+      if (error) throw error;
+      
+      // Extract anomalies from response
+      const allAnomalies = [
+        ...(data?.predictions?.negative || []),
+        ...(data?.predictions?.performanceAnomalies || [])
+      ];
+      
+      setAnomalies(allAnomalies.slice(0, 3)); // Show top 3
+    } catch (error: any) {
+      console.error('Anomaly detection error:', error);
+    }
+  };
 
   const fetchAnalytics = async () => {
     try {
@@ -122,8 +181,83 @@ export default function AnalyticsDashboard({ user }: AnalyticsDashboardProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground mb-2">ROI & Analytics Dashboard</h2>
-        <p className="text-muted-foreground">Track your productivity impact and ROI metrics</p>
+        <p className="text-muted-foreground">Track your productivity impact with AI-powered predictions</p>
       </div>
+
+      {/* Anomaly Alerts */}
+      {anomalies.length > 0 && (
+        <div className="space-y-3">
+          {anomalies.map((anomaly, idx) => (
+            <Alert key={idx} variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle className="flex items-center gap-2">
+                Anomaly Detected
+                <Badge variant="outline">{anomaly.type || 'Performance'}</Badge>
+              </AlertTitle>
+              <AlertDescription>
+                {anomaly.description || anomaly}
+              </AlertDescription>
+            </Alert>
+          ))}
+        </div>
+      )}
+
+      {/* Predictive Performance Forecast */}
+      {predictiveData.predictions && (
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  30-Day Performance Forecast
+                </CardTitle>
+                <CardDescription>AI-predicted performance trends</CardDescription>
+              </div>
+              {predictiveData.confidence && (
+                <Badge variant="secondary" className="text-sm">
+                  {(predictiveData.confidence * 100).toFixed(0)}% Confidence
+                </Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="p-4 rounded-lg bg-background/50 border">
+                <p className="text-sm text-muted-foreground mb-1">Best Case</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {predictiveData.predictions.predictions?.engagement?.bestCase || 'N/A'}
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-background/50 border">
+                <p className="text-sm text-muted-foreground mb-1">Likely Case</p>
+                <p className="text-2xl font-bold text-primary">
+                  {predictiveData.predictions.predictions?.engagement?.likelyCase || 'N/A'}
+                </p>
+              </div>
+              <div className="p-4 rounded-lg bg-background/50 border">
+                <p className="text-sm text-muted-foreground mb-1">Worst Case</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {predictiveData.predictions.predictions?.engagement?.worstCase || 'N/A'}
+                </p>
+              </div>
+            </div>
+            {predictiveData.predictions.actions && (
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-foreground">Recommended Actions:</p>
+                <ul className="space-y-1">
+                  {predictiveData.predictions.actions.slice(0, 3).map((action: any, idx: number) => (
+                    <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                      <TrendingUp className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>{action.action || action}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Impact Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
