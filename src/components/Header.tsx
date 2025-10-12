@@ -4,8 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Sparkles, LogOut, Menu, X } from 'lucide-react';
+import { Sparkles, LogOut, Menu, ChevronDown } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface HeaderProps {
   user?: User | null;
@@ -37,6 +43,16 @@ export const Header = ({ user }: HeaderProps) => {
     { name: 'AI AGENTS', path: '/agents' },
     { name: 'ANALYTICS', path: '/analytics' },
     { name: 'MARKETPLACE', path: '/marketplace' },
+  ];
+
+  // Additional items in "More" dropdown
+  const moreNavItems = [
+    { name: 'BENCHMARK', path: '/benchmark' },
+    { name: 'OPTIMIZATION LAB', path: '/optimization-lab' },
+    { name: 'COMMUNITY', path: '/community' },
+    { name: 'ENTERPRISE', path: '/enterprise' },
+    { name: 'INTEGRATIONS', path: '/integrations' },
+    { name: 'TEAM', path: '/team' },
     { name: 'SETTINGS', path: '/settings' },
   ];
 
@@ -95,6 +111,27 @@ export const Header = ({ user }: HeaderProps) => {
                   </button>
                 );
               })}
+              
+              {/* More Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="relative px-5 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1">
+                    MORE
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-black/95 backdrop-blur-xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] min-w-[200px]">
+                  {moreNavItems.map((link) => (
+                    <DropdownMenuItem
+                      key={link.path}
+                      onClick={() => navigate(link.path)}
+                      className="text-zinc-400 hover:text-white hover:bg-white/[0.06] cursor-pointer font-semibold text-sm py-3 px-4 rounded-lg focus:bg-white/[0.06] focus:text-white"
+                    >
+                      {link.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </nav>
 
             {/* User Section */}
