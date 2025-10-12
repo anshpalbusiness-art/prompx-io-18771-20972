@@ -91,14 +91,14 @@ export const Header = ({ user }: HeaderProps) => {
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center px-4">
+            <nav className="hidden lg:flex items-center gap-6 flex-1 justify-center px-4">
               {primaryNavItems.map((link) => {
                 const isActive = window.location.pathname === link.path;
                 return (
                 <button
                   key={link.path}
                   onClick={() => navigate(link.path)}
-                  className={`relative px-4 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap ${
+                  className={`relative px-3 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap ${
                     isActive
                       ? 'bg-white/[0.12] text-white shadow-[0_4px_16px_rgba(255,255,255,0.12)] scale-[1.02]'
                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100'
@@ -114,7 +114,7 @@ export const Header = ({ user }: HeaderProps) => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="relative px-4 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1">
+                  <button className="relative px-3 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1">
                     MORE
                     <ChevronDown className="w-4 h-4" />
                   </button>
