@@ -371,7 +371,7 @@ All colors MUST be HSL.
 
   /* Dropdown specific fixes with solid background */
   [data-radix-popper-content-wrapper] {
-    z-index: 1000 !important;
+    z-index: 9999 !important;
     position: absolute !important;
   }
 
@@ -379,8 +379,12 @@ All colors MUST be HSL.
   [role="listbox"],
   [data-radix-select-content],
   [data-radix-dropdown-menu-content] {
-    background-color: hsl(var(--popover)) !important;
-    z-index: 1000 !important;
+    background-color: hsl(0 0% 0%) !important;
+    color: hsl(0 0% 100%) !important;
+    border: 1px solid hsl(0 0% 100% / 0.15) !important;
+    box-shadow: 0 8px 32px hsl(0 0% 0% / 0.8) !important;
+    border-radius: 0.75rem !important;
+    z-index: 9999 !important;
   }
 
   /* Animation improvements */
