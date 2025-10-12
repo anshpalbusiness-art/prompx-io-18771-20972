@@ -2,3 +2,6 @@ project_id = "knldnlwpsrhcgvlbjsyx"
 
 [functions.analyze-vision]
 verify_jwt = false
+
+[functions.analyze-website]
+verify_jwt = false

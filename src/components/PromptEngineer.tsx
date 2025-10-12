@@ -4,8 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { AICopilot } from "@/components/AICopilot";
-import { Copy, CheckCircle, Wand2, Sparkles, Code, Image, Music, Video, MessageSquare, Zap, Target, BookOpen, ArrowRight, Stars, Palette, Brain, Mic, MicOff, Volume2, Globe, Languages, Loader2, User, History, Briefcase, Plus } from "lucide-react";
+import { Copy, CheckCircle, Wand2, Sparkles, Code, Image, Music, Video, MessageSquare, Zap, Target, BookOpen, ArrowRight, Stars, Palette, Brain, Mic, MicOff, Volume2, Globe, Languages, Loader2, User, History, Briefcase, Plus, Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PromptGenerator, type PromptTemplate } from "@/lib/promptGenerator";
 import { supabase } from "@/integrations/supabase/client";
@@ -154,6 +156,8 @@ export const PromptEngineer = () => {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isAnalyzingFile, setIsAnalyzingFile] = useState(false);
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [showUrlDialog, setShowUrlDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -1508,6 +1512,55 @@ export const PromptEngineer = () => {
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const analyzeWebsite = async (url: string) => {
+    if (!url.trim()) {
+      toast({
+        title: "URL Required",
+        description: "Please enter a valid website URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAnalyzingFile(true);
+    setShowUrlDialog(false);
+
+    try {
+      console.log('Analyzing website:', url);
+      
+      const { data, error } = await supabase.functions.invoke('analyze-website', {
+        body: { url }
+      });
+
+      if (error) throw error;
+
+      if (data?.analysis) {
+        const analysisText = `🌐 Website Analysis (${url}):\n\n${data.analysis}`;
+        const newInput = userInput 
+          ? `${userInput}\n\n${analysisText}`
+          : analysisText;
+        
+        setUserInput(newInput);
+        
+        toast({
+          title: "✅ Website Analyzed!",
+          description: "AI has generated a prompt based on the website",
+        });
+      }
+    } catch (error) {
+      console.error('Error analyzing website:', error);
+      
+      toast({
+        title: "Analysis Failed",
+        description: "Could not analyze website. Please check the URL and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzingFile(false);
+      setWebsiteUrl('');
+    }
+  };
+
   const executeWorkflow = async (steps: WorkflowStep[]) => {
     if (!userInput.trim()) {
       toast({
@@ -2140,6 +2193,56 @@ export const PromptEngineer = () => {
                   
                   {/* Voice Input and Upload Buttons */}
                   <div className="absolute bottom-2 sm:bottom-2.5 right-2 sm:right-3 z-10 flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded-full p-1 shadow-sm border border-border/30">
+                    {/* Website URL Button */}
+                    <Dialog open={showUrlDialog} onOpenChange={setShowUrlDialog}>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 sm:h-9 sm:w-9 rounded-full hover:bg-accent transition-colors touch-manipulation"
+                          title="Analyze website"
+                        >
+                          <Link2 className="h-5 w-5 sm:h-5 sm:w-5 text-foreground" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Analyze Website</DialogTitle>
+                          <DialogDescription>
+                            Enter a website URL to generate an AI prompt that can recreate a similar design or functionality
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex flex-col gap-4 py-4">
+                          <Input
+                            placeholder="https://example.com"
+                            value={websiteUrl}
+                            onChange={(e) => setWebsiteUrl(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                analyzeWebsite(websiteUrl);
+                              }
+                            }}
+                          />
+                          <Button 
+                            onClick={() => analyzeWebsite(websiteUrl)}
+                            disabled={!websiteUrl.trim() || isAnalyzingFile}
+                          >
+                            {isAnalyzingFile ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Analyzing...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="w-4 h-4 mr-2" />
+                                Analyze Website
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    
                     {/* Plus Button for File Upload */}
                     <Button
                       variant="ghost"
