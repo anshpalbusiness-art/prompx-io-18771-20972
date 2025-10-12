@@ -91,14 +91,14 @@ export const Header = ({ user }: HeaderProps) => {
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-2 flex-1 justify-center px-4">
+            <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center px-4">
               {primaryNavItems.map((link) => {
                 const isActive = window.location.pathname === link.path;
                 return (
                 <button
                   key={link.path}
                   onClick={() => navigate(link.path)}
-                  className={`relative px-5 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap ${
+                  className={`relative px-4 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap ${
                     isActive
                       ? 'bg-white/[0.12] text-white shadow-[0_4px_16px_rgba(255,255,255,0.12)] scale-[1.02]'
                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100'
@@ -114,7 +114,7 @@ export const Header = ({ user }: HeaderProps) => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="relative px-5 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1">
+                  <button className="relative px-4 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1">
                     MORE
                     <ChevronDown className="w-4 h-4" />
                   </button>
@@ -137,17 +137,17 @@ export const Header = ({ user }: HeaderProps) => {
             </nav>
 
             {/* User Section */}
-            <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
+            <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
               {user ? (
                 <>
-                  <div className="text-sm text-zinc-300 font-medium px-5 py-2.5 bg-white/[0.06] rounded-xl border border-white/[0.08] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.08] hover:border-white/[0.12] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
+                  <div className="text-sm text-zinc-300 font-medium px-4 py-2.5 bg-white/[0.06] rounded-xl border border-white/[0.08] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.08] hover:border-white/[0.12] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
                     {user.email}
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleLogout}
-                    className="h-10 px-6 bg-transparent border-white/[0.12] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 rounded-xl font-semibold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
+                    className="h-10 px-5 bg-transparent border-white/[0.12] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 rounded-xl font-semibold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
                   >
                     <LogOut className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-12" />
                     Sign Out
@@ -157,7 +157,7 @@ export const Header = ({ user }: HeaderProps) => {
                 <Button
                   onClick={() => navigate("/auth")}
                   size="sm"
-                  className="bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-50 hover:to-white h-10 px-7 font-bold shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.35)] transition-all duration-300 rounded-xl hover:scale-105 active:scale-95"
+                  className="bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-50 hover:to-white h-10 px-6 font-bold shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.35)] transition-all duration-300 rounded-xl hover:scale-105 active:scale-95"
                 >
                   Sign In
                 </Button>
