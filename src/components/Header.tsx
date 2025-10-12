@@ -30,7 +30,18 @@ export const Header = ({ user }: HeaderProps) => {
     setMobileMenuOpen(false);
   };
 
-  const navItems = [
+  // Primary nav items shown in desktop header
+  const primaryNavItems = [
+    { name: 'HOME', path: '/' },
+    { name: 'DASHBOARD', path: '/dashboard' },
+    { name: 'AI AGENTS', path: '/agents' },
+    { name: 'ANALYTICS', path: '/analytics' },
+    { name: 'MARKETPLACE', path: '/marketplace' },
+    { name: 'SETTINGS', path: '/settings' },
+  ];
+
+  // All nav items for mobile menu
+  const allNavItems = [
     { name: 'HOME', path: '/' },
     { name: 'DASHBOARD', path: '/dashboard' },
     { name: 'BENCHMARK', path: '/benchmark' },
@@ -64,14 +75,14 @@ export const Header = ({ user }: HeaderProps) => {
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1.5 flex-1 min-w-0 justify-center px-4 overflow-x-auto whitespace-nowrap">
-              {navItems.map((link) => {
+            <nav className="hidden lg:flex items-center gap-2 flex-1 justify-center px-4">
+              {primaryNavItems.map((link) => {
                 const isActive = window.location.pathname === link.path;
                 return (
                 <button
                   key={link.path}
                   onClick={() => navigate(link.path)}
-                  className={`relative px-4 py-2.5 text-[0.8125rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap shrink-0 ${
+                  className={`relative px-5 py-2.5 text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-wide whitespace-nowrap ${
                     isActive
                       ? 'bg-white/[0.12] text-white shadow-[0_4px_16px_rgba(255,255,255,0.12)] scale-[1.02]'
                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100'
@@ -138,7 +149,7 @@ export const Header = ({ user }: HeaderProps) => {
                   </div>
 
                   <nav className="flex flex-col gap-1.5 px-1">
-                    {navItems.map((link) => {
+                    {allNavItems.map((link) => {
                       const isActive = window.location.pathname === link.path;
                       return (
                         <button
