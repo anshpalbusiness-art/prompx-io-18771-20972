@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import { IntelligentInsights } from "@/components/IntelligentInsights";
 import Layout from "@/components/Layout";
 import { User } from "@supabase/supabase-js";
 
@@ -48,9 +49,16 @@ const Analytics = () => {
               Analytics Dashboard
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-              Track your prompt performance, usage metrics, and ROI insights
+              Track your prompt performance with AI-powered insights and predictive analytics
             </p>
           </div>
+          
+          {/* Intelligent Insights Section */}
+          <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-14">
+            <IntelligentInsights />
+          </div>
+
+          {/* Traditional Analytics Dashboard */}
           <div className="w-full">
             <AnalyticsDashboard user={user} />
           </div>

@@ -210,7 +210,7 @@ Format as JSON with: optimized, alternatives (array), improvements (array), impa
   } catch (error) {
     console.error('Intelligent Optimizer Error:', error);
     return new Response(JSON.stringify({
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       details: 'Intelligent optimization failed'
     }), {
       status: 500,

@@ -193,7 +193,7 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
   } catch (error) {
     console.error('AI Analytics Engine Error:', error);
     return new Response(JSON.stringify({
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       details: 'AI analytics processing failed'
     }), {
       status: 500,

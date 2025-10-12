@@ -109,7 +109,7 @@ PERFORMANCE DATA:
 ${JSON.stringify(performance)}
 
 CURRENT STATISTICS:
-- Engagement: Mean ${engagementStats.mean.toFixed(2)}, Trend: ${engagementStats.trend} (${engagementStats.trendValue.toFixed(1)}%)
+- Engagement: Mean ${engagementStats.mean.toFixed(2)}, Trend: ${engagementStats.trend} (${(engagementStats.trendValue || 0).toFixed(1)}%)
 - Conversions: Mean ${conversionStats.mean.toFixed(2)}, Trend: ${conversionStats.trend}
 
 FEEDBACK PATTERNS:
@@ -170,7 +170,7 @@ FEEDBACK:
 ${JSON.stringify(feedback?.slice(0, 20))}
 
 TRENDS:
-Engagement: ${engagementStats.trend} (${engagementStats.trendValue.toFixed(1)}%)
+Engagement: ${engagementStats.trend} (${(engagementStats.trendValue || 0).toFixed(1)}%)
 Conversions: ${conversionStats.trend}
 
 Generate:
@@ -275,7 +275,7 @@ Format as JSON with: performanceAnomalies, patternAnomalies, positive, negative,
   } catch (error) {
     console.error('Predictive Insights Error:', error);
     return new Response(JSON.stringify({
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       details: 'Predictive analysis failed'
     }), {
       status: 500,
