@@ -76,7 +76,7 @@ export const Header = ({ user }: HeaderProps) => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] w-full">
       <div className="w-full">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1600px]">
-          <div className="flex items-center justify-between h-16 lg:h-20 gap-8">
+          <div className="flex items-center justify-between h-16 lg:h-20 gap-6">
             {/* Logo */}
             <button 
               onClick={() => navigate('/')}
@@ -91,7 +91,7 @@ export const Header = ({ user }: HeaderProps) => {
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-6 flex-1 justify-center px-4">
+            <nav className="hidden lg:flex items-center gap-3 flex-1 justify-center px-4">
               {primaryNavItems.map((link) => {
                 const isActive = window.location.pathname === link.path;
                 return (
@@ -137,7 +137,7 @@ export const Header = ({ user }: HeaderProps) => {
             </nav>
 
             {/* User Section */}
-            <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
+            <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
               {user ? (
                 <>
                   <div className="text-sm text-zinc-300 font-medium px-4 py-2.5 bg-white/[0.06] rounded-xl border border-white/[0.08] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.08] hover:border-white/[0.12] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
@@ -147,7 +147,7 @@ export const Header = ({ user }: HeaderProps) => {
                     variant="outline"
                     size="sm"
                     onClick={handleLogout}
-                    className="h-10 px-5 bg-transparent border-white/[0.12] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 rounded-xl font-semibold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
+                    className="h-10 px-4 bg-transparent border-white/[0.12] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 rounded-xl font-semibold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
                   >
                     <LogOut className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-12" />
                     Sign Out
@@ -157,7 +157,7 @@ export const Header = ({ user }: HeaderProps) => {
                 <Button
                   onClick={() => navigate("/auth")}
                   size="sm"
-                  className="bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-50 hover:to-white h-10 px-6 font-bold shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.35)] transition-all duration-300 rounded-xl hover:scale-105 active:scale-95"
+                  className="bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-50 hover:to-white h-10 px-5 font-bold shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.35)] transition-all duration-300 rounded-xl hover:scale-105 active:scale-95"
                 >
                   Sign In
                 </Button>
