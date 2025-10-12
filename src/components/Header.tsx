@@ -120,12 +120,12 @@ export const Header = ({ user }: HeaderProps) => {
                     <ChevronDown className="w-4 h-4" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-black/95 backdrop-blur-xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] min-w-[200px]">
+                <DropdownMenuContent align="end" className="bg-black border border-white/[0.15] shadow-[0_8px_32px_rgba(0,0,0,0.6)] min-w-[200px] z-50 backdrop-blur-xl">
                   {moreNavItems.map((link) => (
                     <DropdownMenuItem
                       key={link.path}
                       onClick={() => navigate(link.path)}
-                      className="text-zinc-400 hover:text-white hover:bg-white/[0.06] cursor-pointer font-semibold text-sm py-3 px-4 rounded-lg focus:bg-white/[0.06] focus:text-white"
+                      className="text-white hover:text-white hover:bg-white/[0.1] cursor-pointer font-semibold text-sm py-3 px-4 rounded-lg focus:bg-white/[0.1] focus:text-white"
                     >
                       {link.name}
                     </DropdownMenuItem>
