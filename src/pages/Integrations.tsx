@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Layout from "@/components/Layout";
+import { User } from "@supabase/supabase-js";
 import ApiKeyManagement from "@/components/ApiKeyManagement";
 import SDKDocumentation from "@/components/SDKDocumentation";
 import { Code2, Plug, TrendingUp, Shield, Zap, Globe, Webhook, Activity, TestTube2, BarChart3 } from "lucide-react";
@@ -23,7 +25,19 @@ import {
 } from "@/components/ui/select";
 
 export default function Integrations() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
   const [webhookUrl, setWebhookUrl] = useState("");
   const [testPrompt, setTestPrompt] = useState("Write a professional email requesting a meeting");
   const [testModel, setTestModel] = useState("google/gemini-2.5-flash");
@@ -34,14 +48,13 @@ export default function Integrations() {
   const { data: apiKeys } = useQuery({
     queryKey: ["api-keys"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-      setUser(user);
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) return [];
       
       const { data, error } = await supabase
         .from("api_keys")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", currentUser.id)
         .order("created_at", { ascending: false });
       
       if (error) throw error;
@@ -139,7 +152,8 @@ export default function Integrations() {
   ];
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <Layout user={user}>
+      <div className="container mx-auto p-6 space-y-8">
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <Plug className="h-8 w-8 text-primary" />
@@ -428,6 +442,7 @@ export default function Integrations() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </Layout>
   );
 }
