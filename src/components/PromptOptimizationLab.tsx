@@ -100,6 +100,39 @@ const PromptOptimizationLab = ({ userId }: { userId: string }) => {
       return;
     }
 
+    // Check usage limits before optimizing
+    try {
+      const { data: usageData, error: usageError } = await supabase
+        .rpc('check_usage_limit', {
+          _user_id: userId,
+          _resource_type: 'prompt_optimization',
+          _period_days: 30
+        });
+
+      if (usageError) throw usageError;
+
+      if (!usageData.has_access && !usageData.is_admin) {
+        toast({
+          title: "Prompt Limit Reached",
+          description: `You've used ${usageData.used}/${usageData.limit} prompts. Upgrade to continue!`,
+          variant: "destructive",
+        });
+        // Redirect to pricing page
+        setTimeout(() => {
+          window.location.href = '/settings?tab=pricing';
+        }, 2000);
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking usage limits:', error);
+      toast({
+        title: "Error",
+        description: "Failed to check usage limits. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     setResult(null);
 
@@ -120,6 +153,13 @@ const PromptOptimizationLab = ({ userId }: { userId: string }) => {
       if (error) throw error;
 
       setResult(data);
+      
+      // Track usage after successful optimization
+      await supabase.rpc('track_usage', {
+        _user_id: userId,
+        _resource_type: 'prompt_optimization',
+        _count: 1
+      });
       
       // Auto-analyze for knowledge graph
       await supabase.functions.invoke('analyze-prompt-relationships', {

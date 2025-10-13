@@ -2825,6 +2825,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      track_usage: {
+        Args: { _count?: number; _resource_type: string; _user_id: string }
+        Returns: Json
+      }
       update_leaderboard: {
         Args: Record<PropertyKey, never>
         Returns: undefined

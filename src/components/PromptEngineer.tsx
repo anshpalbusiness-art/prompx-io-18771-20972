@@ -1427,6 +1427,15 @@ export const PromptEngineer = () => {
       setIsGenerating(false);
       setShowResults(true);
       
+      // Track usage after successful generation
+      if (user) {
+        await supabase.rpc('track_usage', {
+          _user_id: user.id,
+          _resource_type: 'prompt_optimization',
+          _count: 1
+        });
+      }
+      
       // Save to history (first prompt only)
       if (user && finalPrompts.length > 0) {
         await supabase.from('prompt_history').insert({

@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Activity, TrendingUp, Zap, Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Activity, TrendingUp, Zap, Shield, RefreshCw, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import type { User } from "@supabase/supabase-js";
 
 interface UsageInfo {
@@ -22,7 +24,9 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
   const [promptUsage, setPromptUsage] = useState<UsageInfo | null>(null);
   const [currentPlan, setCurrentPlan] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -93,12 +97,53 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
     return "text-primary";
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadUsageData();
+    setRefreshing(false);
+    toast({
+      title: "Updated",
+      description: "Usage data refreshed successfully",
+    });
+  };
+
+  const handleUpgrade = () => {
+    navigate('/settings?tab=pricing');
+  };
+
   if (loading) {
     return <div className="text-center py-8">Loading usage data...</div>;
   }
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Usage Dashboard</h2>
+          <p className="text-sm text-muted-foreground">Track your subscription and usage</p>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          {currentPlan?.plan_type === 'free' && (
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={handleUpgrade}
+            >
+              <CreditCard className="w-4 h-4 mr-2" />
+              Upgrade Plan
+            </Button>
+          )}
+        </div>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -183,11 +228,22 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
                 </p>
               )}
               {promptUsage.remaining === 0 && (
-                <div className="flex items-center gap-2">
-                  <Badge variant="destructive">Limit Reached</Badge>
-                  <p className="text-sm text-destructive">
-                    Upgrade your plan to continue optimizing prompts
-                  </p>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="destructive">Limit Reached</Badge>
+                    <p className="text-sm text-destructive">
+                      Upgrade your plan to continue optimizing prompts
+                    </p>
+                  </div>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    onClick={handleUpgrade}
+                    className="w-fit"
+                  >
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    View Pricing Plans
+                  </Button>
                 </div>
               )}
             </div>
