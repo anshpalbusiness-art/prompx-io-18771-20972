@@ -1316,33 +1316,71 @@ export const PromptEngineer = () => {
 
         const generatedPrompts = data?.prompts || [];
         
-        // Validate and clean prompts on frontend
+        // Enhanced validation and quality control on frontend
         const validPrompts = generatedPrompts.filter((p: any) => {
-          // Ensure prompt has required structure
           if (!p || typeof p !== 'object') {
             console.warn('Invalid prompt object:', p);
             return false;
           }
           
-          // Ensure title and prompt are strings
           if (typeof p.title !== 'string' || typeof p.prompt !== 'string') {
             console.warn('Prompt missing title or prompt string:', p);
             return false;
           }
           
-          // Check if prompt contains nested JSON (shouldn't happen now)
+          // Quality check: Ensure prompts are substantial (at least 30 characters)
+          if (p.prompt.trim().length < 30) {
+            console.warn('Prompt too short:', p);
+            return false;
+          }
+          
+          // Quality check: Ensure prompts contain the user's core intent
+          const userWords = enhanced.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+          const promptWords = p.prompt.toLowerCase();
+          const hasRelevantContent = userWords.some(word => promptWords.includes(word));
+          
+          if (!hasRelevantContent && !p.prompt.includes(enhanced.substring(0, 50))) {
+            console.warn('Prompt may be off-topic:', p);
+            return false;
+          }
+          
+          // Check for nested JSON
           try {
             const parsed = JSON.parse(p.prompt);
-            if (Array.isArray(parsed)) {
-              console.warn('Prompt contains array JSON - this should not happen:', p);
+            if (Array.isArray(parsed) || typeof parsed === 'object') {
+              console.warn('Prompt contains nested JSON:', p);
               return false;
             }
           } catch {
-            // This is good - prompt is a regular string, not JSON
+            // Good - prompt is a regular string
           }
           
           return true;
         });
+        
+        // If quality control filtered out all prompts, show error
+        if (validPrompts.length === 0 && generatedPrompts.length > 0) {
+          console.error('All generated prompts failed quality checks:', generatedPrompts);
+          toast({
+            title: "Quality Check Failed",
+            description: `Generated prompts for ${model.name} didn't meet quality standards. Trying again...`,
+            variant: "destructive",
+          });
+          
+          // Retry with a simpler approach
+          const fallbackPrompts = [
+            {
+              title: "Direct Response",
+              prompt: `Request: "${enhanced}"\n\nPlease provide a clear, direct response with specific information.`,
+              modelId: modelId,
+              modelName: model.name,
+              provider: model.provider,
+              category: model.category
+            }
+          ];
+          allPrompts.push(...fallbackPrompts);
+          continue;
+        }
         
         // Add model metadata to each prompt
         const modelPrompts = validPrompts.map((p: any) => ({
@@ -1457,9 +1495,29 @@ export const PromptEngineer = () => {
       setIsGenerating(false);
       setIsEnhancing(false);
       setIsTranslating(false);
+      
+      // Provide helpful error messages
+      let errorMessage = "Failed to generate prompts. Please try again.";
+      let errorTitle = "Generation Failed";
+      
+      if (error instanceof Error) {
+        if (error.message.includes('rate limit') || error.message.includes('429')) {
+          errorTitle = "Rate Limit Exceeded";
+          errorMessage = "Too many requests. Please wait a moment and try again.";
+        } else if (error.message.includes('credits') || error.message.includes('402')) {
+          errorTitle = "Insufficient Credits";
+          errorMessage = "AI credits depleted. Please add credits to continue.";
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorTitle = "Network Error";
+          errorMessage = "Connection failed. Please check your internet and try again.";
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
-        title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Please try again",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     }

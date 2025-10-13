@@ -132,19 +132,26 @@ const AgentBuilder = ({ userId, agent, onSave }: AgentBuilderProps) => {
       console.error('Error saving agent:', error);
       
       // Provide specific error messages based on error type
-      let errorMessage = 'Failed to save agent';
+      let errorMessage = 'Failed to save agent. Please try again.';
+      let errorTitle = 'Error';
+      
       if (error instanceof Error) {
         if (error.message.includes('uuid')) {
-          errorMessage = 'Invalid data format. Please try again.';
+          errorTitle = 'Invalid Data';
+          errorMessage = 'Invalid data format. Please check your input and try again.';
         } else if (error.message.includes('duplicate')) {
-          errorMessage = 'An agent with this name already exists.';
-        } else {
+          errorTitle = 'Duplicate Name';
+          errorMessage = 'An agent with this name already exists. Please use a different name.';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorTitle = 'Connection Error';
+          errorMessage = 'Network error. Please check your connection and try again.';
+        } else if (error.message) {
           errorMessage = error.message;
         }
       }
       
       toast({
-        title: "Error",
+        title: errorTitle,
         description: errorMessage,
         variant: "destructive",
       });

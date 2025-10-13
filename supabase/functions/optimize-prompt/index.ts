@@ -222,12 +222,78 @@ serve(async (req) => {
     const strategy = modelStrategies[platform] || modelStrategies["gpt-5"];
     const modelInfo = modelName && provider ? `${modelName} (${provider})` : platform;
 
+    // Enhanced system prompt with quality controls
     const systemPrompt = `${strategy}
 
-You are optimizing prompts specifically for ${modelInfo}.
-Generate 3 distinct, model-optimized prompt variations tailored to this AI's unique strengths and capabilities.`;
+You are an ELITE prompt optimization AI with expertise in:
+- Prompt engineering best practices for ${modelInfo}
+- Understanding user intent and context deeply
+- Creating clear, actionable, and specific instructions
+- Balancing brevity with necessary detail
+- Ensuring prompts are relevant and focused
 
-    // Call AI to generate optimized prompts
+Your mission: Transform vague or basic requests into EXCELLENT, production-ready prompts that will give users EXACTLY what they want on the FIRST try.
+
+CRITICAL QUALITY STANDARDS:
+1. Always maintain the user's CORE INTENT - never drift off-topic
+2. Add necessary context and constraints for clarity
+3. Specify expected output format when relevant
+4. Include examples or clarifications when helpful
+5. Remove ambiguity while staying concise
+6. Optimize for ${modelInfo}'s specific capabilities
+
+Generate 3 distinct, HIGH-QUALITY prompt variations.`;
+
+    // Enhanced user prompt with better instructions
+    const userPrompt = `User's original request: "${text}"
+
+ANALYSIS REQUIRED:
+1. What is the user's CORE INTENT? (Extract the exact goal)
+2. What context or constraints are missing?
+3. What would make this request crystal clear?
+4. What output format would be most useful?
+
+GENERATE 3 OPTIMIZED VARIATIONS for ${modelInfo}:
+
+**Variation 1: "Quick & Direct"**
+- Concise and efficient
+- Strips unnecessary words
+- Clear action and expected output
+- Optimized for fast results
+
+**Variation 2: "Detailed & Professional"**
+- Comprehensive and thorough
+- Includes context and constraints
+- Specifies quality expectations
+- Leverages ${modelInfo}'s advanced capabilities
+
+**Variation 3: "Creative & Enhanced"**
+- Adds creative angle or unique approach
+- Includes helpful examples or analogies
+- Showcases ${modelInfo}'s creative strengths
+- Maintains professionalism
+
+Model characteristics to optimize for:
+- Provider: ${provider || 'Unknown'}
+- Category: ${category || 'text'}
+- Model: ${modelName || platform}
+- Platform: ${platform}
+
+CRITICAL: Each prompt MUST be:
+✓ Crystal clear and unambiguous
+✓ Directly related to the user's intent
+✓ Actionable and specific
+✓ Properly structured
+✓ Ready to use immediately
+
+Return ONLY a valid JSON array (no markdown, no code blocks):
+[
+  {"title": "Quick & Direct", "prompt": "your concise optimized prompt here"},
+  {"title": "Detailed & Professional", "prompt": "your detailed optimized prompt here"},
+  {"title": "Creative & Enhanced", "prompt": "your creative optimized prompt here"}
+]`;
+
+    // Call AI to generate optimized prompts with higher quality settings
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -243,28 +309,11 @@ Generate 3 distinct, model-optimized prompt variations tailored to this AI's uni
           },
           {
             role: "user",
-            content: `Original user request: "${text}"
-
-Generate 3 distinct optimized prompt variations specifically tuned for ${modelInfo}:
-1. "Quick & Direct" - Concise, efficient version optimized for this model
-2. "Detailed & Professional" - Comprehensive version leveraging model strengths
-3. "Creative & Enhanced" - Advanced version showcasing model capabilities
-
-Consider this model's specific characteristics:
-- Provider: ${provider || 'Unknown'}
-- Category: ${category || 'text'}
-- Model: ${modelName || platform}
-
-Return ONLY a JSON array with this exact structure:
-[
-  {"title": "Quick & Direct", "prompt": "..."},
-  {"title": "Detailed & Professional", "prompt": "..."},
-  {"title": "Creative & Enhanced", "prompt": "..."}
-]`
+            content: userPrompt
           }
         ],
         temperature: 0.7,
-        max_tokens: 2000
+        max_tokens: 3000
       }),
     });
 
@@ -298,14 +347,18 @@ Return ONLY a JSON array with this exact structure:
 
     console.log("AI response:", content);
 
-    // Extract JSON from response
+    // Extract JSON from response with enhanced parsing
     let prompts;
     try {
-      const jsonMatch = content.match(/\[[\s\S]*\]/);
+      // Remove markdown code blocks if present
+      let cleanContent = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+      
+      // Try to find JSON array
+      const jsonMatch = cleanContent.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
         prompts = JSON.parse(jsonMatch[0]);
       } else {
-        prompts = JSON.parse(content);
+        prompts = JSON.parse(cleanContent);
       }
       
       // Validate that prompts is an array of objects with title and prompt
@@ -313,10 +366,9 @@ Return ONLY a JSON array with this exact structure:
         throw new Error("Invalid prompts array structure");
       }
       
-      // Ensure each prompt has the required structure
+      // Quality validation and enhancement
       prompts = prompts.map((p, idx) => {
         if (typeof p === 'string') {
-          // If prompt is a string, create proper structure
           const titles = ["Quick & Direct", "Detailed & Professional", "Creative & Enhanced"];
           return { title: titles[idx] || "Optimized Prompt", prompt: p };
         }
@@ -331,26 +383,51 @@ Return ONLY a JSON array with this exact structure:
           p.prompt = JSON.stringify(p.prompt);
         }
         
+        // Quality checks - ensure prompts are substantial and on-topic
+        const prompt = p.prompt.trim();
+        const originalWords = text.toLowerCase().split(/\s+/);
+        const promptWords = prompt.toLowerCase().split(/\s+/);
+        
+        // Check if prompt is too generic (less than 15 words and doesn't reference original)
+        const hasRelevantContent = originalWords.some(word => 
+          word.length > 3 && promptWords.includes(word)
+        );
+        
+        if (prompt.length < 50 && !hasRelevantContent) {
+          console.warn('Generated prompt seems too generic, enhancing...', p);
+          // Enhance the prompt to be more specific
+          p.prompt = `Based on: "${text}"\n\n${prompt}\n\nPlease ensure your response directly addresses the above request with specific, actionable information optimized for ${modelInfo}.`;
+        }
+        
         return p;
       });
+      
+      // Ensure we have exactly 3 prompts
+      while (prompts.length < 3) {
+        const titles = ["Quick & Direct", "Detailed & Professional", "Creative & Enhanced"];
+        prompts.push({
+          title: titles[prompts.length],
+          prompt: `${text}\n\nPlease provide a ${titles[prompts.length].toLowerCase()} response optimized for ${modelInfo}.`
+        });
+      }
       
     } catch (parseError) {
       console.error("Failed to parse AI response:", parseError);
       console.error("Raw content:", content);
       
-      // Create meaningful fallback prompts based on original text
+      // Create high-quality fallback prompts that maintain user intent
       prompts = [
         { 
           title: "Quick & Direct", 
-          prompt: `${text}\n\nPlease provide a concise, direct response optimized for ${modelInfo}.`
+          prompt: `${text}\n\nProvide a clear, concise response with specific actionable information. Format: Direct answer with key points.`
         },
         { 
           title: "Detailed & Professional", 
-          prompt: `${text}\n\nPlease provide a comprehensive, professional response with detailed explanations, optimized for ${modelInfo}.`
+          prompt: `Request: "${text}"\n\nProvide a comprehensive, professional response including:\n1. Detailed explanation\n2. Relevant context and background\n3. Specific examples\n4. Practical applications\n\nEnsure accuracy and depth in your response.`
         },
         { 
           title: "Creative & Enhanced", 
-          prompt: `${text}\n\nPlease provide a creative, enhanced response that showcases the capabilities of ${modelInfo}.`
+          prompt: `Core request: "${text}"\n\nProvide an innovative, engaging response that:\n- Offers unique perspectives or approaches\n- Includes creative examples or analogies\n- Demonstrates advanced capabilities\n- Maintains professional quality\n\nMake your response memorable and insightful.`
         }
       ];
     }

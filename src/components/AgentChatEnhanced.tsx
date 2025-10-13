@@ -155,15 +155,26 @@ const AgentChatEnhanced = ({ agent, userId }: AgentChatEnhancedProps) => {
     } catch (error) {
       console.error('Error executing agent:', error);
       
-      let errorMessage = "Failed to get response from agent";
-      if (error.message?.includes('Rate limit')) {
-        errorMessage = "Rate limit exceeded. Please wait before trying again.";
-      } else if (error.message?.includes('credits')) {
-        errorMessage = "AI credits depleted. Please add credits to continue.";
+      let errorMessage = "Failed to get response from agent. Please try again.";
+      let errorTitle = "Error";
+      
+      if (error instanceof Error) {
+        if (error.message?.includes('Rate limit') || error.message?.includes('429')) {
+          errorTitle = "Rate Limit Exceeded";
+          errorMessage = "Too many requests. Please wait before trying again.";
+        } else if (error.message?.includes('credits') || error.message?.includes('402')) {
+          errorTitle = "Insufficient Credits";
+          errorMessage = "AI credits depleted. Please add credits to continue using AI agents.";
+        } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+          errorTitle = "Connection Error";
+          errorMessage = "Network error. Please check your connection and try again.";
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
       }
       
       toast({
-        title: "Error",
+        title: errorTitle,
         description: errorMessage,
         variant: "destructive",
       });

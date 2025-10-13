@@ -55,8 +55,8 @@ const AgentLibrary = ({ userId, planAccess }: AgentLibraryProps) => {
     } catch (error) {
       console.error('Error fetching agents:', error);
       toast({
-        title: "Error",
-        description: "Failed to load your agents",
+        title: "Error Loading Agents",
+        description: error instanceof Error ? error.message : "Failed to load agents. Please refresh the page.",
         variant: "destructive",
       });
     } finally {
@@ -83,8 +83,8 @@ const AgentLibrary = ({ userId, planAccess }: AgentLibraryProps) => {
     } catch (error) {
       console.error('Error deleting agent:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete agent",
+        title: "Error Deleting Agent",
+        description: error instanceof Error ? error.message : "Failed to delete agent. Please try again.",
         variant: "destructive",
       });
     }
