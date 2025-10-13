@@ -196,6 +196,27 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_emails: {
+        Row: {
+          added_by: string | null
+          created_at: string | null
+          email: string
+          id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       agent_analytics: {
         Row: {
           agent_id: string
@@ -2799,6 +2820,10 @@ export type Database = {
       is_team_owner: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
+      }
+      sync_existing_admins: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       update_leaderboard: {
         Args: Record<PropertyKey, never>

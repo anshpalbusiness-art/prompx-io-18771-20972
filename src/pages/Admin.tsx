@@ -7,8 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Users, DollarSign, TrendingUp, FileText } from "lucide-react";
+import { Users, DollarSign, TrendingUp, FileText, Mail, Plus, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface DashboardStats {
   totalUsers: number;
@@ -18,12 +21,23 @@ interface DashboardStats {
   recentPrompts: { id: string; user_email: string; prompt: string; created_at: string; platform: string }[];
 }
 
+interface AdminEmail {
+  id: string;
+  email: string;
+  created_at: string;
+}
+
 const Admin = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [adminEmails, setAdminEmails] = useState<AdminEmail[]>([]);
+  const [newEmail, setNewEmail] = useState("");
+  const [isAddingEmail, setIsAddingEmail] = useState(false);
+  const [emailToDelete, setEmailToDelete] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -52,6 +66,7 @@ const Admin = () => {
 
       setIsAdmin(true);
       loadDashboardStats();
+      loadAdminEmails();
       setLoading(false);
     };
 
@@ -152,6 +167,95 @@ const Admin = () => {
     }
   };
 
+  const loadAdminEmails = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('admin_emails')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setAdminEmails(data || []);
+    } catch (error) {
+      console.error('Error loading admin emails:', error);
+      toast.error("Failed to load admin emails");
+    }
+  };
+
+  const handleAddEmail = async () => {
+    if (!newEmail.trim()) {
+      toast.error("Please enter an email address");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    setIsAddingEmail(true);
+    try {
+      const { error } = await supabase
+        .from('admin_emails')
+        .insert({ email: newEmail.toLowerCase().trim(), added_by: user?.id });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast.error("This email is already in the admin list");
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      toast.success(`${newEmail} added to admin list`);
+      setNewEmail("");
+      loadAdminEmails();
+    } catch (error) {
+      console.error('Error adding admin email:', error);
+      toast.error("Failed to add admin email");
+    } finally {
+      setIsAddingEmail(false);
+    }
+  };
+
+  const handleDeleteEmail = async (id: string, email: string) => {
+    try {
+      const { error } = await supabase
+        .from('admin_emails')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success(`${email} removed from admin list`);
+      loadAdminEmails();
+      setEmailToDelete(null);
+    } catch (error) {
+      console.error('Error deleting admin email:', error);
+      toast.error("Failed to remove admin email");
+    }
+  };
+
+  const handleSyncExistingAdmins = async () => {
+    setIsSyncing(true);
+    try {
+      const { error } = await supabase.rpc('sync_existing_admins');
+
+      if (error) throw error;
+
+      toast.success("Successfully synced existing users with admin emails");
+      loadDashboardStats();
+    } catch (error) {
+      console.error('Error syncing admins:', error);
+      toast.error("Failed to sync existing admins");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -226,10 +330,11 @@ const Admin = () => {
 
           {/* Detailed Tables */}
           <Tabs defaultValue="subscriptions" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
               <TabsTrigger value="usage">Usage Stats</TabsTrigger>
               <TabsTrigger value="prompts">Recent Prompts</TabsTrigger>
+              <TabsTrigger value="admins">Admin Emails</TabsTrigger>
             </TabsList>
 
             <TabsContent value="subscriptions" className="mt-6">
@@ -322,9 +427,120 @@ const Admin = () => {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="admins" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Admin Email Management</CardTitle>
+                      <CardDescription>Users with these emails will automatically become admins</CardDescription>
+                    </div>
+                    <Button 
+                      onClick={handleSyncExistingAdmins} 
+                      disabled={isSyncing}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                      Sync Existing Users
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {/* Add New Email */}
+                  <div className="flex gap-2 mb-6">
+                    <Input
+                      type="email"
+                      placeholder="Enter email address..."
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddEmail()}
+                      className="flex-1"
+                    />
+                    <Button 
+                      onClick={handleAddEmail} 
+                      disabled={isAddingEmail || !newEmail.trim()}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Admin
+                    </Button>
+                  </div>
+
+                  {/* Admin Emails Table */}
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Email Address</TableHead>
+                        <TableHead>Added On</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {adminEmails.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                            <Mail className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                            <p>No admin emails configured yet</p>
+                            <p className="text-sm mt-1">Add your first admin email above</p>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        adminEmails.map((adminEmail) => (
+                          <TableRow key={adminEmail.id}>
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-2">
+                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                {adminEmail.email}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {new Date(adminEmail.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEmailToDelete(adminEmail.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!emailToDelete} onOpenChange={(open) => !open && setEmailToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Admin Email?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the email from the admin list. Users who already have admin access will keep it until you manually revoke it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const email = adminEmails.find(e => e.id === emailToDelete);
+                if (email) handleDeleteEmail(emailToDelete!, email.email);
+              }}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };
