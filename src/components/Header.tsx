@@ -21,6 +21,25 @@ export const Header = ({ user }: HeaderProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is admin
+  React.useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      setIsAdmin(!!data);
+    };
+    
+    checkAdminStatus();
+  }, [user]);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -54,6 +73,7 @@ export const Header = ({ user }: HeaderProps) => {
     { name: 'COMMUNITY', path: '/community' },
     { name: 'ENTERPRISE', path: '/enterprise' },
     { name: 'TEAM', path: '/team' },
+    ...(isAdmin ? [{ name: 'ADMIN DASHBOARD', path: '/admin' }] : []),
   ];
 
   // All nav items for mobile menu
@@ -70,6 +90,7 @@ export const Header = ({ user }: HeaderProps) => {
     { name: 'TEAM', path: '/team' },
     { name: 'MARKETPLACE', path: '/marketplace' },
     { name: 'SETTINGS', path: '/settings' },
+    ...(isAdmin ? [{ name: 'ADMIN DASHBOARD', path: '/admin' }] : []),
   ];
 
   return (
