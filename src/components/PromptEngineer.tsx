@@ -1983,12 +1983,50 @@ export const PromptEngineer = () => {
                 <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 max-w-6xl mx-auto">
                   {AI_MODELS
                     .filter(model => selectedCategory === 'all' || model.category === selectedCategory)
-                    .filter(model => 
-                      searchQuery === '' || 
-                      model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      model.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      model.provider.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
+                    .filter(model => {
+                      if (searchQuery === '') return true;
+                      
+                      const query = searchQuery.toLowerCase().trim();
+                      
+                      // Smart search aliases and mappings
+                      const searchAliases: { [key: string]: string[] } = {
+                        'chatgpt': ['gpt', 'openai', 'gpt-5', 'gpt-4'],
+                        'chat gpt': ['gpt', 'openai', 'gpt-5', 'gpt-4'],
+                        'gpt': ['gpt', 'openai', 'gpt-5', 'gpt-4'],
+                        'claude': ['claude', 'anthropic', 'opus', 'sonnet', 'haiku'],
+                        'gemini': ['gemini', 'google', 'flash', 'pro'],
+                        'llama': ['llama', 'meta'],
+                        'mistral': ['mistral', 'large'],
+                        'midjourney': ['midjourney', 'mj', 'image'],
+                        'dalle': ['dall-e', 'dalle', 'openai', 'image'],
+                        'stable diffusion': ['stable', 'diffusion', 'sd', 'image'],
+                        'copilot': ['copilot', 'github', 'code'],
+                        'cursor': ['cursor', 'code'],
+                        'sora': ['sora', 'openai', 'video'],
+                        'elevenlabs': ['elevenlabs', 'voice', 'audio', 'tts']
+                      };
+                      
+                      // Check if query matches any alias
+                      let matchTerms: string[] = [query];
+                      for (const [alias, terms] of Object.entries(searchAliases)) {
+                        if (query.includes(alias) || alias.includes(query)) {
+                          matchTerms = [...matchTerms, ...terms];
+                        }
+                      }
+                      
+                      // Search across multiple fields with all match terms
+                      const searchableText = [
+                        model.name,
+                        model.description,
+                        model.provider,
+                        model.id,
+                        model.category
+                      ].join(' ').toLowerCase();
+                      
+                      return matchTerms.some(term => 
+                        searchableText.includes(term)
+                      );
+                    })
                     .map((model) => {
                       const Icon = model.icon;
                       const isSelected = compareMode 
