@@ -42,6 +42,7 @@ interface PlanAccess {
 export const usePlanAccess = (userId: string | undefined): PlanAccess => {
   const [planType, setPlanType] = useState<string>('free');
   const [planName, setPlanName] = useState<string>('Free');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [limits, setLimits] = useState<PlanLimits>({
     prompts_per_month: 5,
     workflows: 0,
@@ -67,6 +68,45 @@ export const usePlanAccess = (userId: string | undefined): PlanAccess => {
   const loadUserPlan = async () => {
     try {
       setIsLoading(true);
+      
+      // Check if user is admin
+      const { data: adminRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      const userIsAdmin = !!adminRole;
+      setIsAdmin(userIsAdmin);
+      
+      // If admin, grant unlimited access to everything
+      if (userIsAdmin) {
+        setPlanType('enterprise');
+        setPlanName('Admin');
+        setLimits({
+          prompts_per_month: -1,
+          workflows: -1,
+          api_calls: -1,
+          team_members: -1,
+        });
+        setFeatures({
+          basic_templates: true,
+          all_templates: true,
+          advanced_workflows: true,
+          compliance_checks: true,
+          team_collaboration: true,
+          priority_support: true,
+          custom_templates: true,
+          dedicated_support: true,
+          prompt_optimization: true,
+          sso: true,
+          sla: true,
+          custom_integrations: true,
+        });
+        setIsLoading(false);
+        return;
+      }
       
       // Get user's active subscription
       const { data: subscription, error: subError } = await supabase
@@ -109,20 +149,24 @@ export const usePlanAccess = (userId: string | undefined): PlanAccess => {
   };
 
   const canAccessFeature = (feature: keyof PlanFeatures): boolean => {
+    if (isAdmin) return true;
     return features[feature] === true;
   };
 
   const canAccessWorkflows = (): boolean => {
+    if (isAdmin) return true;
     return limits.workflows !== 0;
   };
 
   const canAccessAgents = (): boolean => {
+    if (isAdmin) return true;
     // Free plan can create agents but with limited features
     // Pro and above have full access
     return planType !== 'free' || limits.prompts_per_month > 0;
   };
 
   const hasProPlan = (): boolean => {
+    if (isAdmin) return true;
     return planType !== 'free';
   };
 
