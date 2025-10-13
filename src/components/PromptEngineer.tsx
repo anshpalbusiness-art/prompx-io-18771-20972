@@ -1208,6 +1208,39 @@ export const PromptEngineer = () => {
       return;
     }
 
+    // Check usage limits before generating prompts
+    try {
+      const { data: usageData, error: usageError } = await supabase
+        .rpc('check_usage_limit', {
+          _user_id: user?.id,
+          _resource_type: 'prompt_optimization',
+          _period_days: 30
+        });
+
+      if (usageError) throw usageError;
+
+      if (!usageData.has_access && !usageData.is_admin) {
+        toast({
+          title: "Prompt Limit Reached",
+          description: "You've reached your monthly limit. Upgrade to continue optimizing prompts.",
+          variant: "destructive",
+        });
+        // Redirect to settings page with pricing tab after 2 seconds
+        setTimeout(() => {
+          window.location.href = '/settings?tab=pricing';
+        }, 2000);
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking usage limits:', error);
+      toast({
+        title: "Error",
+        description: "Failed to check usage limits. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsGenerating(true);
     setIsEnhancing(true);
     setShowResults(false);
