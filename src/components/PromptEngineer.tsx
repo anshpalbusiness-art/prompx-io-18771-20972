@@ -2159,6 +2159,14 @@ export const PromptEngineer = () => {
                             } else {
                               setSelectedTool(model.id);
                             }
+                            
+                            // Scroll to input area after selection
+                            setTimeout(() => {
+                              document.getElementById('describe-vision')?.scrollIntoView({ 
+                                behavior: 'smooth',
+                                block: 'center'
+                              });
+                            }, 100);
                           }}
                         >
                           <div className={`p-2 rounded-lg transition-all duration-300 ${
@@ -2205,7 +2213,7 @@ export const PromptEngineer = () => {
               </div>
 
               {/* Input Area with Voice Support */}
-              <div className="mb-6 sm:mb-8">
+              <div id="describe-vision" className="mb-6 sm:mb-8">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-3 sm:mb-4">
                   <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground">
                     Describe Your Vision
