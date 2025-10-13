@@ -2522,126 +2522,6 @@ export const PromptEngineer = () => {
         </div>
       </section>
 
-      {/* Personalization Features */}
-      {user && (
-        <section className="py-12 sm:py-16 md:py-20 bg-background w-full overflow-x-hidden">
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <Tabs defaultValue="profile" className="w-full">
-              <TabsList className="w-full mb-6">
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="visual">Visual Builder</TabsTrigger>
-                <TabsTrigger value="copilot">AI Co-Pilot</TabsTrigger>
-                <TabsTrigger value="templates">Templates</TabsTrigger>
-                <TabsTrigger value="history">History</TabsTrigger>
-                <TabsTrigger value="workflow">Workflow</TabsTrigger>
-                <TabsTrigger value="teams">Teams</TabsTrigger>
-                <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                <TabsTrigger value="abtesting">A/B Testing</TabsTrigger>
-                <TabsTrigger value="compliance">Compliance</TabsTrigger>
-                <TabsTrigger value="legal">Legal Packs</TabsTrigger>
-                <TabsTrigger value="pricing" id="pricing">Pricing</TabsTrigger>
-                <TabsTrigger value="apikeys" id="api">API Keys</TabsTrigger>
-                <TabsTrigger value="usage">Usage</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="profile">
-                <UserProfile 
-                  userId={user.id} 
-                  onPreferencesUpdate={setUserPreferences}
-                />
-              </TabsContent>
-
-              <TabsContent value="visual">
-                <VisualPromptBuilder onPromptGenerated={(prompt) => {
-                  setUserInput(prompt);
-                  toast({
-                    title: "Prompt Generated",
-                    description: "Your visual prompt has been built! Scroll down to generate optimized versions.",
-                  });
-                  // Scroll to the main input area
-                  document.getElementById('tool-selector')?.scrollIntoView({ behavior: 'smooth' });
-                }} />
-              </TabsContent>
-
-              <TabsContent value="copilot">
-                <AICopilot />
-              </TabsContent>
-
-              <TabsContent value="templates">
-                <IndustryTemplates 
-                  onTemplateSelect={(template) => {
-                    setUserInput(template);
-                    toast({
-                      title: "Template Applied",
-                      description: "Customize the template with your specific details",
-                    });
-                  }}
-                />
-              </TabsContent>
-
-              <TabsContent value="history">
-                <PromptHistory 
-                  userId={user.id}
-                  onPromptSelect={(prompt) => {
-                    setUserInput(prompt);
-                    toast({
-                      title: "Prompt Loaded",
-                      description: "Edit and regenerate as needed",
-                    });
-                  }}
-                />
-              </TabsContent>
-
-              <TabsContent value="workflow">
-                <WorkflowBuilder 
-                  onExecute={executeWorkflow} 
-                  isExecuting={isExecutingWorkflow}
-                  user={user}
-                  planAccess={planAccess}
-                />
-              </TabsContent>
-
-              <TabsContent value="teams">
-                <TeamManagement user={user} />
-              </TabsContent>
-
-              <TabsContent value="marketplace">
-                <PromptMarketplace user={user} />
-              </TabsContent>
-
-              <TabsContent value="analytics">
-                <AnalyticsDashboard user={user} />
-              </TabsContent>
-
-              <TabsContent value="abtesting">
-                <ABTestingPanel user={user} />
-              </TabsContent>
-
-              <TabsContent value="compliance">
-                <ComplianceDashboard user={user} />
-              </TabsContent>
-
-              <TabsContent value="legal">
-                <LegalPromptPacks />
-              </TabsContent>
-
-              <TabsContent value="pricing">
-                <PricingPlans user={user} />
-              </TabsContent>
-
-              <TabsContent value="apikeys">
-                <ApiKeyManagement user={user} />
-              </TabsContent>
-
-              <TabsContent value="usage">
-                <UsageDashboard user={user} />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </section>
-      )}
-
       {/* Workflow Progress */}
       {isExecutingWorkflow && workflowProgress.length > 0 && (
         <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-background w-full overflow-x-hidden">
@@ -2776,6 +2656,126 @@ export const PromptEngineer = () => {
                 Create New Prompts
               </Button>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Personalization Features */}
+      {user && (
+        <section className="py-12 sm:py-16 md:py-20 bg-background w-full overflow-x-hidden">
+          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <Tabs defaultValue="profile" className="w-full">
+              <TabsList className="w-full mb-6">
+                <TabsTrigger value="profile">Profile</TabsTrigger>
+                <TabsTrigger value="visual">Visual Builder</TabsTrigger>
+                <TabsTrigger value="copilot">AI Co-Pilot</TabsTrigger>
+                <TabsTrigger value="templates">Templates</TabsTrigger>
+                <TabsTrigger value="history">History</TabsTrigger>
+                <TabsTrigger value="workflow">Workflow</TabsTrigger>
+                <TabsTrigger value="teams">Teams</TabsTrigger>
+                <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger value="abtesting">A/B Testing</TabsTrigger>
+                <TabsTrigger value="compliance">Compliance</TabsTrigger>
+                <TabsTrigger value="legal">Legal Packs</TabsTrigger>
+                <TabsTrigger value="pricing" id="pricing">Pricing</TabsTrigger>
+                <TabsTrigger value="apikeys" id="api">API Keys</TabsTrigger>
+                <TabsTrigger value="usage">Usage</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="profile">
+                <UserProfile 
+                  userId={user.id} 
+                  onPreferencesUpdate={setUserPreferences}
+                />
+              </TabsContent>
+
+              <TabsContent value="visual">
+                <VisualPromptBuilder onPromptGenerated={(prompt) => {
+                  setUserInput(prompt);
+                  toast({
+                    title: "Prompt Generated",
+                    description: "Your visual prompt has been built! Scroll down to generate optimized versions.",
+                  });
+                  // Scroll to the main input area
+                  document.getElementById('tool-selector')?.scrollIntoView({ behavior: 'smooth' });
+                }} />
+              </TabsContent>
+
+              <TabsContent value="copilot">
+                <AICopilot />
+              </TabsContent>
+
+              <TabsContent value="templates">
+                <IndustryTemplates 
+                  onTemplateSelect={(template) => {
+                    setUserInput(template);
+                    toast({
+                      title: "Template Applied",
+                      description: "Customize the template with your specific details",
+                    });
+                  }}
+                />
+              </TabsContent>
+
+              <TabsContent value="history">
+                <PromptHistory 
+                  userId={user.id}
+                  onPromptSelect={(prompt) => {
+                    setUserInput(prompt);
+                    toast({
+                      title: "Prompt Loaded",
+                      description: "Edit and regenerate as needed",
+                    });
+                  }}
+                />
+              </TabsContent>
+
+              <TabsContent value="workflow">
+                <WorkflowBuilder 
+                  onExecute={executeWorkflow} 
+                  isExecuting={isExecutingWorkflow}
+                  user={user}
+                  planAccess={planAccess}
+                />
+              </TabsContent>
+
+              <TabsContent value="teams">
+                <TeamManagement user={user} />
+              </TabsContent>
+
+              <TabsContent value="marketplace">
+                <PromptMarketplace user={user} />
+              </TabsContent>
+
+              <TabsContent value="analytics">
+                <AnalyticsDashboard user={user} />
+              </TabsContent>
+
+              <TabsContent value="abtesting">
+                <ABTestingPanel user={user} />
+              </TabsContent>
+
+              <TabsContent value="compliance">
+                <ComplianceDashboard user={user} />
+              </TabsContent>
+
+              <TabsContent value="legal">
+                <LegalPromptPacks />
+              </TabsContent>
+
+              <TabsContent value="pricing">
+                <PricingPlans user={user} />
+              </TabsContent>
+
+              <TabsContent value="apikeys">
+                <ApiKeyManagement user={user} />
+              </TabsContent>
+
+              <TabsContent value="usage">
+                <UsageDashboard user={user} />
+              </TabsContent>
+            </Tabs>
           </div>
         </section>
       )}
