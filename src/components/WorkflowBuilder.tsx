@@ -7,10 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Plus, Trash2, Play, ArrowRight, Save, FolderOpen, Download, Upload, Settings, Sparkles, Loader2 } from "lucide-react";
+import { Plus, Trash2, Play, ArrowRight, Save, FolderOpen, Download, Upload, Settings, Sparkles, Loader2, Lock, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export interface WorkflowStep {
   id: string;
@@ -26,9 +27,10 @@ interface WorkflowBuilderProps {
   onExecute: (steps: WorkflowStep[]) => void;
   isExecuting: boolean;
   user: User | null;
+  planAccess?: any;
 }
 
-export const WorkflowBuilder = ({ onExecute, isExecuting, user }: WorkflowBuilderProps) => {
+export const WorkflowBuilder = ({ onExecute, isExecuting, user, planAccess }: WorkflowBuilderProps) => {
   const { toast } = useToast();
   const [steps, setSteps] = useState<WorkflowStep[]>([
     { id: '1', name: 'Step 1', prompt: '', model: 'google/gemini-2.5-flash', temperature: 0.7, maxTokens: 2000 }
@@ -39,6 +41,9 @@ export const WorkflowBuilder = ({ onExecute, isExecuting, user }: WorkflowBuilde
   const [workflowDescription, setWorkflowDescription] = useState('');
   const [naturalLanguageInput, setNaturalLanguageInput] = useState('');
   const [isGeneratingWorkflow, setIsGeneratingWorkflow] = useState(false);
+
+  // Check if workflows are accessible
+  const canAccessWorkflows = planAccess?.canAccessWorkflows() !== false;
 
   useEffect(() => {
     if (user) {
@@ -97,6 +102,12 @@ export const WorkflowBuilder = ({ onExecute, isExecuting, user }: WorkflowBuilde
   };
 
   const handleExecute = () => {
+    if (!canAccessWorkflows) {
+      planAccess?.showUpgradeMessage('Workflows');
+      planAccess?.redirectToPricing();
+      return;
+    }
+
     const emptySteps = steps.filter(s => !s.prompt.trim());
     if (emptySteps.length > 0) {
       toast({
@@ -208,6 +219,12 @@ export const WorkflowBuilder = ({ onExecute, isExecuting, user }: WorkflowBuilde
   };
 
   const generateWorkflowFromNaturalLanguage = async () => {
+    if (!canAccessWorkflows) {
+      planAccess?.showUpgradeMessage('AI Workflow Generation');
+      planAccess?.redirectToPricing();
+      return;
+    }
+
     if (!naturalLanguageInput.trim()) {
       toast({
         title: "Input required",
@@ -321,6 +338,26 @@ export const WorkflowBuilder = ({ onExecute, isExecuting, user }: WorkflowBuilde
 
   return (
     <div className="space-y-6">
+      {!canAccessWorkflows && (
+        <Alert className="border-destructive/50 bg-destructive/5">
+          <Lock className="h-4 w-4" />
+          <AlertTitle>Workflows Not Available</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              Workflows are only available on Pro, Team, and Enterprise plans. Upgrade to unlock multi-step AI workflows.
+            </span>
+            <Button 
+              size="sm" 
+              onClick={() => planAccess?.redirectToPricing()}
+              className="ml-4"
+            >
+              <Crown className="h-4 w-4 mr-2" />
+              Upgrade Now
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-4">
         <div>
           <h3 className="text-lg font-semibold">AI Workflow Builder</h3>

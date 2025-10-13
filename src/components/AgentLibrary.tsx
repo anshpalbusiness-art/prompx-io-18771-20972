@@ -25,9 +25,10 @@ interface Agent {
 
 interface AgentLibraryProps {
   userId: string;
+  planAccess: any;
 }
 
-const AgentLibrary = ({ userId }: AgentLibraryProps) => {
+const AgentLibrary = ({ userId, planAccess }: AgentLibraryProps) => {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
@@ -93,7 +94,19 @@ const AgentLibrary = ({ userId }: AgentLibraryProps) => {
     fetchAgents();
     setIsBuilderOpen(false);
     setEditingAgent(null);
-    setActiveTab("templates"); // Reset tab on save
+    setActiveTab("templates");
+  };
+
+  const handleCreateAgent = () => {
+    // Check if on free plan and already has agents
+    if (planAccess.planType === 'free' && agents.length >= 2) {
+      planAccess.showUpgradeMessage('Creating more than 2 AI agents');
+      planAccess.redirectToPricing();
+      return;
+    }
+    setEditingAgent(null);
+    setActiveTab("templates");
+    setIsBuilderOpen(true);
   };
 
   const handleTemplateSelect = (template: any) => {
@@ -139,10 +152,7 @@ const AgentLibrary = ({ userId }: AgentLibraryProps) => {
           }
         }}>
           <DialogTrigger asChild>
-            <Button size="lg" onClick={() => {
-              setEditingAgent(null);
-              setActiveTab("templates");
-            }}>
+            <Button size="lg" onClick={handleCreateAgent}>
               <Plus className="w-4 h-4 mr-2" />
               Create New Agent
             </Button>

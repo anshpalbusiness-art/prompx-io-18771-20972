@@ -4,11 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import AgentLibrary from "@/components/AgentLibrary";
 import Layout from "@/components/Layout";
 import { User } from "@supabase/supabase-js";
+import { usePlanAccess } from "@/hooks/usePlanAccess";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Crown, Lock } from "lucide-react";
 
 const Agents = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const planAccess = usePlanAccess(user?.id);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -51,8 +56,29 @@ const Agents = () => {
               Create and manage specialized AI agents trained for specific tasks
             </p>
           </div>
+
+          {!planAccess.isLoading && planAccess.planType === 'free' && (
+            <Alert className="mb-6 border-primary/50 bg-primary/5">
+              <Lock className="h-4 w-4" />
+              <AlertTitle>Limited Access on Free Plan</AlertTitle>
+              <AlertDescription className="flex items-center justify-between">
+                <span>
+                  Free plan users have limited AI agent features. Upgrade to Pro for advanced workflows and unlimited agents.
+                </span>
+                <Button 
+                  size="sm" 
+                  onClick={() => navigate('/settings?tab=pricing')}
+                  className="ml-4"
+                >
+                  <Crown className="h-4 w-4 mr-2" />
+                  Upgrade
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="w-full">
-            <AgentLibrary userId={user?.id || ""} />
+            <AgentLibrary userId={user?.id || ""} planAccess={planAccess} />
           </div>
         </div>
       </div>

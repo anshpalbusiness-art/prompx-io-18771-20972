@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PromptGenerator, type PromptTemplate } from "@/lib/promptGenerator";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
+import { usePlanAccess } from "@/hooks/usePlanAccess";
 import { UserProfile } from "./UserProfile";
 import { IndustryTemplates } from "./IndustryTemplates";
 import { PromptHistory } from "./PromptHistory";
@@ -117,6 +118,7 @@ const WORKFLOW_STEPS = [
 
 export const PromptEngineer = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const planAccess = usePlanAccess(user?.id);
   const [selectedTool, setSelectedTool] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -2596,6 +2598,7 @@ export const PromptEngineer = () => {
                   onExecute={executeWorkflow} 
                   isExecuting={isExecutingWorkflow}
                   user={user}
+                  planAccess={planAccess}
                 />
               </TabsContent>
 
