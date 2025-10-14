@@ -235,7 +235,19 @@ Format as JSON with: performanceAnomalies, patternAnomalies, positive, negative,
     });
 
     if (!aiResponse.ok) {
-      throw new Error(`AI API error: ${aiResponse.status}`);
+      const status = aiResponse.status;
+      const body = await aiResponse.text();
+      console.error('AI API error:', status, body);
+      if (status === 402 || status === 429) {
+        const friendly = status === 402
+          ? 'Out of AI credits. Please add credits in Settings → Workspace → Usage.'
+          : 'Rate limit reached. Please wait and try again.';
+        return new Response(
+          JSON.stringify({ success: false, code: status, error: friendly, raw: body }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      throw new Error(`AI API error: ${status}`);
     }
 
     const aiData = await aiResponse.json();

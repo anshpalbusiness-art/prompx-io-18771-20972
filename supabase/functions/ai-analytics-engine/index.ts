@@ -156,9 +156,22 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
     });
 
     if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('AI API Error:', aiResponse.status, errorText);
-      throw new Error(`AI API error: ${aiResponse.status}`);
+      const status = aiResponse.status;
+      let bodyText = await aiResponse.text();
+      try { bodyText = JSON.stringify(JSON.parse(bodyText)); } catch {}
+      console.error('AI API Error:', status, bodyText);
+
+      if (status === 402 || status === 429) {
+        const friendly = status === 402
+          ? 'Out of AI credits. Please add credits in Settings → Workspace → Usage.'
+          : 'Rate limit reached. Please wait a few seconds and try again.';
+        return new Response(
+          JSON.stringify({ success: false, code: status, error: friendly, raw: bodyText }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      throw new Error(`AI API error: ${status}`);
     }
 
     const aiData = await aiResponse.json();

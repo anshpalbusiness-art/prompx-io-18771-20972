@@ -44,6 +44,15 @@ export const IntelligentInsights = () => {
 
       if (error) throw error;
 
+      if (data?.success === false) {
+        toast({
+          title: data.code === 402 ? 'Add AI credits' : 'Please slow down',
+          description: data.error || 'AI service temporarily unavailable.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       if (data?.analysis) {
         const formattedInsights = formatInsights(data.analysis, type);
         setInsights(formattedInsights);
