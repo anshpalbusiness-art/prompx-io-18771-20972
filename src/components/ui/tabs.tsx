@@ -40,7 +40,7 @@ const TabsList = React.forwardRef<
   const scroll = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current;
     if (container) {
-      const scrollAmount = 200;
+      const scrollAmount = 240;
       container.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -48,38 +48,48 @@ const TabsList = React.forwardRef<
     }
   };
 
+  const leftDisabled = !canScrollLeft;
+  const rightDisabled = !canScrollRight;
+
   return (
-    <div className="relative flex items-center group">
-      {canScrollLeft && (
-        <button
-          onClick={() => scroll('left')}
-          className="absolute left-0 z-10 h-full px-2 bg-gradient-to-r from-background to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          aria-label="Scroll left"
-        >
-          <ChevronLeft className="h-5 w-5 text-foreground" />
-        </button>
-      )}
+    <div className="relative flex items-center">
+      <button
+        onClick={() => scroll('left')}
+        disabled={leftDisabled}
+        className={cn(
+          "absolute left-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 sm:w-10 bg-gradient-to-r from-background to-transparent transition-opacity duration-200",
+          leftDisabled ? "opacity-40 cursor-not-allowed" : "opacity-100"
+        )}
+        aria-label="Scroll left"
+      >
+        <ChevronLeft className="h-5 w-5 text-muted-foreground" />
+      </button>
       <TabsPrimitive.List
         ref={ref}
         className={cn(
-          "inline-flex h-auto items-center gap-2 p-0 bg-transparent overflow-x-auto scrollbar-hide w-full",
+          "relative inline-flex h-auto items-center gap-2 p-0 bg-transparent w-full",
           className,
         )}
         {...props}
       >
-        <div ref={scrollContainerRef} className="flex gap-2 w-full">
+        <div
+          ref={scrollContainerRef}
+          className="flex gap-2 w-full overflow-x-auto scrollbar-hide flex-nowrap snap-x snap-mandatory scroll-px-2"
+        >
           {props.children}
         </div>
       </TabsPrimitive.List>
-      {canScrollRight && (
-        <button
-          onClick={() => scroll('right')}
-          className="absolute right-0 z-10 h-full px-2 bg-gradient-to-l from-background to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          aria-label="Scroll right"
-        >
-          <ChevronRight className="h-5 w-5 text-foreground" />
-        </button>
-      )}
+      <button
+        onClick={() => scroll('right')}
+        disabled={rightDisabled}
+        className={cn(
+          "absolute right-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 sm:w-10 bg-gradient-to-l from-background to-transparent transition-opacity duration-200",
+          rightDisabled ? "opacity-40 cursor-not-allowed" : "opacity-100"
+        )}
+        aria-label="Scroll right"
+      >
+        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+      </button>
     </div>
   );
 });
