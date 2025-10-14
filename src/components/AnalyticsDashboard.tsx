@@ -246,12 +246,23 @@ export default function AnalyticsDashboard({ user }: AnalyticsDashboardProps) {
               <div className="space-y-2">
                 <p className="text-sm font-semibold text-foreground">Recommended Actions:</p>
                 <ul className="space-y-1">
-                  {predictiveData.predictions.actions.slice(0, 3).map((action: any, idx: number) => (
-                    <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                  {Array.isArray(predictiveData.predictions.actions) ? (
+                    predictiveData.predictions.actions.slice(0, 3).map((action: any, idx: number) => (
+                      <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                        <TrendingUp className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          {typeof action === 'string' 
+                            ? action 
+                            : action.action || action.recommendation || JSON.stringify(action)}
+                        </span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-sm text-muted-foreground flex items-start gap-2">
                       <TrendingUp className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>{action.action || action}</span>
+                      <span>{predictiveData.predictions.actions.recommendation || 'Review analytics data'}</span>
                     </li>
-                  ))}
+                  )}
                 </ul>
               </div>
             )}
