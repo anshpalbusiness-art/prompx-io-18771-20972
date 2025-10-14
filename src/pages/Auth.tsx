@@ -140,10 +140,9 @@ const Auth = () => {
       {/* Large background PrompX text */}
       <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden pointer-events-none select-none">
         <div 
-          className="text-[32vw] font-bold text-zinc-800/50"
+          className="text-[20rem] sm:text-[26rem] font-bold text-zinc-800/40"
           style={{
-            letterSpacing: '-0.05em',
-            lineHeight: '1'
+            letterSpacing: '-0.05em'
           }}
         >
           PrompX
@@ -151,36 +150,36 @@ const Auth = () => {
       </div>
 
       {/* Auth Card */}
-      <Card className="w-full max-w-md relative z-20 border border-zinc-800 bg-zinc-950 shadow-2xl rounded-lg">
-        <CardHeader className="space-y-2 pb-6 px-8 pt-10">
-          <CardTitle className="text-3xl font-bold text-white leading-tight">
-            Welcome to<br />PrompX
+      <Card className="w-full max-w-md relative z-20 border-0 bg-zinc-900 shadow-xl">
+        <CardHeader className="space-y-1 pb-6 px-8 pt-8">
+          <CardTitle className="text-3xl font-bold text-white">
+            Welcome to PrompX
           </CardTitle>
-          <CardDescription className="text-zinc-500 text-sm">
+          <CardDescription className="text-zinc-400 text-sm">
             Sign in to continue your journey
           </CardDescription>
         </CardHeader>
-        <CardContent className="px-8 pb-10">
+        <CardContent className="px-8 pb-8">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-transparent p-0 h-auto mb-6 gap-2">
+            <TabsList className="grid w-full grid-cols-2 bg-transparent p-0 h-auto mb-6">
               <TabsTrigger 
                 value="signin"
-                className="data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-transparent text-zinc-500 transition-all duration-200 rounded-lg py-2.5 font-medium text-sm"
+                className="data-[state=active]:bg-white data-[state=active]:text-black text-zinc-400 transition-all duration-200 rounded-md py-2.5 font-medium"
               >
                 Sign In
               </TabsTrigger>
               <TabsTrigger 
                 value="signup"
-                className="data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-transparent text-zinc-500 transition-all duration-200 rounded-lg py-2.5 font-medium text-sm"
+                className="data-[state=active]:bg-white data-[state=active]:text-black text-zinc-400 transition-all duration-200 rounded-md py-2.5 font-medium"
               >
                 Sign Up
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="signin" className="mt-0 space-y-5">
-              <form onSubmit={handleSignIn} className="space-y-5">
+            <TabsContent value="signin" className="mt-0 space-y-4">
+              <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email" className="text-white text-sm font-normal">
+                  <Label htmlFor="signin-email" className="text-white text-sm">
                     Email
                   </Label>
                   <Input
@@ -190,11 +189,11 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="bg-black border-zinc-800 text-white placeholder:text-zinc-600 h-12 rounded-lg focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-zinc-700"
+                    className="bg-black border-zinc-700 text-white placeholder:text-zinc-500 h-11"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password" className="text-white text-sm font-normal">
+                  <Label htmlFor="signin-password" className="text-white text-sm">
                     Password
                   </Label>
                   <Input
@@ -204,12 +203,12 @@ const Auth = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="bg-black border-zinc-800 text-white placeholder:text-zinc-600 h-12 rounded-lg focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-zinc-700"
+                    className="bg-black border-zinc-700 text-white placeholder:text-zinc-500 h-11"
                   />
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full h-12 bg-white text-black hover:bg-zinc-100 font-medium mt-2 rounded-lg"
+                  className="w-full h-11 bg-white text-black hover:bg-zinc-100 font-semibold mt-6"
                   disabled={loading}
                 >
                   {loading ? (
@@ -227,7 +226,7 @@ const Auth = () => {
             <TabsContent value="signup" className="mt-0 space-y-4">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-username" className="text-white text-sm font-normal">
+                  <Label htmlFor="signup-username" className="text-white text-sm">
                     Username
                   </Label>
                   <Input
@@ -237,11 +236,11 @@ const Auth = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
-                    className="bg-black border-zinc-800 text-white placeholder:text-zinc-600 h-12 rounded-lg focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-zinc-700"
+                    className="bg-black border-zinc-700 text-white placeholder:text-zinc-500 h-11"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email" className="text-white text-sm font-normal">
+                  <Label htmlFor="signup-email" className="text-white text-sm">
                     Email
                   </Label>
                   <Input
@@ -251,11 +250,11 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="bg-black border-zinc-800 text-white placeholder:text-zinc-600 h-12 rounded-lg focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-zinc-700"
+                    className="bg-black border-zinc-700 text-white placeholder:text-zinc-500 h-11"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password" className="text-white text-sm font-normal">
+                  <Label htmlFor="signup-password" className="text-white text-sm">
                     Password
                   </Label>
                   <Input
@@ -265,12 +264,12 @@ const Auth = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="bg-black border-zinc-800 text-white placeholder:text-zinc-600 h-12 rounded-lg focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-zinc-700"
+                    className="bg-black border-zinc-700 text-white placeholder:text-zinc-500 h-11"
                   />
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full h-12 bg-white text-black hover:bg-zinc-100 font-medium mt-2 rounded-lg"
+                  className="w-full h-11 bg-white text-black hover:bg-zinc-100 font-semibold mt-6"
                   disabled={loading}
                 >
                   {loading ? (
