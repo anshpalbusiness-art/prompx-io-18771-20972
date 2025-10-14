@@ -26,26 +26,88 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Validate API key
+    // Extract key prefix from provided API key
+    const keyPrefix = apiKey.substring(0, 12);
+    
+    // Find API key by prefix first
     const { data: keyData, error: keyError } = await supabase
       .from('api_keys')
-      .select('id, user_id, is_active, rate_limit_per_hour, requests_count')
-      .eq('api_key', apiKey)
+      .select('id, user_id, is_active, rate_limit_per_hour, requests_count, api_key_hash, expires_at')
+      .eq('key_prefix', keyPrefix)
       .single();
 
     if (keyError || !keyData) {
+      // Log failed authentication attempt
+      console.error('API key not found:', keyError);
       return new Response(
         JSON.stringify({ error: 'Invalid API key' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    // Validate the full API key using hash
+    const { data: isValid, error: validateError } = await supabase
+      .rpc('validate_api_key_hash', { 
+        _api_key: apiKey, 
+        _api_key_hash: keyData.api_key_hash 
+      });
+
+    if (validateError || !isValid) {
+      // Log failed authentication attempt
+      await supabase.from('api_key_audit_logs').insert({
+        api_key_id: keyData.id,
+        user_id: keyData.user_id,
+        action: 'authentication_failed',
+        success: false,
+        error_message: 'Invalid API key hash',
+        metadata: { attempted_prefix: keyPrefix }
+      });
+      
+      return new Response(
+        JSON.stringify({ error: 'Invalid API key' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if key has expired
+    if (keyData.expires_at && new Date(keyData.expires_at) < new Date()) {
+      await supabase.from('api_key_audit_logs').insert({
+        api_key_id: keyData.id,
+        user_id: keyData.user_id,
+        action: 'authentication_failed',
+        success: false,
+        error_message: 'API key has expired',
+      });
+      
+      return new Response(
+        JSON.stringify({ error: 'API key has expired' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     if (!keyData.is_active) {
+      await supabase.from('api_key_audit_logs').insert({
+        api_key_id: keyData.id,
+        user_id: keyData.user_id,
+        action: 'authentication_failed',
+        success: false,
+        error_message: 'API key is inactive',
+      });
+      
       return new Response(
         JSON.stringify({ error: 'API key is inactive' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Log successful authentication
+    await supabase.from('api_key_audit_logs').insert({
+      api_key_id: keyData.id,
+      user_id: keyData.user_id,
+      action: 'prompt_generation',
+      success: true,
+      metadata: { tool_type: 'text' }
+    });
 
     // Update usage stats
     await supabase

@@ -30,12 +30,21 @@ import type { User } from "@supabase/supabase-js";
 interface ApiKey {
   id: string;
   key_name: string;
-  api_key: string;
+  api_key: string | null;
+  api_key_hash: string | null;
+  key_prefix: string | null;
   is_active: boolean;
   requests_count: number;
   rate_limit_per_hour: number;
   last_used_at: string | null;
+  expires_at: string | null;
+  last_rotated_at: string | null;
   created_at: string;
+}
+
+interface NewlyCreatedKey {
+  id: string;
+  plaintext_key: string;
 }
 
 interface ApiKeyManagementProps {
@@ -48,6 +57,7 @@ export default function ApiKeyManagement({ user }: ApiKeyManagementProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [keyToDelete, setKeyToDelete] = useState<string | null>(null);
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
+  const [newlyCreatedKey, setNewlyCreatedKey] = useState<NewlyCreatedKey | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -97,20 +107,48 @@ export default function ApiKeyManagement({ user }: ApiKeyManagementProps) {
     setIsCreating(true);
     try {
       const apiKey = generateApiKey();
-      const { error } = await supabase.from("api_keys").insert({
-        user_id: user?.id,
-        key_name: newKeyName,
-        api_key: apiKey,
-      });
+      const keyPrefix = apiKey.substring(0, 12);
+      
+      // Generate hash using database function
+      const { data: hashData, error: hashError } = await supabase
+        .rpc('generate_api_key_hash', { _api_key: apiKey });
+      
+      if (hashError) throw hashError;
+
+      const { data: insertData, error } = await supabase
+        .from("api_keys")
+        .insert({
+          user_id: user?.id,
+          key_name: newKeyName,
+          api_key: apiKey, // Will be cleared after insert
+          api_key_hash: hashData,
+          key_prefix: keyPrefix,
+          expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year
+        })
+        .select('id')
+        .single();
 
       if (error) throw error;
 
+      // Store the newly created key to display once
+      setNewlyCreatedKey({
+        id: insertData.id,
+        plaintext_key: apiKey,
+      });
+
       toast({
         title: "API key created",
-        description: "Your new API key has been generated successfully",
+        description: "⚠️ Copy this key now - you won't be able to see it again!",
       });
 
       setNewKeyName("");
+      
+      // Clear the plaintext key from database
+      await supabase
+        .from("api_keys")
+        .update({ api_key: null })
+        .eq('id', insertData.id);
+      
       loadApiKeys();
     } catch (error: any) {
       toast({
@@ -169,8 +207,20 @@ export default function ApiKeyManagement({ user }: ApiKeyManagementProps) {
     setVisibleKeys(newVisible);
   };
 
-  const maskApiKey = (key: string) => {
-    return `${key.substring(0, 8)}${"•".repeat(20)}${key.substring(key.length - 4)}`;
+  const maskApiKey = (keyId: string, keyPrefix: string | null) => {
+    // Check if this is a newly created key
+    if (newlyCreatedKey?.id === keyId) {
+      return newlyCreatedKey.plaintext_key;
+    }
+    // Otherwise show masked version using prefix
+    return keyPrefix ? `${keyPrefix}${"•".repeat(24)}` : "••••••••••••••••••••••••••••••••••••";
+  };
+
+  const getDisplayKey = (key: ApiKey) => {
+    if (newlyCreatedKey?.id === key.id) {
+      return newlyCreatedKey.plaintext_key;
+    }
+    return null;
   };
 
   return (
@@ -218,57 +268,81 @@ export default function ApiKeyManagement({ user }: ApiKeyManagementProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {apiKeys.map((key) => (
-                    <TableRow key={key.id}>
-                      <TableCell className="font-medium">{key.key_name}</TableCell>
-                      <TableCell className="font-mono text-sm">
-                        <div className="flex items-center gap-2">
-                          {visibleKeys.has(key.id) ? key.api_key : maskApiKey(key.api_key)}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleKeyVisibility(key.id)}
-                          >
-                            {visibleKeys.has(key.id) ? (
-                              <EyeOff className="h-4 w-4" />
+                  {apiKeys.map((key) => {
+                    const displayKey = getDisplayKey(key);
+                    const isNewKey = newlyCreatedKey?.id === key.id;
+                    const isExpired = key.expires_at && new Date(key.expires_at) < new Date();
+                    
+                    return (
+                      <TableRow key={key.id} className={isNewKey ? "bg-accent/50" : ""}>
+                        <TableCell className="font-medium">
+                          {key.key_name}
+                          {isExpired && (
+                            <Badge variant="destructive" className="ml-2 text-xs">
+                              Expired
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          <div className="flex items-center gap-2">
+                            {displayKey ? (
+                              <>
+                                <span className="text-green-600 dark:text-green-400">
+                                  {displayKey}
+                                </span>
+                                <Badge variant="outline" className="text-xs">
+                                  Copy now - shown once!
+                                </Badge>
+                              </>
                             ) : (
-                              <Eye className="h-4 w-4" />
+                              maskApiKey(key.id, key.key_prefix)
                             )}
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={key.is_active ? "default" : "secondary"}>
-                          {key.is_active ? "Active" : "Inactive"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{key.requests_count.toLocaleString()}</TableCell>
-                      <TableCell>{key.rate_limit_per_hour}/hour</TableCell>
-                      <TableCell>
-                        {key.last_used_at
-                          ? new Date(key.last_used_at).toLocaleDateString()
-                          : "Never"}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(key.api_key)}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setKeyToDelete(key.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={key.is_active && !isExpired ? "default" : "secondary"}>
+                            {isExpired ? "Expired" : key.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{key.requests_count.toLocaleString()}</TableCell>
+                        <TableCell>{key.rate_limit_per_hour}/hour</TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            <div>
+                              {key.last_used_at
+                                ? new Date(key.last_used_at).toLocaleDateString()
+                                : "Never"}
+                            </div>
+                            {key.expires_at && (
+                              <div className="text-xs text-muted-foreground">
+                                Expires: {new Date(key.expires_at).toLocaleDateString()}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            {displayKey && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => copyToClipboard(displayKey)}
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setKeyToDelete(key.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
