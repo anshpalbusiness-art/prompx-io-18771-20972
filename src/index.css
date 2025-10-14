@@ -371,6 +371,16 @@ All colors MUST be HSL.
   .z-modal { z-index: 2000; }
   .z-toast { z-index: 3000; }
 
+  /* Hide scrollbar while keeping functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Dropdown specific fixes with solid background */
   [data-radix-popper-content-wrapper] {
     z-index: 9999 !important;
