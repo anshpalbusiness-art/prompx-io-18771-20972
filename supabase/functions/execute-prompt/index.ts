@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, model = "gpt-5-mini-2025-08-07", systemPrompt, temperature = 0.7, maxTokens = 2000 } = await req.json();
+    const { prompt, model = "google/gemini-2.5-flash", systemPrompt, temperature = 0.7, maxTokens = 2000 } = await req.json();
 
     if (!prompt) {
       return new Response(
@@ -20,30 +20,36 @@ serve(async (req) => {
       );
     }
 
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-    if (!OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY is not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      console.error('LOVABLE_API_KEY is not configured');
       return new Response(
         JSON.stringify({ error: 'AI service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Map incoming model IDs to valid OpenAI models when needed (e.g., Gemini -> GPT-5 equivalents)
+    // Map incoming model IDs to Lovable AI gateway models
     const mapModel = (m: string) => {
       switch (m) {
+        // Keep Gemini family as-is
         case 'google/gemini-2.5-flash':
-          return 'gpt-5-mini-2025-08-07';
         case 'google/gemini-2.5-pro':
-          return 'gpt-5-2025-08-07';
         case 'google/gemini-2.5-flash-lite':
-          return 'gpt-5-nano-2025-08-07';
+          return m;
+        // Map legacy OpenAI identifiers to Lovable AI OpenAI models
+        case 'gpt-5-2025-08-07':
+          return 'openai/gpt-5';
+        case 'gpt-5-mini-2025-08-07':
+          return 'openai/gpt-5-mini';
+        case 'gpt-5-nano-2025-08-07':
+          return 'openai/gpt-5-nano';
         default:
           return m;
       }
     };
     const resolvedModel = mapModel(model);
-    console.log('Executing prompt with OpenAI model:', model, '-> resolved:', resolvedModel);
+    console.log('Executing prompt with Lovable AI model:', model, '-> resolved:', resolvedModel);
 
     const messages = systemPrompt
       ? [
@@ -57,7 +63,7 @@ serve(async (req) => {
       model: resolvedModel,
       messages,
     };
-    if (resolvedModel.startsWith('gpt-5')) {
+    if (resolvedModel.startsWith('openai/gpt-5')) {
       payload.max_completion_tokens = maxTokens;
       // Do not include temperature for GPT-5 models
     } else {
@@ -65,10 +71,10 @@ serve(async (req) => {
       payload.temperature = temperature;
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
