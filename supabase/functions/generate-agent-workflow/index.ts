@@ -126,7 +126,45 @@ Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
           { role: 'system', content: systemPrompt },
           { role: 'user', content: naturalLanguageInput }
         ],
-        temperature: 0.3,
+        temperature: 0.2,
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'build_workflow',
+              description: 'Return a structured multi-agent workflow for the given goal',
+              parameters: {
+                type: 'object',
+                properties: {
+                  workflowName: { type: 'string' },
+                  workflowDescription: { type: 'string' },
+                  agents: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' },
+                        category: { type: 'string' },
+                        description: { type: 'string' },
+                        systemPrompt: { type: 'string' },
+                        prompt: { type: 'string' },
+                        dependsOn: { type: 'array', items: { type: 'string' }, default: [] },
+                        capabilities: { type: 'array', items: { type: 'string' }, default: [] },
+                        model: { type: 'string', enum: ['google/gemini-2.5-flash','google/gemini-2.5-pro','google/gemini-2.5-flash-lite'] },
+                        temperature: { type: 'number' }
+                      },
+                      required: ['id','name','category','description','systemPrompt','prompt']
+                    }
+                  }
+                },
+                required: ['workflowName','workflowDescription','agents'],
+                additionalProperties: false
+              }
+            }
+          }
+        ],
+        tool_choice: { type: 'function', function: { name: 'build_workflow' } }
       }),
     });
 
@@ -149,17 +187,37 @@ Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
     }
 
     const data = await response.json();
-    const content = data.choices[0].message.content;
-    console.log('AI response:', content);
+    const choice = data.choices?.[0];
 
-    // Parse the JSON response
-    let workflowStructure;
+    // Parse structured output from tool calls when available
+    let workflowStructure: any;
     try {
-      // Remove markdown code blocks if present
-      const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      workflowStructure = JSON.parse(cleanContent);
+      const toolCalls = choice?.message?.tool_calls;
+      if (Array.isArray(toolCalls) && toolCalls.length > 0) {
+        const fnCall = toolCalls.find((tc: any) => tc.type === 'function' && tc.function?.name === 'build_workflow') || toolCalls[0];
+        const argsStr = fnCall?.function?.arguments ?? '';
+        workflowStructure = JSON.parse(argsStr);
+      } else {
+        // Fallback: parse from plain content
+        const content: string = choice?.message?.content ?? '';
+        console.log('AI response (content):', content);
+        let cleanContent = content.replace(/```json\s*/g, '').replace(/```/g, '').trim();
+        try {
+          workflowStructure = JSON.parse(cleanContent);
+        } catch {
+          // Attempt to extract the first JSON object
+          const first = cleanContent.indexOf('{');
+          const last = cleanContent.lastIndexOf('}');
+          if (first !== -1 && last !== -1 && last > first) {
+            const jsonSlice = cleanContent.slice(first, last + 1);
+            workflowStructure = JSON.parse(jsonSlice);
+          } else {
+            throw new Error('No JSON object found in model output');
+          }
+        }
+      }
     } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError, 'Content:', content);
+      console.error('Failed to parse AI response:', parseError, 'Raw:', JSON.stringify(choice));
       throw new Error('Failed to parse workflow structure from AI response');
     }
 

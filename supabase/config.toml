@@ -1,1 +1,4 @@
 project_id = "wsbfadfgfrrfakhgeumg"
+
+[functions.generate-agent-workflow]
+verify_jwt = false
