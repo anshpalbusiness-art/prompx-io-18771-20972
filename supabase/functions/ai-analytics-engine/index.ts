@@ -146,24 +146,51 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-pro',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.7,
-        response_format: { type: "json_object" }
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('AI API Error:', errorText);
+      console.error('AI API Error:', aiResponse.status, errorText);
       throw new Error(`AI API error: ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
-    const analysis = JSON.parse(aiData.choices[0].message.content);
+    let analysis;
+    
+    try {
+      const content = aiData.choices[0].message.content;
+      // Try to parse JSON from the response
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        analysis = JSON.parse(jsonMatch[0]);
+      } else {
+        // If no JSON found, create a structured response
+        analysis = {
+          insights: [{
+            title: 'Analysis Complete',
+            description: content.slice(0, 500),
+            insight: content
+          }]
+        };
+      }
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      // Fallback: create basic analysis structure
+      analysis = {
+        insights: [{
+          title: 'Data Analysis',
+          description: 'Analysis generated from your performance data',
+          insight: aiData.choices[0].message.content
+        }]
+      };
+    }
 
     // Store insights for future learning
     const { error: insertError } = await supabase
