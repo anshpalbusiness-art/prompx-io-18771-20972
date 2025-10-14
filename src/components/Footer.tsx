@@ -89,44 +89,6 @@ export const Footer = () => {
             <p className="text-sm sm:text-base text-zinc-500 text-center sm:text-left">
               © {new Date().getFullYear()} PrompX. All rights reserved.
             </p>
-            
-            {/* Social Links */}
-            <div className="flex items-center gap-6">
-              <a 
-                href="https://twitter.com/prompx" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-zinc-400 hover:text-white transition-colors duration-200"
-                aria-label="Twitter"
-              >
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a 
-                href="https://github.com/prompx" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-zinc-400 hover:text-white transition-colors duration-200"
-                aria-label="GitHub"
-              >
-                <Github className="w-5 h-5" />
-              </a>
-              <a 
-                href="https://linkedin.com/company/prompx" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-zinc-400 hover:text-white transition-colors duration-200"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a 
-                href="mailto:contact@prompx.com" 
-                className="text-zinc-400 hover:text-white transition-colors duration-200"
-                aria-label="Email"
-              >
-                <Mail className="w-5 h-5" />
-              </a>
-            </div>
           </div>
         </div>
       </div>
