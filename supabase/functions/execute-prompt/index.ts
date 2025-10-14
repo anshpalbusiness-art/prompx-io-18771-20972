@@ -29,14 +29,41 @@ serve(async (req) => {
       );
     }
 
-    console.log('Executing prompt with OpenAI model:', model);
+    // Map incoming model IDs to valid OpenAI models when needed (e.g., Gemini -> GPT-5 equivalents)
+    const mapModel = (m: string) => {
+      switch (m) {
+        case 'google/gemini-2.5-flash':
+          return 'gpt-5-mini-2025-08-07';
+        case 'google/gemini-2.5-pro':
+          return 'gpt-5-2025-08-07';
+        case 'google/gemini-2.5-flash-lite':
+          return 'gpt-5-nano-2025-08-07';
+        default:
+          return m;
+      }
+    };
+    const resolvedModel = mapModel(model);
+    console.log('Executing prompt with OpenAI model:', model, '-> resolved:', resolvedModel);
 
-    const messages = systemPrompt 
+    const messages = systemPrompt
       ? [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt }
         ]
       : [{ role: 'user', content: prompt }];
+
+    // Build payload according to model family (GPT-5 uses max_completion_tokens and ignores temperature)
+    const payload: any = {
+      model: resolvedModel,
+      messages,
+    };
+    if (resolvedModel.startsWith('gpt-5')) {
+      payload.max_completion_tokens = maxTokens;
+      // Do not include temperature for GPT-5 models
+    } else {
+      payload.max_tokens = maxTokens;
+      payload.temperature = temperature;
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -44,12 +71,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: model,
-        messages,
-        temperature,
-        max_completion_tokens: maxTokens,
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {

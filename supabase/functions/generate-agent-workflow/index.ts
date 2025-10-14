@@ -126,7 +126,7 @@ Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
           { role: 'system', content: systemPrompt },
           { role: 'user', content: naturalLanguageInput }
         ],
-        temperature: 0.2,
+        
         tools: [
           {
             type: 'function',
