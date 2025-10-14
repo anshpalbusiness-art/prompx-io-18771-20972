@@ -161,6 +161,7 @@ export const PromptEngineer = () => {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [showUrlDialog, setShowUrlDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const workflowResultsRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   // Get current user
@@ -1812,6 +1813,11 @@ export const PromptEngineer = () => {
         });
       }
 
+      // Scroll to results
+      setTimeout(() => {
+        workflowResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+
     } catch (error) {
       console.error('Workflow execution error:', error);
       toast({
@@ -2603,7 +2609,7 @@ export const PromptEngineer = () => {
 
       {/* Workflow Results */}
       {workflowResults.length > 0 && (
-        <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-background w-full overflow-x-hidden">
+        <section ref={workflowResultsRef} className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-background w-full overflow-x-hidden">
           <div className="max-w-4xl mx-auto w-full">
             <WorkflowResults results={workflowResults} />
           </div>
