@@ -193,7 +193,7 @@ const Auth = () => {
         </CardHeader>
         <CardContent className="px-6 sm:px-8 pb-10">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList scrollable={false} className="grid w-full grid-cols-2 bg-zinc-950/90 border border-white/10 p-1 h-11 rounded-lg mb-8">
+            <TabsList className="grid w-full grid-cols-2 bg-zinc-950/90 border border-white/10 p-1 h-11 rounded-lg mb-8">
               <TabsTrigger 
                 value="signin"
                 className="data-[state=active]:bg-white data-[state=active]:text-zinc-900 text-zinc-400 transition-colors duration-200 text-sm font-medium rounded-md"
