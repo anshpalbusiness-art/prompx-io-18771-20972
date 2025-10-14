@@ -60,7 +60,7 @@ Return ONLY the translated and culturally adapted prompt without any explanation
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'llama-3.1-8b-instant',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Translate and culturally adapt this prompt:\n\n${prompt}${culturalContext ? `\n\nAdditional cultural context: ${culturalContext}` : ''}` }
