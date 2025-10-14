@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, model = "llama-3.1-8b-instant", systemPrompt, temperature = 0.7, maxTokens = 2000 } = await req.json();
+    const { prompt, model = "gpt-5-mini-2025-08-07", systemPrompt, temperature = 0.7, maxTokens = 2000 } = await req.json();
 
     if (!prompt) {
       return new Response(
@@ -20,16 +20,16 @@ serve(async (req) => {
       );
     }
 
-    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
-    if (!GROQ_API_KEY) {
-      console.error('GROQ_API_KEY is not configured');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    if (!OPENAI_API_KEY) {
+      console.error('OPENAI_API_KEY is not configured');
       return new Response(
         JSON.stringify({ error: 'AI service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Executing prompt with Groq model');
+    console.log('Executing prompt with OpenAI model:', model);
 
     const messages = systemPrompt 
       ? [
@@ -38,17 +38,17 @@ serve(async (req) => {
         ]
       : [{ role: 'user', content: prompt }];
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: model || 'llama-3.3-70b-versatile',
+        model: model,
         messages,
         temperature,
-        max_tokens: maxTokens,
+        max_completion_tokens: maxTokens,
       }),
     });
 

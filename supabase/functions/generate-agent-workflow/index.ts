@@ -22,9 +22,9 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    if (!OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY is not configured');
     }
 
     const systemPrompt = `You are an intelligent workflow architect. Your job is to analyze natural language business goals and create a multi-agent workflow with dependencies.
@@ -113,15 +113,15 @@ Example for "I want to launch a new AI course":
 
 Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
 
-    console.log('Calling AI to generate workflow structure...');
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    console.log('Calling OpenAI to generate workflow structure...');
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'gpt-5-mini-2025-08-07',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: naturalLanguageInput }
@@ -151,7 +151,7 @@ Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
                         prompt: { type: 'string' },
                         dependsOn: { type: 'array', items: { type: 'string' }, default: [] },
                         capabilities: { type: 'array', items: { type: 'string' }, default: [] },
-                        model: { type: 'string', enum: ['google/gemini-2.5-flash','google/gemini-2.5-pro','google/gemini-2.5-flash-lite'] },
+                        model: { type: 'string', enum: ['gpt-5-2025-08-07','gpt-5-mini-2025-08-07','gpt-5-nano-2025-08-07'] },
                         temperature: { type: 'number' }
                       },
                       required: ['id','name','category','description','systemPrompt','prompt']
