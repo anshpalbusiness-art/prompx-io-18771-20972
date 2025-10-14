@@ -6,10 +6,16 @@ import { cn } from "@/lib/utils";
 
 const Tabs = TabsPrimitive.Root;
 
+type TabsListProps = React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & {
+  scrollable?: boolean;
+  showArrows?: boolean;
+};
+
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => {
+  TabsListProps
+>(({ className, scrollable = true, showArrows, ...props }, ref) => {
+  const effectiveShowArrows = showArrows ?? scrollable;
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(false);
@@ -51,19 +57,38 @@ const TabsList = React.forwardRef<
   const leftDisabled = !canScrollLeft;
   const rightDisabled = !canScrollRight;
 
+  if (!scrollable) {
+    return (
+      <TabsPrimitive.List
+        ref={ref}
+        className={cn(
+          "relative inline-flex h-auto items-center gap-2 p-0 bg-transparent w-full",
+          className,
+        )}
+        {...props}
+      >
+        <div className="flex gap-2 w-full flex-nowrap">
+          {props.children}
+        </div>
+      </TabsPrimitive.List>
+    );
+  }
+
   return (
     <div className="relative flex items-center">
-      <button
-        onClick={() => scroll('left')}
-        disabled={leftDisabled}
-        className={cn(
-          "absolute left-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 sm:w-10 bg-gradient-to-r from-background to-transparent transition-opacity duration-200",
-          leftDisabled ? "opacity-40 cursor-not-allowed" : "opacity-100"
-        )}
-        aria-label="Scroll left"
-      >
-        <ChevronLeft className="h-5 w-5 text-muted-foreground" />
-      </button>
+      {effectiveShowArrows && (
+        <button
+          onClick={() => scroll('left')}
+          disabled={leftDisabled}
+          className={cn(
+            "absolute left-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 sm:w-10 bg-gradient-to-r from-background to-transparent transition-opacity duration-200",
+            leftDisabled ? "opacity-40 cursor-not-allowed" : "opacity-100"
+          )}
+          aria-label="Scroll left"
+        >
+          <ChevronLeft className="h-5 w-5 text-muted-foreground" />
+        </button>
+      )}
       <TabsPrimitive.List
         ref={ref}
         className={cn(
@@ -79,17 +104,19 @@ const TabsList = React.forwardRef<
           {props.children}
         </div>
       </TabsPrimitive.List>
-      <button
-        onClick={() => scroll('right')}
-        disabled={rightDisabled}
-        className={cn(
-          "absolute right-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 sm:w-10 bg-gradient-to-l from-background to-transparent transition-opacity duration-200",
-          rightDisabled ? "opacity-40 cursor-not-allowed" : "opacity-100"
-        )}
-        aria-label="Scroll right"
-      >
-        <ChevronRight className="h-5 w-5 text-muted-foreground" />
-      </button>
+      {effectiveShowArrows && (
+        <button
+          onClick={() => scroll('right')}
+          disabled={rightDisabled}
+          className={cn(
+            "absolute right-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 sm:w-10 bg-gradient-to-l from-background to-transparent transition-opacity duration-200",
+            rightDisabled ? "opacity-40 cursor-not-allowed" : "opacity-100"
+          )}
+          aria-label="Scroll right"
+        >
+          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+        </button>
+      )}
     </div>
   );
 });
