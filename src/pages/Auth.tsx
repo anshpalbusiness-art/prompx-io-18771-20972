@@ -240,7 +240,7 @@ const Auth = () => {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full h-13 bg-gradient-to-r from-white to-zinc-100 text-zinc-900 hover:from-zinc-50 hover:to-white font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 text-base mt-8 rounded-lg hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full h-13 bg-white text-zinc-900 hover:bg-zinc-50 font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 text-base mt-8 rounded-lg hover:scale-[1.02] active:scale-[0.98]"
                   disabled={loading}
                 >
                   {loading ? (
@@ -301,7 +301,7 @@ const Auth = () => {
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full h-13 bg-gradient-to-r from-white to-zinc-100 text-zinc-900 hover:from-zinc-50 hover:to-white font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 text-base mt-8 rounded-lg hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full h-13 bg-white text-zinc-900 hover:bg-zinc-50 font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 text-base mt-8 rounded-lg hover:scale-[1.02] active:scale-[0.98]"
                   disabled={loading}
                 >
                   {loading ? (
