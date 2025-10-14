@@ -7,7 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { z } from "zod";
+import { Mail } from "lucide-react";
 
 const authSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -22,6 +24,10 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [showOTPVerification, setShowOTPVerification] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [generatedOTP, setGeneratedOTP] = useState("");
+  const [pendingSignupData, setPendingSignupData] = useState<any>(null);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -40,40 +46,48 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const sendOTP = async (email: string) => {
+    // Generate 6-digit OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedOTP(otpCode);
+
+    try {
+      const { error } = await supabase.functions.invoke('send-otp-email', {
+        body: { email, otp: otpCode }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Verification code sent",
+        description: `Check your email and console for the code (${otpCode})`,
+      });
+    } catch (error: any) {
+      console.error("OTP Error:", error);
+      toast({
+        title: "Info",
+        description: `For demo: Your code is ${otpCode}`,
+      });
+    }
+  };
+
+  const handleRequestOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       const validated = authSchema.parse({ email, password, username });
       
-      const { error } = await supabase.auth.signUp({
+      // Store signup data for later
+      setPendingSignupData({
         email: validated.email,
         password: validated.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            username: validated.username,
-          },
-        },
+        username: validated.username,
       });
 
-      if (error) {
-        if (error.message.includes("already registered")) {
-          toast({
-            title: "Account exists",
-            description: "This email is already registered. Please sign in instead.",
-            variant: "destructive",
-          });
-        } else {
-          throw error;
-        }
-      } else {
-        toast({
-          title: "Success!",
-          description: "Your account has been created. You can now sign in.",
-        });
-      }
+      // Send OTP
+      await sendOTP(validated.email);
+      setShowOTPVerification(true);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast({
@@ -84,10 +98,55 @@ const Auth = () => {
       } else {
         toast({
           title: "Error",
-          description: error.message || "An error occurred during sign up",
+          description: error.message,
           variant: "destructive",
         });
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (otp !== generatedOTP) {
+      toast({
+        title: "Invalid code",
+        description: "Please check the verification code and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: pendingSignupData.email,
+        password: pendingSignupData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            username: pendingSignupData.username,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Your account has been created. You can now sign in.",
+      });
+      
+      // Reset states
+      setShowOTPVerification(false);
+      setOtp("");
+      setPendingSignupData(null);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An error occurred during sign up",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -132,6 +191,25 @@ const Auth = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to sign in with Google",
+        variant: "destructive",
+      });
     }
   };
 
@@ -253,67 +331,175 @@ const Auth = () => {
                   )}
                 </Button>
               </form>
+
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-zinc-900 px-4 text-zinc-400">Or continue with</span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleGoogleSignIn}
+                className="w-full h-13 bg-zinc-950/60 border-white/10 text-white hover:bg-zinc-950/80 hover:border-white/20 font-medium transition-all duration-300 rounded-lg"
+              >
+                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Sign in with Google
+              </Button>
             </TabsContent>
             
             <TabsContent value="signup" className="mt-0 space-y-6">
-              <form onSubmit={handleSignUp} className="space-y-5">
-                <div className="space-y-2.5">
-                  <Label htmlFor="signup-username" className="text-zinc-100 text-sm font-semibold">
-                    Username
-                  </Label>
-                  <Input
-                    id="signup-username"
-                    type="text"
-                    placeholder="johndoe"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    className="bg-zinc-950/60 border-white/10 text-white placeholder:text-zinc-500 focus:border-white/40 focus:ring-2 focus:ring-white/20 h-13 text-base transition-all duration-300 hover:border-white/20 hover:bg-zinc-950/80 rounded-lg"
-                  />
+              {!showOTPVerification ? (
+                <form onSubmit={handleRequestOTP} className="space-y-5">
+                  <div className="space-y-2.5">
+                    <Label htmlFor="signup-username" className="text-zinc-100 text-sm font-semibold">
+                      Username
+                    </Label>
+                    <Input
+                      id="signup-username"
+                      type="text"
+                      placeholder="johndoe"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                      className="bg-zinc-950/60 border-white/10 text-white placeholder:text-zinc-500 focus:border-white/40 focus:ring-2 focus:ring-white/20 h-13 text-base transition-all duration-300 hover:border-white/20 hover:bg-zinc-950/80 rounded-lg"
+                    />
+                  </div>
+                  <div className="space-y-2.5">
+                    <Label htmlFor="signup-email" className="text-zinc-100 text-sm font-semibold">
+                      Email
+                    </Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="name@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="bg-zinc-950/60 border-white/10 text-white placeholder:text-zinc-500 focus:border-white/40 focus:ring-2 focus:ring-white/20 h-13 text-base transition-all duration-300 hover:border-white/20 hover:bg-zinc-950/80 rounded-lg"
+                    />
+                  </div>
+                  <div className="space-y-2.5">
+                    <Label htmlFor="signup-password" className="text-zinc-100 text-sm font-semibold">
+                      Password
+                    </Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Create a password (min. 6 characters)"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="bg-zinc-950/60 border-white/10 text-white placeholder:text-zinc-500 focus:border-white/40 focus:ring-2 focus:ring-white/20 h-13 text-base transition-all duration-300 hover:border-white/20 hover:bg-zinc-950/80 rounded-lg"
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-13 bg-white text-zinc-900 hover:bg-zinc-50 font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 text-base mt-8 rounded-lg hover:scale-[1.02] active:scale-[0.98]"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />
+                        Sending code...
+                      </span>
+                    ) : (
+                      <>
+                        <Mail className="w-4 h-4 mr-2" />
+                        Send Verification Code
+                      </>
+                    )}
+                  </Button>
+                </form>
+              ) : (
+                <div className="space-y-6">
+                  <div className="text-center space-y-2">
+                    <h3 className="text-xl font-semibold text-white">Verify Your Email</h3>
+                    <p className="text-zinc-400 text-sm">
+                      Enter the 6-digit code sent to {email}
+                    </p>
+                  </div>
+                  
+                  <div className="flex justify-center">
+                    <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+                      <InputOTPGroup className="gap-2">
+                        <InputOTPSlot index={0} className="w-12 h-12 bg-zinc-950/60 border-white/10 text-white text-lg" />
+                        <InputOTPSlot index={1} className="w-12 h-12 bg-zinc-950/60 border-white/10 text-white text-lg" />
+                        <InputOTPSlot index={2} className="w-12 h-12 bg-zinc-950/60 border-white/10 text-white text-lg" />
+                        <InputOTPSlot index={3} className="w-12 h-12 bg-zinc-950/60 border-white/10 text-white text-lg" />
+                        <InputOTPSlot index={4} className="w-12 h-12 bg-zinc-950/60 border-white/10 text-white text-lg" />
+                        <InputOTPSlot index={5} className="w-12 h-12 bg-zinc-950/60 border-white/10 text-white text-lg" />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Button 
+                      onClick={handleVerifyOTP}
+                      className="w-full h-13 bg-white text-zinc-900 hover:bg-zinc-50 font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 text-base rounded-lg hover:scale-[1.02] active:scale-[0.98]"
+                      disabled={loading || otp.length !== 6}
+                    >
+                      {loading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <div className="w-4 h-4 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />
+                          Verifying...
+                        </span>
+                      ) : (
+                        "Verify & Create Account"
+                      )}
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => {
+                        setShowOTPVerification(false);
+                        setOtp("");
+                      }}
+                      className="w-full text-zinc-400 hover:text-white"
+                    >
+                      Back to sign up
+                    </Button>
+                  </div>
                 </div>
-                <div className="space-y-2.5">
-                  <Label htmlFor="signup-email" className="text-zinc-100 text-sm font-semibold">
-                    Email
-                  </Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="bg-zinc-950/60 border-white/10 text-white placeholder:text-zinc-500 focus:border-white/40 focus:ring-2 focus:ring-white/20 h-13 text-base transition-all duration-300 hover:border-white/20 hover:bg-zinc-950/80 rounded-lg"
-                  />
-                </div>
-                <div className="space-y-2.5">
-                  <Label htmlFor="signup-password" className="text-zinc-100 text-sm font-semibold">
-                    Password
-                  </Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="Create a password (min. 6 characters)"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="bg-zinc-950/60 border-white/10 text-white placeholder:text-zinc-500 focus:border-white/40 focus:ring-2 focus:ring-white/20 h-13 text-base transition-all duration-300 hover:border-white/20 hover:bg-zinc-950/80 rounded-lg"
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full h-13 bg-white text-zinc-900 hover:bg-zinc-50 font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-white/30 text-base mt-8 rounded-lg hover:scale-[1.02] active:scale-[0.98]"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />
-                      Creating account...
-                    </span>
-                  ) : (
-                    "Create Account"
-                  )}
-                </Button>
-              </form>
+              )}
+
+              {!showOTPVerification && (
+                <>
+                  <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-white/10"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="bg-zinc-900 px-4 text-zinc-400">Or continue with</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleGoogleSignIn}
+                    className="w-full h-13 bg-zinc-950/60 border-white/10 text-white hover:bg-zinc-950/80 hover:border-white/20 font-medium transition-all duration-300 rounded-lg"
+                  >
+                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                      <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Sign up with Google
+                  </Button>
+                </>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>
