@@ -193,16 +193,16 @@ const Auth = () => {
         </CardHeader>
         <CardContent className="px-6 sm:px-8 pb-10">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-zinc-950/90 border border-white/10 p-1.5 h-12 rounded-xl mb-8 shadow-lg">
+            <TabsList className="grid w-full grid-cols-2 bg-zinc-950/90 border border-white/10 p-1 h-11 rounded-lg mb-8">
               <TabsTrigger 
                 value="signin"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-white data-[state=active]:to-zinc-100 data-[state=active]:text-zinc-900 data-[state=active]:shadow-lg text-zinc-400 hover:text-zinc-100 transition-all duration-300 text-sm font-semibold rounded-lg"
+                className="data-[state=active]:bg-white data-[state=active]:text-zinc-900 text-zinc-400 transition-colors duration-200 text-sm font-medium rounded-md"
               >
                 Sign In
               </TabsTrigger>
               <TabsTrigger 
                 value="signup"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-white data-[state=active]:to-zinc-100 data-[state=active]:text-zinc-900 data-[state=active]:shadow-lg text-zinc-400 hover:text-zinc-100 transition-all duration-300 text-sm font-semibold rounded-lg"
+                className="data-[state=active]:bg-white data-[state=active]:text-zinc-900 text-zinc-400 transition-colors duration-200 text-sm font-medium rounded-md"
               >
                 Sign Up
               </TabsTrigger>
