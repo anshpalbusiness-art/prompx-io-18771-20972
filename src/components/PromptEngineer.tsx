@@ -2737,23 +2737,107 @@ export const PromptEngineer = () => {
         <section className="py-12 sm:py-16 md:py-20 bg-background w-full overflow-x-hidden">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Tabs defaultValue="profile" className="w-full">
-              <TabsList className="w-full mb-6">
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="visual">Visual Builder</TabsTrigger>
-                <TabsTrigger value="copilot">AI Co-Pilot</TabsTrigger>
-                <TabsTrigger value="templates">Templates</TabsTrigger>
-                <TabsTrigger value="history">History</TabsTrigger>
-                <TabsTrigger value="workflow">Workflow</TabsTrigger>
-                <TabsTrigger value="teams">Teams</TabsTrigger>
-                <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                <TabsTrigger value="abtesting">A/B Testing</TabsTrigger>
-                <TabsTrigger value="compliance">Compliance</TabsTrigger>
-                <TabsTrigger value="legal">Legal Packs</TabsTrigger>
-                <TabsTrigger value="pricing" id="pricing">Pricing</TabsTrigger>
-                <TabsTrigger value="apikeys" id="api">API Keys</TabsTrigger>
-                <TabsTrigger value="usage">Usage</TabsTrigger>
-              </TabsList>
+              <div className="mb-8 space-y-3">
+                {/* Primary Navigation Row */}
+                <TabsList className="inline-flex flex-wrap gap-2 bg-transparent h-auto p-0 w-full">
+                  <TabsTrigger 
+                    value="profile"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    Profile
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="visual"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    Visual Builder
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="copilot"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    AI Co-Pilot
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="templates"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    Templates
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="history"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    History
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="workflow"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    Workflow
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="teams"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    Teams
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="marketplace"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    Marketplace
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="analytics"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    Analytics
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="abtesting"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    A/B Testing
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="compliance"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    Compliance
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Secondary Navigation Row */}
+                <TabsList className="inline-flex flex-wrap gap-2 bg-transparent h-auto p-0 w-full">
+                  <TabsTrigger 
+                    value="legal"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    Legal Packs
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="pricing"
+                    id="pricing"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    Pricing
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="apikeys"
+                    id="api"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    API Keys
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="usage"
+                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
+                  >
+                    Usage
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
               <TabsContent value="profile">
                 <UserProfile 
