@@ -137,10 +137,38 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-black flex items-center justify-center p-4 sm:p-6">
+      {/* Animated PromptX background text with gradient effect - Enhanced for Mobile */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden pointer-events-none select-none">
+        <div 
+          className="text-[clamp(5rem,20vw,24vw)] sm:text-[clamp(8rem,20vw,26vw)] font-extrabold whitespace-nowrap tracking-tighter"
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.12) 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            letterSpacing: '-0.05em'
+          }}
+        >
+          PrompX
+        </div>
+      </div>
+
       {/* Enhanced animated gradient orbs with glow */}
       <div className="absolute top-0 -left-48 -z-10 w-96 h-96 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse-subtle pointer-events-none" />
       <div className="absolute bottom-0 -right-48 -z-10 w-96 h-96 bg-gradient-to-tl from-purple-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse-subtle pointer-events-none" style={{ animationDelay: '1s' }} />
       <div className="absolute top-1/2 left-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 rounded-full blur-3xl animate-pulse-subtle pointer-events-none" style={{ animationDelay: '0.5s' }} />
+      
+      {/* Enhanced grid pattern with shimmer effect */}
+      <div 
+        className="absolute inset-0 -z-20 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '80px 80px'
+        }}
+      />
 
       {/* Premium card with enhanced glassmorphism */}
       <Card className="w-full max-w-md relative z-20 border border-white/10 bg-zinc-900/90 backdrop-blur-3xl shadow-elegant animate-scale-in overflow-hidden group">
