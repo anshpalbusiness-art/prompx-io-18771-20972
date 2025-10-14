@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, model = "google/gemini-2.5-flash", systemPrompt, temperature = 0.7, maxTokens = 2000 } = await req.json();
+    const { prompt, model = "llama-3.1-8b-instant", systemPrompt, temperature = 0.7, maxTokens = 2000 } = await req.json();
 
     if (!prompt) {
       return new Response(
