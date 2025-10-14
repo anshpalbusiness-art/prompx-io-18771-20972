@@ -24,7 +24,7 @@ export interface WorkflowStep {
 }
 
 interface WorkflowBuilderProps {
-  onExecute: (steps: WorkflowStep[]) => void;
+  onExecute: (steps: WorkflowStep[], userInput: string) => void;
   isExecuting: boolean;
   user: User | null;
   planAccess?: any;
@@ -41,6 +41,7 @@ export const WorkflowBuilder = ({ onExecute, isExecuting, user, planAccess }: Wo
   const [workflowDescription, setWorkflowDescription] = useState('');
   const [naturalLanguageInput, setNaturalLanguageInput] = useState('');
   const [isGeneratingWorkflow, setIsGeneratingWorkflow] = useState(false);
+  const [workflowInput, setWorkflowInput] = useState('');
 
   // Check if workflows are accessible
   const canAccessWorkflows = planAccess?.canAccessWorkflows() !== false;
@@ -108,6 +109,15 @@ export const WorkflowBuilder = ({ onExecute, isExecuting, user, planAccess }: Wo
       return;
     }
 
+    if (!workflowInput.trim()) {
+      toast({
+        title: "Input required",
+        description: "Please provide input for the workflow to process",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const emptySteps = steps.filter(s => !s.prompt.trim());
     if (emptySteps.length > 0) {
       toast({
@@ -117,7 +127,7 @@ export const WorkflowBuilder = ({ onExecute, isExecuting, user, planAccess }: Wo
       });
       return;
     }
-    onExecute(steps);
+    onExecute(steps, workflowInput);
   };
 
   const saveWorkflow = async () => {
@@ -608,6 +618,23 @@ export const WorkflowBuilder = ({ onExecute, isExecuting, user, planAccess }: Wo
           </Card>
         ))}
       </div>
+
+      {/* Workflow Input */}
+      <Card className="p-4 border-primary/30 bg-primary/5">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Workflow Input</Label>
+          <p className="text-xs text-muted-foreground">
+            This input will be used as the starting point for your workflow. Use {"{{input}}"} in your prompts to reference this value.
+          </p>
+          <Textarea
+            value={workflowInput}
+            onChange={(e) => setWorkflowInput(e.target.value)}
+            placeholder="Enter the data or context for your workflow to process..."
+            rows={3}
+            className="resize-none"
+          />
+        </div>
+      </Card>
 
       <div className="flex gap-2">
         <Button variant="outline" onClick={addStep} disabled={isExecuting}>

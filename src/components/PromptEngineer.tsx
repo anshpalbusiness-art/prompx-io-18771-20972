@@ -1709,8 +1709,8 @@ export const PromptEngineer = () => {
     }
   };
 
-  const executeWorkflow = async (steps: WorkflowStep[]) => {
-    if (!userInput.trim()) {
+  const executeWorkflow = async (steps: WorkflowStep[], workflowInputData: string) => {
+    if (!workflowInputData.trim()) {
       toast({
         title: "Input required",
         description: "Please provide input for the workflow",
@@ -1731,7 +1731,7 @@ export const PromptEngineer = () => {
     setWorkflowProgress(initialProgress);
 
     const results: WorkflowResult[] = [];
-    let previousOutput = userInput;
+    let previousOutput = workflowInputData;
 
     try {
       for (let i = 0; i < steps.length; i++) {
@@ -1745,7 +1745,7 @@ export const PromptEngineer = () => {
 
         // Replace variables in the prompt
         let processedPrompt = step.prompt
-          .replace(/\{\{input\}\}/g, userInput)
+          .replace(/\{\{input\}\}/g, workflowInputData)
           .replace(/\{\{previous\}\}/g, previousOutput);
 
         toast({
@@ -1806,7 +1806,7 @@ export const PromptEngineer = () => {
       if (user) {
         await supabase.from('prompt_history').insert({
           user_id: user.id,
-          original_prompt: userInput,
+          original_prompt: workflowInputData,
           optimized_prompt: results[results.length - 1].output,
           platform: 'workflow'
         });
