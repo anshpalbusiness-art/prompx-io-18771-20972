@@ -22,9 +22,9 @@ serve(async (req) => {
       );
     }
 
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-    if (!OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY is not configured');
+    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
+    if (!GROK_API_KEY) {
+      throw new Error('GROK_API_KEY is not configured');
     }
 
     const systemPrompt = `You are an intelligent workflow architect. Your job is to analyze natural language business goals and create a multi-agent workflow with dependencies.
@@ -49,122 +49,28 @@ CRITICAL: You must respond with a valid JSON object following this exact structu
       "prompt": "string - the specific task prompt (use {{input}} for user input, {{agent_id}} for other agent outputs)",
       "dependsOn": ["string array - IDs of agents this agent depends on"],
       "capabilities": ["string array - what this agent can do"],
-      "model": "google/gemini-2.5-flash",
+      "model": "grok-beta",
       "temperature": 0.7
-    }
-  ]
-}
-
-Example for "I want to launch a new AI course":
-{
-  "workflowName": "AI Course Launch Campaign",
-  "workflowDescription": "Complete workflow to research, create content, and market a new AI course",
-  "agents": [
-    {
-      "id": "research_agent",
-      "name": "Market Research Agent",
-      "category": "research",
-      "description": "Analyzes market trends and competition",
-      "systemPrompt": "You are a market research expert specializing in online education and AI courses. Provide data-driven insights about market opportunities, competition, and target audience.",
-      "prompt": "Research the market for {{input}}. Analyze: 1) Current trends in AI education 2) Competitor courses and pricing 3) Target audience pain points 4) Market gaps and opportunities",
-      "dependsOn": [],
-      "capabilities": ["web_research", "competitive_analysis", "trend_identification"],
-      "model": "google/gemini-2.5-flash",
-      "temperature": 0.5
-    },
-    {
-      "id": "copywriting_agent",
-      "name": "Sales Copy Agent",
-      "category": "content",
-      "description": "Creates compelling sales page copy",
-      "systemPrompt": "You are a conversion copywriter specializing in online course sales pages. Write persuasive, benefit-driven copy that converts visitors into students.",
-      "prompt": "Based on this market research: {{research_agent}}, create a compelling sales page for {{input}}. Include: 1) Attention-grabbing headline 2) Key benefits and outcomes 3) Course curriculum overview 4) Social proof elements 5) Strong call-to-action",
-      "dependsOn": ["research_agent"],
-      "capabilities": ["copywriting", "conversion_optimization", "storytelling"],
-      "model": "google/gemini-2.5-flash",
-      "temperature": 0.8
-    },
-    {
-      "id": "social_agent",
-      "name": "Social Media Agent",
-      "category": "marketing",
-      "description": "Creates social media promotion strategy",
-      "systemPrompt": "You are a social media marketing expert for educational content. Create engaging posts that drive traffic and enrollments.",
-      "prompt": "Using the course details from {{copywriting_agent}} and market insights from {{research_agent}}, create a 30-day social media campaign for {{input}}. Include: 1) Platform-specific posts (LinkedIn, Twitter, Instagram) 2) Content calendar 3) Hashtag strategy 4) Engagement tactics",
-      "dependsOn": ["research_agent", "copywriting_agent"],
-      "capabilities": ["social_media_marketing", "content_planning", "community_building"],
-      "model": "google/gemini-2.5-flash",
-      "temperature": 0.7
-    },
-    {
-      "id": "ad_agent",
-      "name": "Paid Ads Agent",
-      "category": "marketing",
-      "description": "Creates paid advertising campaigns",
-      "systemPrompt": "You are a performance marketing expert specializing in course launches. Create data-driven ad campaigns for maximum ROI.",
-      "prompt": "Based on {{research_agent}} insights and {{copywriting_agent}} messaging, create paid ad campaigns for {{input}}. Include: 1) Google Ads (search & display) 2) Facebook/Instagram ads 3) LinkedIn ads 4) Ad copy variations 5) Targeting parameters 6) Budget recommendations",
-      "dependsOn": ["research_agent", "copywriting_agent"],
-      "capabilities": ["paid_advertising", "audience_targeting", "roi_optimization"],
-      "model": "google/gemini-2.5-flash",
-      "temperature": 0.6
     }
   ]
 }
 
 Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
 
-    console.log('Calling OpenAI to generate workflow structure...');
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    console.log('Calling Grok to generate workflow structure...');
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${GROK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'grok-beta',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: naturalLanguageInput }
         ],
-        temperature: 0.2,
-        tools: [
-          {
-            type: 'function',
-            function: {
-              name: 'build_workflow',
-              description: 'Return a structured multi-agent workflow for the given goal',
-              parameters: {
-                type: 'object',
-                properties: {
-                  workflowName: { type: 'string' },
-                  workflowDescription: { type: 'string' },
-                  agents: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        id: { type: 'string' },
-                        name: { type: 'string' },
-                        category: { type: 'string' },
-                        description: { type: 'string' },
-                        systemPrompt: { type: 'string' },
-                        prompt: { type: 'string' },
-                        dependsOn: { type: 'array', items: { type: 'string' }, default: [] },
-                        capabilities: { type: 'array', items: { type: 'string' }, default: [] },
-                        model: { type: 'string', enum: ['gpt-4o','gpt-4o-mini','gpt-4-turbo','o1-preview','o1-mini'] },
-                        temperature: { type: 'number' }
-                      },
-                      required: ['id','name','category','description','systemPrompt','prompt']
-                    }
-                  }
-                },
-                required: ['workflowName','workflowDescription','agents'],
-                additionalProperties: false
-              }
-            }
-          }
-        ],
-        tool_choice: { type: 'function', function: { name: 'build_workflow' } }
+        temperature: 0.2
       }),
     });
 
@@ -189,31 +95,23 @@ Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
     const data = await response.json();
     const choice = data.choices?.[0];
 
-    // Parse structured output from tool calls when available
+    // Parse structured output
     let workflowStructure: any;
     try {
-      const toolCalls = choice?.message?.tool_calls;
-      if (Array.isArray(toolCalls) && toolCalls.length > 0) {
-        const fnCall = toolCalls.find((tc: any) => tc.type === 'function' && tc.function?.name === 'build_workflow') || toolCalls[0];
-        const argsStr = fnCall?.function?.arguments ?? '';
-        workflowStructure = JSON.parse(argsStr);
-      } else {
-        // Fallback: parse from plain content
-        const content: string = choice?.message?.content ?? '';
-        console.log('AI response (content):', content);
-        let cleanContent = content.replace(/```json\s*/g, '').replace(/```/g, '').trim();
-        try {
-          workflowStructure = JSON.parse(cleanContent);
-        } catch {
-          // Attempt to extract the first JSON object
-          const first = cleanContent.indexOf('{');
-          const last = cleanContent.lastIndexOf('}');
-          if (first !== -1 && last !== -1 && last > first) {
-            const jsonSlice = cleanContent.slice(first, last + 1);
-            workflowStructure = JSON.parse(jsonSlice);
-          } else {
-            throw new Error('No JSON object found in model output');
-          }
+      const content: string = choice?.message?.content ?? '';
+      console.log('AI response (content):', content);
+      let cleanContent = content.replace(/```json\s*/g, '').replace(/```/g, '').trim();
+      try {
+        workflowStructure = JSON.parse(cleanContent);
+      } catch {
+        // Attempt to extract the first JSON object
+        const first = cleanContent.indexOf('{');
+        const last = cleanContent.lastIndexOf('}');
+        if (first !== -1 && last !== -1 && last > first) {
+          const jsonSlice = cleanContent.slice(first, last + 1);
+          workflowStructure = JSON.parse(jsonSlice);
+        } else {
+          throw new Error('No JSON object found in model output');
         }
       }
     } catch (parseError) {

@@ -22,7 +22,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const groqApiKey = Deno.env.get('GROQ_API_KEY')!;
+    const grokApiKey = Deno.env.get('GROK_API_KEY')!;
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { userId, analysisType, dataPoints, context }: AnalyticsRequest = await req.json();
@@ -139,14 +139,14 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
     }
 
     // Call AI for intelligent analysis
-    const aiResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const aiResponse = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${groqApiKey}`,
+        'Authorization': `Bearer ${grokApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        model: 'grok-beta',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }

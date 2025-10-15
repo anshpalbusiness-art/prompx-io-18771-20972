@@ -20,16 +20,16 @@ serve(async (req) => {
       );
     }
 
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-    if (!OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY is not configured');
+    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
+    if (!GROK_API_KEY) {
+      console.error('GROK_API_KEY is not configured');
       return new Response(
         JSON.stringify({ error: 'AI service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Executing prompt with OpenAI model:', model);
+    console.log('Executing prompt with Grok model');
 
     const messages = systemPrompt
       ? [
@@ -38,14 +38,14 @@ serve(async (req) => {
         ]
       : [{ role: 'user', content: prompt }];
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${GROK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: model,
+        model: 'grok-beta',
         messages,
         temperature,
         max_tokens: maxTokens,
