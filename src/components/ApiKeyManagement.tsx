@@ -68,14 +68,17 @@ export default function ApiKeyManagement({ user }: ApiKeyManagementProps) {
 
   const loadApiKeys = async () => {
     try {
+      // SECURITY: Never select the api_key column - it should always be null
+      // We only use api_key_hash and key_prefix for validation
       const { data, error } = await supabase
         .from("api_keys")
-        .select("*")
+        .select("id, key_name, api_key_hash, key_prefix, is_active, requests_count, rate_limit_per_hour, last_used_at, expires_at, last_rotated_at, created_at")
         .eq("user_id", user?.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setApiKeys(data || []);
+      // Map to include null api_key for type compatibility
+      setApiKeys((data || []).map(key => ({ ...key, api_key: null })));
     } catch (error: any) {
       toast({
         title: "Error loading API keys",
@@ -120,7 +123,7 @@ export default function ApiKeyManagement({ user }: ApiKeyManagementProps) {
         .insert({
           user_id: user?.id,
           key_name: newKeyName,
-          api_key: apiKey, // Will be cleared after insert
+          api_key: apiKey, // Automatically cleared by database trigger
           api_key_hash: hashData,
           key_prefix: keyPrefix,
           expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year
@@ -131,6 +134,7 @@ export default function ApiKeyManagement({ user }: ApiKeyManagementProps) {
       if (error) throw error;
 
       // Store the newly created key to display once
+      // Note: The database trigger automatically clears the plaintext from storage
       setNewlyCreatedKey({
         id: insertData.id,
         plaintext_key: apiKey,
@@ -142,13 +146,6 @@ export default function ApiKeyManagement({ user }: ApiKeyManagementProps) {
       });
 
       setNewKeyName("");
-      
-      // Clear the plaintext key from database
-      await supabase
-        .from("api_keys")
-        .update({ api_key: null })
-        .eq('id', insertData.id);
-      
       loadApiKeys();
     } catch (error: any) {
       toast({
