@@ -139,7 +139,7 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
     }
 
     // Call AI for intelligent analysis
-    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${googleApiKey}`, {
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${googleApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -49,7 +49,7 @@ CRITICAL: You must respond with a valid JSON object following this exact structu
       "prompt": "string - the specific task prompt (use {{input}} for user input, {{agent_id}} for other agent outputs)",
       "dependsOn": ["string array - IDs of agents this agent depends on"],
       "capabilities": ["string array - what this agent can do"],
-      "model": "grok-beta",
+      "model": "gemini-1.5-flash",
       "temperature": 0.7
     }
   ]
