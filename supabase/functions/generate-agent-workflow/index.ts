@@ -22,9 +22,9 @@ serve(async (req) => {
       );
     }
 
-    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
-    if (!GROK_API_KEY) {
-      throw new Error('GROK_API_KEY is not configured');
+    const GOOGLE_AI_KEY = Deno.env.get('GOOGLE_AI_STUDIO_API_KEY');
+    if (!GOOGLE_AI_KEY) {
+      throw new Error('GOOGLE_AI_STUDIO_API_KEY is not configured');
     }
 
     const systemPrompt = `You are an intelligent workflow architect. Your job is to analyze natural language business goals and create a multi-agent workflow with dependencies.
@@ -57,20 +57,21 @@ CRITICAL: You must respond with a valid JSON object following this exact structu
 
 Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
 
-    console.log('Calling Grok to generate workflow structure...');
-    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+    console.log('Calling Gemini to generate workflow structure...');
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GOOGLE_AI_KEY}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'grok-beta',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: naturalLanguageInput }
-        ],
-        temperature: 0.2
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\n${naturalLanguageInput}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.2
+        }
       }),
     });
 
@@ -93,14 +94,13 @@ Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
     }
 
     const data = await response.json();
-    const choice = data.choices?.[0];
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     // Parse structured output
     let workflowStructure: any;
     try {
-      const content: string = choice?.message?.content ?? '';
       console.log('AI response (content):', content);
-      let cleanContent = content.replace(/```json\s*/g, '').replace(/```/g, '').trim();
+      let cleanContent = (content || '').replace(/```json\s*/g, '').replace(/```/g, '').trim();
       try {
         workflowStructure = JSON.parse(cleanContent);
       } catch {
@@ -115,7 +115,7 @@ Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
         }
       }
     } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError, 'Raw:', JSON.stringify(choice));
+      console.error('Failed to parse AI response:', parseError, 'Raw:', JSON.stringify(content));
       throw new Error('Failed to parse workflow structure from AI response');
     }
 

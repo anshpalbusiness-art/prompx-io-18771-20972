@@ -22,7 +22,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const grokApiKey = Deno.env.get('GROK_API_KEY')!;
+    const googleApiKey = Deno.env.get('GOOGLE_AI_STUDIO_API_KEY')!;
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { userId, analysisType, dataPoints, context }: AnalyticsRequest = await req.json();
@@ -139,19 +139,18 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
     }
 
     // Call AI for intelligent analysis
-    const aiResponse = await fetch('https://api.x.ai/v1/chat/completions', {
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${googleApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${grokApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'grok-beta',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.7,
+        contents: [{
+          parts: [{ text: systemPrompt + '\n\n' + userPrompt }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+        },
       }),
     });
 
@@ -178,7 +177,7 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
     let analysis;
     
     try {
-      const content = aiData.choices[0].message.content;
+      const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
       // Try to parse JSON from the response
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -195,12 +194,13 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
       }
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
+      const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text || 'No analysis available';
       // Fallback: create basic analysis structure
       analysis = {
         insights: [{
           title: 'Data Analysis',
           description: 'Analysis generated from your performance data',
-          insight: aiData.choices[0].message.content
+          insight: content
         }]
       };
     }

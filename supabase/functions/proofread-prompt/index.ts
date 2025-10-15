@@ -26,39 +26,36 @@ serve(async (req) => {
       );
     }
 
-    const GROK_API_KEY = Deno.env.get("GROK_API_KEY");
-    if (!GROK_API_KEY) {
-      throw new Error("GROK_API_KEY is not configured");
+    const GOOGLE_AI_KEY = Deno.env.get("GOOGLE_AI_STUDIO_API_KEY");
+    if (!GOOGLE_AI_KEY) {
+      throw new Error("GOOGLE_AI_STUDIO_API_KEY is not configured");
     }
 
     // Call AI to proofread and correct the text
-    const response = await fetch("https://api.x.ai/v1/chat/completions", {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GOOGLE_AI_KEY}`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${GROK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "grok-beta",
-        messages: [
-          {
-            role: "system",
-            content: `You are an expert proofreading AI. Your job is to correct spelling mistakes, grammar errors, and improve sentence structure while preserving the original meaning and intent. Return ONLY the corrected text without any explanations or additional commentary. Fix:
+        contents: [{
+          parts: [{
+            text: `You are an expert proofreading AI. Your job is to correct spelling mistakes, grammar errors, and improve sentence structure while preserving the original meaning and intent. Return ONLY the corrected text without any explanations or additional commentary. Fix:
 - Spelling errors (typos, misspellings, homophones)
 - Grammar issues (subject-verb agreement, tense, punctuation, articles)
 - Sentence structure (run-ons, fragments, clarity)
 - Capitalization and formatting
 - Professional tone improvements (remove slang, fix contractions if inappropriate)
 
-Important: If the text is already correct, return it unchanged. Always maintain the original language and meaning.`
-          },
-          {
-            role: "user",
-            content: text
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 1000
+Important: If the text is already correct, return it unchanged. Always maintain the original language and meaning.
+
+Text to proofread: ${text}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: 1000
+        }
       }),
     });
 
@@ -84,7 +81,7 @@ Important: If the text is already correct, return it unchanged. Always maintain 
     }
 
     const data = await response.json();
-    const correctedText = data.choices?.[0]?.message?.content?.trim() || text;
+    const correctedText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || text;
 
     console.log(`Proofread: "${text}" → "${correctedText}"`);
 

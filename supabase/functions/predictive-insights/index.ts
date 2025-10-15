@@ -22,7 +22,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const grokApiKey = Deno.env.get('GROK_API_KEY')!;
+    const googleApiKey = Deno.env.get('GOOGLE_AI_STUDIO_API_KEY')!;
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { 
@@ -217,20 +217,18 @@ Format as JSON with: performanceAnomalies, patternAnomalies, positive, negative,
     }
 
     // Call AI for predictions
-    const aiResponse = await fetch('https://api.x.ai/v1/chat/completions', {
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${googleApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${grokApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'grok-beta',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.7,
-        response_format: { type: "json_object" }
+        contents: [{
+          parts: [{ text: systemPrompt + '\n\n' + userPrompt }]
+        }],
+        generationConfig: {
+          temperature: 0.7
+        }
       }),
     });
 
@@ -251,7 +249,14 @@ Format as JSON with: performanceAnomalies, patternAnomalies, positive, negative,
     }
 
     const aiData = await aiResponse.json();
-    const predictions = JSON.parse(aiData.choices[0].message.content);
+    const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    let predictions;
+    try {
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      predictions = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(content);
+    } catch {
+      predictions = { summary: content };
+    }
 
     // Store predictions for future validation
     const { error: storeError } = await supabase

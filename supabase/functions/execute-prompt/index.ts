@@ -20,35 +20,37 @@ serve(async (req) => {
       );
     }
 
-    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
-    if (!GROK_API_KEY) {
-      console.error('GROK_API_KEY is not configured');
+    const GOOGLE_AI_KEY = Deno.env.get('GOOGLE_AI_STUDIO_API_KEY');
+    if (!GOOGLE_AI_KEY) {
+      console.error('GOOGLE_AI_STUDIO_API_KEY is not configured');
       return new Response(
         JSON.stringify({ error: 'AI service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Executing prompt with Grok model');
+    console.log('Executing prompt with Gemini model');
 
-    const messages = systemPrompt
-      ? [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
-        ]
-      : [{ role: 'user', content: prompt }];
+    const parts = [];
+    if (systemPrompt) {
+      parts.push({ text: systemPrompt + '\n\n' + prompt });
+    } else {
+      parts.push({ text: prompt });
+    }
 
-    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GOOGLE_AI_KEY}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'grok-beta',
-        messages,
-        temperature,
-        max_tokens: maxTokens,
+        contents: [{
+          parts
+        }],
+        generationConfig: {
+          temperature,
+          maxOutputTokens: maxTokens,
+        },
       }),
     });
 
@@ -77,7 +79,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const result = data.choices?.[0]?.message?.content;
+    const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!result) {
       return new Response(
