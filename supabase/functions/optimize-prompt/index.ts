@@ -33,9 +33,9 @@ serve(async (req) => {
       );
     }
 
-    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
-    if (!GROQ_API_KEY) {
-      throw new Error("GROQ_API_KEY is not configured");
+    const GROK_API_KEY = Deno.env.get("GROK_API_KEY");
+    if (!GROK_API_KEY) {
+      throw new Error("GROK_API_KEY is not configured");
     }
 
     // Model-specific optimization strategies
@@ -293,15 +293,15 @@ Return ONLY a valid JSON array (no markdown, no code blocks):
   {"title": "Creative & Enhanced", "prompt": "your creative optimized prompt here"}
 ]`;
 
-    // Call AI to generate optimized prompts via Groq
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    // Call AI to generate optimized prompts via Grok
+    const response = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${GROQ_API_KEY}`,
+        Authorization: `Bearer ${GROK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
+        model: "grok-beta",
         messages: [
           {
             role: "system",
@@ -326,12 +326,12 @@ Return ONLY a valid JSON array (no markdown, no code blocks):
       }
       if (response.status === 401) {
         return new Response(
-          JSON.stringify({ error: "Invalid or missing GROQ_API_KEY. Please add a valid Groq key in Secrets." }),
+          JSON.stringify({ error: "Invalid or missing GROK_API_KEY. Please add a valid Grok key in Secrets." }),
           { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       const errorText = await response.text();
-      console.error("Groq API error:", response.status, errorText);
+      console.error("Grok API error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "AI prompt optimization failed" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -19,10 +19,10 @@ serve(async (req) => {
 
     console.log('Sanitizing prompt...');
 
-    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
-    if (!GROQ_API_KEY) {
+    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
+    if (!GROK_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'GROQ_API_KEY is not configured' }),
+        JSON.stringify({ error: 'GROK_API_KEY is not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -50,14 +50,14 @@ If the prompt needs reframing, respond with JSON:
 
 Respond ONLY with valid JSON, no other text.`;
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Authorization': `Bearer ${GROK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        model: 'grok-beta',
         messages: [
           { role: 'system', content: 'You are a prompt safety expert. Always respond with valid JSON only.' },
           { role: 'user', content: sanitizationPrompt }
