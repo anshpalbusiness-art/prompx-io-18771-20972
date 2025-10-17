@@ -1,4 +1,3 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -33,14 +32,36 @@ serve(async (req) => {
       );
     }
 
-    const GOOGLE_AI_KEY = Deno.env.get("GOOGLE_AI_STUDIO_API_KEY");
-    if (!GOOGLE_AI_KEY) {
-      throw new Error("GOOGLE_AI_STUDIO_API_KEY is not configured");
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error("ANTHROPIC_API_KEY is not configured");
     }
 
     // Model-specific optimization strategies
     const modelStrategies: Record<string, string> = {
-      // GPT Models
+      "gpt-4": `Expert at GPT-4 optimization. Focus on:
+- Complex reasoning and problem-solving
+- Creative content generation
+- Handling nuanced instructions
+- Adapting to different writing styles`,
+
+      "bard": `Expert at Bard optimization. Focus on:
+- Conversational and engaging prompts
+- Creative writing and storytelling
+- Information retrieval and summarization
+- Multi-turn dialogue`,
+
+      "claude-v2": `Expert at Claude v2 optimization. Focus on:
+- Detailed and structured responses
+- Analytical and research-oriented tasks
+- Ethical considerations and safety
+- Long-form content generation`,
+
+      "palm-2": `Expert at PaLM 2 optimization. Focus on:
+- Multilingual capabilities
+- Code generation and understanding
+- Mathematical reasoning
+- Scientific and technical content`,
       "gpt-5": `Expert at GPT-5 optimization. Focus on:
 - Structured reasoning with chain-of-thought
 - Explicit role definitions and task framing
@@ -60,7 +81,6 @@ serve(async (req) => {
 - Comprehensive contextual understanding
 - Real-time information integration`,
 
-      // Claude Models
       "claude-opus-4": `Expert at Claude Opus 4 optimization. Focus on:
 - Deep analytical reasoning and research
 - XML tags for structured data (<thinking>, <answer>)
@@ -80,7 +100,6 @@ serve(async (req) => {
 - Real-time assistance
 - Straightforward Q&A`,
 
-      // Gemini Models
       "gemini-2.5-pro": `Expert at Gemini 2.5 Pro optimization. Focus on:
 - Multimodal reasoning (text, images, code)
 - Large context window utilization
@@ -100,7 +119,6 @@ serve(async (req) => {
 - Advanced code generation
 - Research-level analysis`,
 
-      // LLaMA Models
       "llama-3.3": `Expert at LLaMA 3.3 optimization. Focus on:
 - Open-source flexibility
 - Conversational AI
@@ -113,7 +131,6 @@ serve(async (req) => {
 - Long-form content generation
 - Technical and scientific tasks`,
 
-      // Mistral Models
       "mistral-large-2": `Expert at Mistral Large 2 optimization. Focus on:
 - European AI excellence
 - Multilingual capabilities
@@ -126,14 +143,12 @@ serve(async (req) => {
 - Cost-effective solutions
 - Quick responses`,
 
-      // xAI
       "grok-2": `Expert at Grok 2 optimization. Focus on:
 - Real-time information and current events
 - Conversational and engaging tone
 - Up-to-date knowledge integration
 - Fact-checking and verification`,
 
-      // Image Models
       "midjourney-v6": `Expert at MidJourney v6 optimization. Generate prompts with:
 - Detailed subject descriptions
 - Artistic style and medium (oil painting, photography, etc.)
@@ -168,7 +183,6 @@ serve(async (req) => {
 - Mood and atmosphere
 - Technical camera details`,
 
-      // Code Models
       "github-copilot": `Expert at GitHub Copilot optimization. Generate code comments that:
 - Clearly describe function purpose
 - Specify parameter types and return values
@@ -192,7 +206,6 @@ serve(async (req) => {
 - Bug fixing and optimization
 - Test generation`,
 
-      // Audio/Video Models
       "elevenlabs": `Expert at ElevenLabs optimization. Generate scripts with:
 - Natural, conversational language
 - Proper punctuation for pacing
@@ -222,7 +235,6 @@ serve(async (req) => {
     const strategy = modelStrategies[platform] || modelStrategies["gpt-5"];
     const modelInfo = modelName && provider ? `${modelName} (${provider})` : platform;
 
-    // Enhanced system prompt with quality controls
     const systemPrompt = `${strategy}
 
 You are an ELITE prompt optimization AI with expertise in:
@@ -244,7 +256,6 @@ CRITICAL QUALITY STANDARDS:
 
 Generate 3 distinct, HIGH-QUALITY prompt variations.`;
 
-    // Enhanced user prompt with better instructions
     const userPrompt = `User's original request: "${text}"
 
 ANALYSIS REQUIRED:
@@ -293,20 +304,20 @@ Return ONLY a valid JSON array (no markdown, no code blocks):
   {"title": "Creative & Enhanced", "prompt": "your creative optimized prompt here"}
 ]`;
 
-    // Call AI to generate optimized prompts via Gemini
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GOOGLE_AI_KEY}`, {
-      method: "POST",
+    // Call Claude API
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        contents: [{
-          parts: [{ text: systemPrompt + '\n\n' + userPrompt }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 3000
-        }
+        model: "claude-sonnet-4-5",
+        max_tokens: 4096,
+        messages: [
+          { role: 'user', content: systemPrompt + '\n\n' + userPrompt }
+        ]
       }),
     });
 
@@ -317,14 +328,14 @@ Return ONLY a valid JSON array (no markdown, no code blocks):
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-        if (response.status === 401) {
+      if (response.status === 401) {
         return new Response(
-          JSON.stringify({ error: "Invalid or missing GOOGLE_AI_STUDIO_API_KEY. Please add a valid Google AI Studio key in Secrets." }),
+          JSON.stringify({ error: "Invalid or missing ANTHROPIC_API_KEY. Please check your Anthropic API key in Secrets." }),
           { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       const errorText = await response.text();
-      console.error("Google AI API error:", response.status, errorText);
+      console.error("Claude API error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "AI prompt optimization failed" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -332,7 +343,7 @@ Return ONLY a valid JSON array (no markdown, no code blocks):
     }
 
     const data = await response.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    const content = data.content?.[0]?.text?.trim();
     
     if (!content) {
       throw new Error("No content returned from AI");
@@ -343,10 +354,8 @@ Return ONLY a valid JSON array (no markdown, no code blocks):
     // Extract JSON from response with enhanced parsing
     let prompts;
     try {
-      // Remove markdown code blocks if present
       let cleanContent = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
       
-      // Try to find JSON array
       const jsonMatch = cleanContent.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
         prompts = JSON.parse(jsonMatch[0]);
@@ -354,48 +363,40 @@ Return ONLY a valid JSON array (no markdown, no code blocks):
         prompts = JSON.parse(cleanContent);
       }
       
-      // Validate that prompts is an array of objects with title and prompt
       if (!Array.isArray(prompts) || prompts.length === 0) {
         throw new Error("Invalid prompts array structure");
       }
       
-      // Quality validation and enhancement
       prompts = prompts.map((p, idx) => {
         if (typeof p === 'string') {
           const titles = ["Quick & Direct", "Detailed & Professional", "Creative & Enhanced"];
           return { title: titles[idx] || "Optimized Prompt", prompt: p };
         }
         
-        // Validate existing structure
         if (!p.title || !p.prompt) {
           throw new Error("Prompt missing title or prompt field");
         }
         
-        // Ensure prompt is a string, not nested JSON
         if (typeof p.prompt !== 'string') {
           p.prompt = JSON.stringify(p.prompt);
         }
         
-        // Quality checks - ensure prompts are substantial and on-topic
         const prompt = p.prompt.trim();
         const originalWords = text.toLowerCase().split(/\s+/);
         const promptWords = prompt.toLowerCase().split(/\s+/);
         
-        // Check if prompt is too generic (less than 15 words and doesn't reference original)
         const hasRelevantContent = originalWords.some(word => 
           word.length > 3 && promptWords.includes(word)
         );
         
         if (prompt.length < 50 && !hasRelevantContent) {
           console.warn('Generated prompt seems too generic, enhancing...', p);
-          // Enhance the prompt to be more specific
-          p.prompt = `Based on: "${text}"\n\n${prompt}\n\nPlease ensure your response directly addresses the above request with specific, actionable information optimized for ${modelInfo}.`;
+          p.prompt = `Based on: "${text}"\n\nPlease ensure your response directly addresses the above request with specific, actionable information optimized for ${modelInfo}.`;
         }
         
         return p;
       });
       
-      // Ensure we have exactly 3 prompts
       while (prompts.length < 3) {
         const titles = ["Quick & Direct", "Detailed & Professional", "Creative & Enhanced"];
         prompts.push({
@@ -408,7 +409,6 @@ Return ONLY a valid JSON array (no markdown, no code blocks):
       console.error("Failed to parse AI response:", parseError);
       console.error("Raw content:", content);
       
-      // Create high-quality fallback prompts that maintain user intent
       prompts = [
         { 
           title: "Quick & Direct", 

@@ -1,4 +1,3 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -26,21 +25,12 @@ serve(async (req) => {
       );
     }
 
-    const GOOGLE_AI_KEY = Deno.env.get("GOOGLE_AI_STUDIO_API_KEY");
-    if (!GOOGLE_AI_KEY) {
-      throw new Error("GOOGLE_AI_STUDIO_API_KEY is not configured");
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error("ANTHROPIC_API_KEY is not configured");
     }
 
-    // Call AI to proofread and correct the text
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GOOGLE_AI_KEY}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `You are an expert proofreading AI. Your job is to correct spelling mistakes, grammar errors, and improve sentence structure while preserving the original meaning and intent. Return ONLY the corrected text without any explanations or additional commentary. Fix:
+    const prompt = `You are an expert proofreading AI. Your job is to correct spelling mistakes, grammar errors, and improve sentence structure while preserving the original meaning and intent. Return ONLY the corrected text without any explanations or additional commentary. Fix:
 - Spelling errors (typos, misspellings, homophones)
 - Grammar issues (subject-verb agreement, tense, punctuation, articles)
 - Sentence structure (run-ons, fragments, clarity)
@@ -49,13 +39,22 @@ serve(async (req) => {
 
 Important: If the text is already correct, return it unchanged. Always maintain the original language and meaning.
 
-Text to proofread: ${text}`
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 1000
-        }
+Text to proofread: ${text}`;
+
+    // Call Claude API
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-5",
+        max_tokens: 1024,
+        messages: [
+          { role: 'user', content: prompt }
+        ]
       }),
     });
 
@@ -66,14 +65,14 @@ Text to proofread: ${text}`
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 402) {
+      if (response.status === 402 || response.status === 401) {
         return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add funds to your workspace." }),
+          JSON.stringify({ error: "Invalid or missing ANTHROPIC_API_KEY. Please check your Anthropic API key in Secrets." }),
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("Claude API error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "AI proofreading failed" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -81,7 +80,7 @@ Text to proofread: ${text}`
     }
 
     const data = await response.json();
-    const correctedText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || text;
+    const correctedText = data.content?.[0]?.text?.trim() || text;
 
     console.log(`Proofread: "${text}" → "${correctedText}"`);
 
