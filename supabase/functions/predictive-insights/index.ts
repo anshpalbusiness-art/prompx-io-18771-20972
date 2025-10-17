@@ -22,7 +22,11 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const googleApiKey = Deno.env.get('GOOGLE_AI_STUDIO_API_KEY')!;
+    const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
+    
+    if (!anthropicApiKey) {
+      throw new Error('ANTHROPIC_API_KEY is not configured');
+    }
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { 
@@ -216,40 +220,48 @@ Format as JSON with: performanceAnomalies, patternAnomalies, positive, negative,
         break;
     }
 
-    // Call AI for predictions
-    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${googleApiKey}`, {
+    // Call Claude AI for predictions
+    const aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
+        'x-api-key': anthropicApiKey,
+        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [{
-          parts: [{ text: systemPrompt + '\n\n' + userPrompt }]
-        }],
-        generationConfig: {
-          temperature: 0.7
-        }
+        model: 'claude-sonnet-4-5',
+        max_tokens: 4096,
+        temperature: 0.7,
+        messages: [
+          {
+            role: 'user',
+            content: systemPrompt + '\n\n' + userPrompt
+          }
+        ]
       }),
     });
 
     if (!aiResponse.ok) {
       const status = aiResponse.status;
       const body = await aiResponse.text();
-      console.error('AI API error:', status, body);
-      if (status === 402 || status === 429) {
-        const friendly = status === 402
-          ? 'Out of AI credits. Please add credits in Settings → Workspace → Usage.'
-          : 'Rate limit reached. Please wait and try again.';
+      console.error('Claude API error:', status, body);
+      if (status === 429) {
         return new Response(
-          JSON.stringify({ success: false, code: status, error: friendly, raw: body }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      throw new Error(`AI API error: ${status}`);
+      if (status === 402 || status === 400) {
+        return new Response(
+          JSON.stringify({ error: 'API error. Please check your Anthropic API key in Secrets.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      throw new Error(`Claude API error: ${status}`);
     }
 
     const aiData = await aiResponse.json();
-    const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    const content = aiData.content[0].text;
     let predictions;
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
