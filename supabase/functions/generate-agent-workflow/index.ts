@@ -22,9 +22,9 @@ serve(async (req) => {
       );
     }
 
-    const GOOGLE_AI_KEY = Deno.env.get('GOOGLE_AI_STUDIO_API_KEY');
-    if (!GOOGLE_AI_KEY) {
-      throw new Error('GOOGLE_AI_STUDIO_API_KEY is not configured');
+    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error('ANTHROPIC_API_KEY is not configured');
     }
 
     const systemPrompt = `You are an intelligent workflow architect. Your job is to analyze natural language business goals and create a multi-agent workflow with dependencies.
@@ -49,7 +49,7 @@ CRITICAL: You must respond with a valid JSON object following this exact structu
       "prompt": "string - the specific task prompt (use {{input}} for user input, {{agent_id}} for other agent outputs)",
       "dependsOn": ["string array - IDs of agents this agent depends on"],
       "capabilities": ["string array - what this agent can do"],
-      "model": "gemini-1.5-flash",
+      "model": "claude-sonnet-4-5",
       "temperature": 0.7
     }
   ]
@@ -57,21 +57,24 @@ CRITICAL: You must respond with a valid JSON object following this exact structu
 
 Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
 
-    console.log('Calling Gemini to generate workflow structure...');
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GOOGLE_AI_KEY}`, {
+    console.log('Calling Claude to generate workflow structure...');
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `${systemPrompt}\n\n${naturalLanguageInput}`
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.2
-        }
+        model: 'claude-sonnet-4-5',
+        max_tokens: 4096,
+        temperature: 0.2,
+        messages: [
+          {
+            role: 'user',
+            content: `${systemPrompt}\n\n${naturalLanguageInput}`
+          }
+        ]
       }),
     });
 
@@ -82,19 +85,19 @@ Respond ONLY with valid JSON. No markdown, no code blocks, no explanations.`;
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      if (response.status === 402) {
+      if (response.status === 402 || response.status === 400) {
         return new Response(
-          JSON.stringify({ error: 'Insufficient credits. Please add credits to continue.' }),
+          JSON.stringify({ error: 'API error. Please check your Anthropic API key in Secrets.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       const errorText = await response.text();
-      console.error('AI API error:', response.status, errorText);
-      throw new Error(`AI API error: ${response.status}`);
+      console.error('Claude API error:', response.status, errorText);
+      throw new Error(`Claude API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const content = data.content?.[0]?.text as string | undefined;
 
     // Parse structured output
     let workflowStructure: any;

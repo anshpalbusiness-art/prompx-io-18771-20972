@@ -22,7 +22,11 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const googleApiKey = Deno.env.get('GOOGLE_AI_STUDIO_API_KEY')!;
+    const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
+    
+    if (!anthropicApiKey) {
+      throw new Error('ANTHROPIC_API_KEY is not configured');
+    }
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { userId, analysisType, dataPoints, context }: AnalyticsRequest = await req.json();
@@ -138,35 +142,39 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
         break;
     }
 
-    // Call AI for intelligent analysis
-    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${googleApiKey}`, {
+    // Call Anthropic Claude for intelligent analysis
+    const aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
+        'x-api-key': anthropicApiKey,
+        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [{
-          parts: [{ text: systemPrompt + '\n\n' + userPrompt }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-        },
+        model: 'claude-sonnet-4-5',
+        max_tokens: 4096,
+        temperature: 0.7,
+        messages: [
+          { role: 'user', content: systemPrompt + '\n\n' + userPrompt }
+        ]
       }),
     });
 
     if (!aiResponse.ok) {
       const status = aiResponse.status;
-      let bodyText = await aiResponse.text();
-      try { bodyText = JSON.stringify(JSON.parse(bodyText)); } catch {}
-      console.error('AI API Error:', status, bodyText);
+      const bodyText = await aiResponse.text();
+      console.error('Claude API Error:', status, bodyText);
 
-      if (status === 402 || status === 429) {
-        const friendly = status === 402
-          ? 'Out of AI credits. Please add credits in Settings → Workspace → Usage.'
-          : 'Rate limit reached. Please wait a few seconds and try again.';
+      if (status === 429) {
         return new Response(
-          JSON.stringify({ success: false, code: status, error: friendly, raw: bodyText }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (status === 402 || status === 400) {
+        return new Response(
+          JSON.stringify({ error: 'API error. Please check your Anthropic API key in Secrets.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
@@ -175,27 +183,24 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
 
     const aiData = await aiResponse.json();
     let analysis;
-    
+
     try {
-      const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
-      // Try to parse JSON from the response
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      const content = aiData.content?.[0]?.text as string | undefined;
+      const jsonMatch = content?.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         analysis = JSON.parse(jsonMatch[0]);
       } else {
-        // If no JSON found, create a structured response
         analysis = {
           insights: [{
             title: 'Analysis Complete',
-            description: content.slice(0, 500),
-            insight: content
+            description: content?.slice(0, 500) || 'No content',
+            insight: content || ''
           }]
         };
       }
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
-      const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text || 'No analysis available';
-      // Fallback: create basic analysis structure
+      const content = aiData.content?.[0]?.text || 'No analysis available';
       analysis = {
         insights: [{
           title: 'Data Analysis',
