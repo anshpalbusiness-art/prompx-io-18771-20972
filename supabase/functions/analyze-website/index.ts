@@ -25,22 +25,17 @@ serve(async (req) => {
       url = 'https://' + url;
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
-    }
-
     console.log('Fetching website:', url);
     
     // Fetch the website content with timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     
     let websiteResponse;
     try {
       websiteResponse = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
           'Accept-Language': 'en-US,en;q=0.5',
         },
@@ -78,46 +73,76 @@ serve(async (req) => {
 
     const html = await websiteResponse.text();
     
-    // Extract text content (basic HTML stripping)
+    // Extract text content
     const textContent = html
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
       .replace(/<[^>]+>/g, ' ')
       .replace(/\s+/g, ' ')
       .trim()
-      .slice(0, 8000); // Limit content size
+      .slice(0, 8000);
 
-    console.log('Analyzing website content with AI...');
+    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error('ANTHROPIC_API_KEY is not configured');
+    }
+
+    console.log('Analyzing website with Claude AI...');
     
-    // Use Lovable AI to analyze the website
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'claude-sonnet-4-5',
+        max_tokens: 4096,
+        temperature: 0.7,
         messages: [
           {
             role: 'user',
-            content: `Analyze this website content and create a detailed AI prompt that would help rebuild or recreate a similar website. Focus on:
+            content: `As an expert web designer and UX analyst, perform an in-depth analysis of this website and create a comprehensive prompt for recreating it.
 
-1. Visual design and layout style
-2. Color scheme and branding
-3. Key features and functionality
-4. User experience patterns
-5. Content structure and sections
-6. Interactive elements
-7. Overall purpose and target audience
+Analyze thoroughly:
+
+**1. Visual Design & Aesthetics**
+- Layout patterns and grid system
+- Typography hierarchy and font choices
+- Color palette and brand identity
+- Visual rhythm and spacing
+- Design style (modern, minimal, bold, etc.)
+
+**2. User Experience & Navigation**
+- Information architecture
+- User flow and journey patterns
+- CTA placement and hierarchy
+- Mobile responsiveness indicators
+
+**3. Content Strategy**
+- Content types and formats
+- Messaging tone and voice
+- Value propositions
+- Content organization
+
+**4. Functional Elements**
+- Interactive components
+- Forms and data collection
+- Social proof elements
+- Performance optimization
+
+**5. Target Audience & Business Goals**
+- Primary user personas
+- Business model indicators
+- Conversion optimization strategies
 
 Website URL: ${url}
-Content preview: ${textContent}
+Content: ${textContent}
 
-Generate a comprehensive prompt that an AI could use to build a similar website. Be specific about design choices, layout, features, and functionality.`
+Generate a detailed, actionable prompt that an AI could use to build a functionally equivalent website. Be specific about design choices, user flows, technical requirements, and business logic.`
           }
-        ],
-        temperature: 0.7,
+        ]
       }),
     });
 
@@ -128,19 +153,19 @@ Generate a comprehensive prompt that an AI could use to build a similar website.
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      if (response.status === 402) {
+      if (response.status === 402 || response.status === 400) {
         return new Response(
-          JSON.stringify({ error: 'Credits exhausted. Please add credits to continue.' }),
+          JSON.stringify({ error: 'API error. Please check your Anthropic API key in Secrets.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       const errorText = await response.text();
-      console.error('AI API error:', response.status, errorText);
-      throw new Error(`AI API error: ${response.status}`);
+      console.error('Claude API error:', response.status, errorText);
+      throw new Error(`Claude API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const analysis = data.choices[0].message.content;
+    const analysis = data.content[0].text;
     
     console.log('Website analysis completed successfully');
 

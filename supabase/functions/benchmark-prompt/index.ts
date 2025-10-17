@@ -18,15 +18,17 @@ serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+    
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    // Latest AI models for best results
+    // Latest AI models including Claude for superior intelligence
     const models = [
+      { name: 'Claude Sonnet 4.5', id: 'claude-sonnet-4-5', description: 'Superior reasoning & intelligence', useClaude: true },
       { name: 'Gemini 2.5 Pro', id: 'google/gemini-2.5-pro', description: 'Top-tier reasoning & multimodal' },
       { name: 'Gemini 2.5 Flash', id: 'google/gemini-2.5-flash', description: 'Balanced speed & quality' },
-      { name: 'Gemini 2.5 Flash Lite', id: 'google/gemini-2.5-flash-lite', description: 'Ultra-fast inference' },
       { name: 'GPT-5', id: 'openai/gpt-5', description: 'State-of-the-art reasoning' },
       { name: 'GPT-5 Mini', id: 'openai/gpt-5-mini', description: 'Efficient performance' },
       { name: 'GPT-5 Nano', id: 'openai/gpt-5-nano', description: 'Speed optimized' },
@@ -38,18 +40,38 @@ serve(async (req) => {
         const startTime = Date.now();
         
         try {
-          const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: model.id,
-              messages: [{ role: 'user', content: prompt }],
-              max_completion_tokens: 500,
-            }),
-          });
+          let response;
+          
+          if (model.useClaude && ANTHROPIC_API_KEY) {
+            // Use Claude API
+            response = await fetch('https://api.anthropic.com/v1/messages', {
+              method: 'POST',
+              headers: {
+                'x-api-key': ANTHROPIC_API_KEY,
+                'anthropic-version': '2023-06-01',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                model: 'claude-sonnet-4-5',
+                max_tokens: 2000,
+                messages: [{ role: 'user', content: prompt }],
+              }),
+            });
+          } else {
+            // Use Lovable AI Gateway
+            response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                model: model.id,
+                messages: [{ role: 'user', content: prompt }],
+                max_completion_tokens: 500,
+              }),
+            });
+          }
 
           const responseTime = Date.now() - startTime;
 
@@ -60,7 +82,9 @@ serve(async (req) => {
           }
 
           const data = await response.json();
-          const content = data.choices?.[0]?.message?.content || '';
+          const content = model.useClaude 
+            ? data.content?.[0]?.text || '' 
+            : data.choices?.[0]?.message?.content || '';
 
           // Calculate quality scores
           const scores = calculateQualityScores(content, prompt);
@@ -83,6 +107,7 @@ serve(async (req) => {
             clarityScore: 0,
             originalityScore: 0,
             depthScore: 0,
+            relevanceScore: 0,
             overallScore: 0,
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error',
