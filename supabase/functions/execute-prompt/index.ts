@@ -11,63 +11,60 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, model = "gpt-4o-mini", systemPrompt, temperature = 0.7, maxTokens = 2000 } = await req.json();
+    const { prompt, model = "google/gemini-2.5-flash", systemPrompt, temperature = 0.7, maxTokens = 2000 } = await req.json();
 
-    if (!prompt) {
+    if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
       return new Response(
         JSON.stringify({ error: 'Prompt is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const GOOGLE_AI_KEY = Deno.env.get('GOOGLE_AI_STUDIO_API_KEY');
-    if (!GOOGLE_AI_KEY) {
-      console.error('GOOGLE_AI_STUDIO_API_KEY is not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      console.error('LOVABLE_API_KEY is not configured');
       return new Response(
-        JSON.stringify({ error: 'AI service not configured' }),
+        JSON.stringify({ error: 'AI gateway not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Executing prompt with Gemini model');
+    console.log(`Executing prompt via Lovable AI Gateway (model: ${model})`);
 
-    const parts = [];
-    if (systemPrompt) {
-      parts.push({ text: systemPrompt + '\n\n' + prompt });
-    } else {
-      parts.push({ text: prompt });
+    const messages: Array<{ role: 'system' | 'user'; content: string }> = [];
+    if (systemPrompt && typeof systemPrompt === 'string' && systemPrompt.trim().length > 0) {
+      messages.push({ role: 'system', content: systemPrompt });
     }
+    messages.push({ role: 'user', content: prompt });
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GOOGLE_AI_KEY}`, {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [{
-          parts
-        }],
-        generationConfig: {
-          temperature,
-          maxOutputTokens: maxTokens,
-        },
+        model,
+        messages,
+        temperature,
+        max_tokens: maxTokens,
+        stream: false,
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI gateway error:', response.status, errorText);
-      
+
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: 'Credits exhausted. Please add more credits to continue.' }),
+          JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -79,7 +76,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const result: string | undefined = data?.choices?.[0]?.message?.content;
 
     if (!result) {
       return new Response(

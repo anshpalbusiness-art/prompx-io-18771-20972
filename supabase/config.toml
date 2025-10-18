@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.execute-claude]
 verify_jwt = false
+
+[functions.execute-prompt]
+verify_jwt = false
