@@ -1,3 +1,4 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -11,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, model = "google/gemini-2.5-flash", systemPrompt, temperature = 0.7, maxTokens = 2000 } = await req.json();
+    const { prompt, model = "claude-sonnet-4-5", systemPrompt, temperature = 0.7, maxTokens = 2000 } = await req.json();
 
     if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
       return new Response(
@@ -20,41 +21,41 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      console.error('LOVABLE_API_KEY is not configured');
+    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+    if (!ANTHROPIC_API_KEY) {
+      console.error('ANTHROPIC_API_KEY is not configured');
       return new Response(
-        JSON.stringify({ error: 'AI gateway not configured' }),
+        JSON.stringify({ error: 'AI provider not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Executing prompt via Lovable AI Gateway (model: ${model})`);
+    console.log(`Executing prompt with Anthropic model: ${model}`);
 
-    const messages: Array<{ role: 'system' | 'user'; content: string }> = [];
-    if (systemPrompt && typeof systemPrompt === 'string' && systemPrompt.trim().length > 0) {
-      messages.push({ role: 'system', content: systemPrompt });
-    }
-    messages.push({ role: 'user', content: prompt });
+    const userContent = systemPrompt
+      ? `${systemPrompt}\n\n${prompt}`
+      : prompt;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model,
-        messages,
-        temperature,
         max_tokens: maxTokens,
-        stream: false,
+        temperature,
+        messages: [
+          { role: 'user', content: userContent }
+        ]
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
+      console.error('Claude API error:', response.status, errorText);
 
       if (response.status === 429) {
         return new Response(
@@ -62,9 +63,9 @@ serve(async (req) => {
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      if (response.status === 402) {
+      if (response.status === 402 || response.status === 400) {
         return new Response(
-          JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }),
+          JSON.stringify({ error: 'API error. Please check your Anthropic API key in Secrets.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -76,7 +77,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const result: string | undefined = data?.choices?.[0]?.message?.content;
+    const result: string | undefined = data?.content?.[0]?.text;
 
     if (!result) {
       return new Response(
