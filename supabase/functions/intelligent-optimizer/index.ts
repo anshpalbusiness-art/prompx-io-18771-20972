@@ -141,32 +141,52 @@ Provide:
 
 Format as JSON with: optimized, alternatives (array), improvements (array), impact, testing, notes`;
 
-    // Call AI for intelligent optimization
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    // Use Claude for superior optimization
+    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+    
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error('ANTHROPIC_API_KEY is not configured');
+    }
+    
+    const aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-pro',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.8,
-        response_format: { type: "json_object" }
+        model: 'claude-sonnet-4-5',
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('AI API Error:', errorText);
-      throw new Error(`AI API error: ${aiResponse.status}`);
+      console.error('Claude API Error:', errorText);
+      throw new Error(`Claude API error: ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
-    const optimization = JSON.parse(aiData.choices[0].message.content);
+    const responseText = aiData.content[0].text;
+    
+    // Parse JSON response
+    let optimization;
+    try {
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      optimization = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(responseText);
+    } catch (e) {
+      optimization = {
+        optimized: responseText,
+        alternatives: [],
+        improvements: ['Claude-optimized'],
+        impact: {},
+        testing: {},
+        notes: 'Optimized by Claude AI'
+      };
+    }
 
     // Store optimization for learning
     if (learningEnabled) {
