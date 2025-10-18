@@ -235,7 +235,7 @@ const Home = () => {
         <div className="container mx-auto max-w-7xl relative z-10 w-full px-4 sm:px-6 lg:px-8">
           <div className={`text-center max-w-4xl mx-auto transition-all duration-1000 delay-300 ${sectionsVisible.hero ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 sm:mb-7 lg:mb-8 leading-tight">
-              <span className="bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent block">
+              <span className="bg-gradient-to-r from-white via-zinc-100 to-zinc-300 bg-clip-text text-transparent block leading-[1.15] pb-1 relative z-10">
                 Professional Prompt Engineering Platform
               </span>
             </h1>
