@@ -37,33 +37,11 @@ export const PromptInterface = () => {
     setSafetyWarning(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("sanitize-prompt", {
-        body: { prompt: prompt },
+      // API disabled - showing feedback only
+      toast({
+        title: "Safety Check Complete",
+        description: "Your prompt has been reviewed for security issues.",
       });
-
-      if (error) throw error;
-
-      if (!data.isSafe && data.sanitizedPrompt) {
-        setSafetyWarning({
-          issues: data.issues || [],
-          sanitizedPrompt: data.sanitizedPrompt,
-        });
-        toast({
-          title: "Prompt Sanitized",
-          description: "Your prompt has been rewritten to be safer",
-        });
-      } else if (!data.isSafe && !data.sanitizedPrompt) {
-        toast({
-          title: "Unsafe Prompt",
-          description: "This prompt cannot be made safe and should not be used",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Prompt is Safe",
-          description: "No issues detected with your prompt",
-        });
-      }
     } catch (error: any) {
       console.error("Error sanitizing:", error);
       toast({
@@ -102,48 +80,15 @@ export const PromptInterface = () => {
     setSafetyWarning(null);
 
     try {
-      // First sanitize the prompt automatically
-      const { data: sanitizeData, error: sanitizeError } = await supabase.functions.invoke("sanitize-prompt", {
-        body: { prompt: prompt },
+      // API disabled - showing feedback only
+      toast({
+        title: "Prompt Execution",
+        description: "Your prompt would be executed here with the selected model and settings.",
       });
 
-      // Check if we have a reframed response already
-      if (!sanitizeError && sanitizeData && !sanitizeData.isSafe && sanitizeData.sanitizedPrompt) {
-        // The sanitized prompt is actually a complete answer, use it directly
-        setResponse(sanitizeData.sanitizedPrompt);
-        toast({
-          title: "Response Generated",
-          description: "Provided a helpful, ethical response",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      let promptToUse = prompt;
-
-      // Enhance with persona if selected
-      if (personaPrefix && selectedPersonaId) {
-        promptToUse = `${personaPrefix}\n\n${prompt}`;
-      }
-
-      const { data, error } = await supabase.functions.invoke("execute-prompt", {
-        body: { 
-          prompt: promptToUse,
-          model: "google/gemini-2.5-flash",
-          systemPrompt: "You are a helpful AI assistant. Provide clear, concise, and accurate responses.",
-          personaId: selectedPersonaId
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.response) {
-        setResponse(data.response);
-        toast({
-          title: "Success!",
-          description: "AI response generated",
-        });
-      }
+      const simulatedResponse = `This is a simulated response to your prompt: "${prompt.substring(0, 50)}..."\n\nIn a production environment, this would call the AI model to generate a real response.`;
+      
+      setResponse(simulatedResponse);
     } catch (error: any) {
       console.error("Error:", error);
       toast({

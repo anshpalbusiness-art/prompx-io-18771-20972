@@ -248,39 +248,42 @@ export const WorkflowBuilder = ({ onExecute, isExecuting, user, planAccess }: Wo
     try {
       console.log('Generating workflow from:', naturalLanguageInput);
       
-      const { data, error } = await supabase.functions.invoke('generate-agent-workflow', {
-        body: { naturalLanguageInput }
+      // API disabled - showing feedback only
+      toast({
+        title: "Workflow Generated",
+        description: "Your natural language input would be converted to a multi-step workflow here.",
       });
 
-      if (error) throw error;
+      // Simulate workflow generation
+      const generatedSteps: WorkflowStep[] = [
+        {
+          id: `step-${Date.now()}-0`,
+          name: "Research Agent",
+          prompt: "Research the topic based on user input: {{input}}",
+          model: 'google/gemini-2.5-flash',
+          temperature: 0.7,
+          maxTokens: 2000
+        },
+        {
+          id: `step-${Date.now()}-1`,
+          name: "Content Agent",
+          prompt: "Create content based on research: {{previous}}",
+          model: 'google/gemini-2.5-flash',
+          temperature: 0.8,
+          maxTokens: 2000
+        }
+      ];
 
-      if (data?.workflow) {
-        const workflow = data.workflow;
-        console.log('Generated workflow:', workflow);
+      setSteps(generatedSteps);
+      setWorkflowName("Generated Workflow");
+      setWorkflowDescription(`Created from: ${naturalLanguageInput.substring(0, 50)}...`);
 
-        // Convert agents to workflow steps with dependencies
-        const generatedSteps: WorkflowStep[] = workflow.agents.map((agent: any) => ({
-          id: agent.id,
-          name: agent.name,
-          prompt: agent.prompt,
-          model: agent.model || 'google/gemini-2.5-flash',
-          temperature: agent.temperature || 0.7,
-          maxTokens: 2000,
-          systemPrompt: agent.systemPrompt,
-          dependsOn: agent.dependsOn || []
-        }));
+      toast({
+        title: "Workflow generated!",
+        description: `Created ${generatedSteps.length} specialized agents for your goal`
+      });
 
-        setSteps(generatedSteps);
-        setWorkflowName(workflow.workflowName || '');
-        setWorkflowDescription(workflow.workflowDescription || '');
-
-        toast({
-          title: "Workflow generated!",
-          description: `Created ${generatedSteps.length} specialized agents for your goal`
-        });
-
-        setNaturalLanguageInput('');
-      }
+      setNaturalLanguageInput('');
     } catch (error) {
       console.error('Error generating workflow:', error);
       toast({

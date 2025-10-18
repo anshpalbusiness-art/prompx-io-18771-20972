@@ -816,35 +816,12 @@ export const PromptEngineer = () => {
 
     if (!enhanced) return { enhanced, improvements };
 
-    // AI-powered proofread - call backend for accurate corrections
+    // API disabled - showing feedback only
     try {
-      console.log("Attempting AI proofread for:", enhanced);
-      const proofreadResponse = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/proofread-prompt`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ text: enhanced }),
-        }
-      );
-
-      if (proofreadResponse.ok) {
-        const { corrected, changed } = await proofreadResponse.json();
-        console.log("AI proofread result:", { corrected, changed });
-        if (changed && corrected) {
-          enhanced = corrected;
-          improvements.push("AI-powered spelling and grammar corrections applied");
-        }
-      } else {
-        console.warn("Proofread API failed with status:", proofreadResponse.status);
-        // Will use fallback below
-      }
+      console.log("Simulated AI proofread for:", enhanced);
+      improvements.push('Text would be proofread and corrected here');
     } catch (error) {
-      console.error("Proofread error:", error);
-      // Continue with enhanced fallback enhancement if AI fails
+      console.error("Error during AI proofread:", error);
     }
 
     // Detect language first
@@ -1300,22 +1277,19 @@ export const PromptEngineer = () => {
         const model = AI_MODELS.find(m => m.id === modelId);
         if (!model) continue;
 
-        const { data, error } = await supabase.functions.invoke('optimize-prompt', {
-          body: {
-            text: enhanced,
-            platform: modelId,
-            modelName: model.name,
-            provider: model.provider,
-            category: model.category
+        // API disabled - showing feedback only
+        console.log(`Would optimize for ${model.name}`);
+
+        // Simulate generated prompts
+        const generatedPrompts = [
+          {
+            prompt: `[Optimized for ${model.name}] ${enhanced}`,
+            modelId: modelId,
+            model: model.name,
+            category: model.category,
+            provider: model.provider
           }
-        });
-
-        if (error) {
-          console.error(`Error optimizing for ${model.name}:`, error);
-          continue;
-        }
-
-        const generatedPrompts = data?.prompts || [];
+        ];
         
         // Enhanced validation and quality control on frontend
         const validPrompts = generatedPrompts.filter((p: any) => {
@@ -1408,43 +1382,15 @@ export const PromptEngineer = () => {
         const translatedPrompts = [];
         for (const prompt of allPrompts) {
           try {
-            const { data: translateData, error: translateError } = await supabase.functions.invoke('translate-prompt', {
-              body: {
-                prompt: prompt.prompt,
-                targetLanguage: selectedLanguage,
-                culturalContext: culturalContext || undefined,
-              },
-            });
+            // API disabled - showing feedback only
+            console.log('Would translate to:', selectedLanguage);
 
-            if (translateError) {
-              console.error('Translation error:', translateError);
-              translatedPrompts.push(prompt);
-              continue;
-            }
-
-            if (translateData.error) {
-              if (translateData.error.includes('rate limit') || translateData.error.includes('429')) {
-                toast({
-                  title: "Translation rate limit exceeded",
-                  description: "Using original prompts.",
-                  variant: "destructive"
-                });
-              } else if (translateData.error.includes('credits') || translateData.error.includes('402')) {
-                toast({
-                  title: "Insufficient credits for translation",
-                  description: "Using original prompts.",
-                  variant: "destructive"
-                });
-              }
-              translatedPrompts.push(prompt);
-              continue;
-            }
-
+            // Simulate translation
             translatedPrompts.push({
               ...prompt,
-              prompt: translateData.translatedPrompt,
+              prompt: `[Translated to ${selectedLanguage}] ${prompt.prompt}`,
               originalPrompt: prompt.prompt,
-              translatedTo: translateData.language
+              translatedTo: selectedLanguage
             });
           } catch (err) {
             console.error('Error translating prompt:', err);
@@ -1593,14 +1539,8 @@ export const PromptEngineer = () => {
             reader.onload = (e) => resolve(e.target?.result as string);
             reader.readAsDataURL(file);
           });
-          
-          const { data, error } = await supabase.functions.invoke('analyze-vision', {
-            body: { image: base64 }
-          });
-          
-          if (data?.analysis) {
-            fileDescriptions.push(`📷 Image analysis: ${data.analysis}`);
-          }
+          // API disabled - showing feedback only
+          fileDescriptions.push(`📷 Image analysis: This is a simulated analysis of ${file.name}`);
         } else {
           // Describe non-image files
           fileDescriptions.push(`📄 File: ${file.name} (${(file.size / 1024).toFixed(1)}KB, ${file.type || 'unknown type'})`);
@@ -1659,43 +1599,18 @@ export const PromptEngineer = () => {
     try {
       console.log('Analyzing website:', url);
       
-      const { data, error } = await supabase.functions.invoke('analyze-website', {
-        body: { url }
+      // API disabled - showing feedback only
+      const simulatedAnalysis = `This is a simulated analysis of ${url}\n\nKey points:\n- Website structure analyzed\n- Content extracted\n- Key information identified`;
+      
+      setUserInput(userInput 
+        ? `${userInput}\n\n[Website Analysis]: ${simulatedAnalysis}`
+        : `[Website Analysis]: ${simulatedAnalysis}`
+      );
+      
+      toast({
+        title: "✅ Website Analyzed!",
+        description: "Website analysis added to your prompt",
       });
-
-      if (error) {
-        // Handle specific error messages
-        if (error.message.includes('blocking automated access')) {
-          toast({
-            title: "Site Protected",
-            description: "This website blocks automated access. Try a different site or copy & paste the content manually.",
-            variant: "destructive",
-          });
-        } else if (error.message.includes('timeout')) {
-          toast({
-            title: "Timeout",
-            description: "Website took too long to respond. Try again or use a faster loading site.",
-            variant: "destructive",
-          });
-        } else {
-          throw error;
-        }
-        return;
-      }
-
-      if (data?.analysis) {
-        const analysisText = `🌐 Website Analysis (${url}):\n\n${data.analysis}`;
-        const newInput = userInput 
-          ? `${userInput}\n\n${analysisText}`
-          : analysisText;
-        
-        setUserInput(newInput);
-        
-        toast({
-          title: "✅ Website Analyzed!",
-          description: "AI has generated a prompt based on the website",
-        });
-      }
     } catch (error) {
       console.error('Error analyzing website:', error);
       
@@ -1755,21 +1670,11 @@ export const PromptEngineer = () => {
         });
 
         try {
-          const { data, error } = await supabase.functions.invoke('execute-prompt', {
-            body: {
-              prompt: processedPrompt,
-              model: step.model || 'google/gemini-2.5-flash',
-              systemPrompt: step.systemPrompt,
-              temperature: step.temperature || 0.7,
-              maxTokens: step.maxTokens || 2000
-            }
-          });
-
-          if (error) throw error;
-          if (!data.result) throw new Error('No result from execution');
+          // API disabled - showing feedback only
+          console.log(`Would execute step ${i + 1}: ${step.name}`);
 
           const executionTime = Date.now() - startTime;
-          previousOutput = data.result;
+          previousOutput = `Simulated output from ${step.name}: This would be the AI-generated result based on the prompt: "${processedPrompt.substring(0, 100)}..."`;
 
           // Update progress - mark step as completed
           setWorkflowProgress(prev => prev.map((p, idx) => 
@@ -1779,7 +1684,7 @@ export const PromptEngineer = () => {
           results.push({
             stepName: step.name,
             stepIndex: i,
-            output: data.result,
+            output: previousOutput,
             executionTime
           });
 

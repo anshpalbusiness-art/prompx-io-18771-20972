@@ -56,29 +56,20 @@ const AgentChat = ({ agent }: AgentChatProps) => {
         content: msg.content
       }));
 
-      const { data, error } = await supabase.functions.invoke('execute-agent', {
-        body: { 
-          agentId: agent.id,
-          userInput: userMessage,
-          conversationHistory // Enhanced: Include conversation history
-        }
+      // API disabled - showing feedback only
+      toast({
+        title: "Agent Executed",
+        description: "Your agent would process this message and respond here.",
       });
-
-      if (error) throw error;
 
       setMessages((prev) => [
         ...prev,
         { 
           role: 'assistant', 
-          content: data.response,
+          content: `This is a simulated response from ${agent.name} to: "${userMessage.substring(0, 50)}..."\n\nIn production, the agent would provide context-aware responses based on the conversation history.`,
           timestamp: Date.now()
         }
       ]);
-
-      // Show response time if available
-      if (data.responseTime) {
-        console.log(`Response generated in ${data.responseTime}ms`);
-      }
     } catch (error) {
       console.error('Error executing agent:', error);
       

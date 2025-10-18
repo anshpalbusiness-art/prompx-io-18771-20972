@@ -39,81 +39,16 @@ export const AICopilot = () => {
     setIsLoading(true);
 
     try {
-      const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/copilot-chat`;
-      
-      const response = await fetch(CHAT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({
-          messages: [...messages, userMessage],
-          context: messages.length === 1 ? input : null,
-        }),
+      // API disabled - showing feedback only
+      toast.info("Copilot Activated", {
+        description: "Your AI copilot would provide prompt engineering assistance here.",
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to get response");
-      }
+      const assistantMessage = `This is a simulated copilot response to help with: "${input.substring(0, 50)}..."\n\nIn production, I would provide real-time prompt engineering guidance to help you craft the perfect prompt.\n\nFINAL_PROMPT: Your optimized prompt would appear here based on our conversation.`;
+      
+      setFinalPrompt("Your optimized prompt would appear here based on our conversation.");
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let assistantMessage = "";
-      let textBuffer = "";
-
-      const updateAssistantMessage = (content: string) => {
-        setMessages((prev) => {
-          const last = prev[prev.length - 1];
-          if (last?.role === "assistant") {
-            return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content } : m));
-          }
-          return [...prev, { role: "assistant", content }];
-        });
-      };
-
-      while (reader) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        textBuffer += decoder.decode(value, { stream: true });
-        let newlineIndex: number;
-
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") break;
-
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-            if (content) {
-              assistantMessage += content;
-              
-              // Check if final prompt is being generated
-              if (assistantMessage.includes("FINAL_PROMPT:")) {
-                const promptMatch = assistantMessage.match(/FINAL_PROMPT:\s*([\s\S]*)/);
-                if (promptMatch) {
-                  setFinalPrompt(promptMatch[1].trim());
-                }
-              }
-              
-              updateAssistantMessage(assistantMessage);
-            }
-          } catch {
-            textBuffer = line + "\n" + textBuffer;
-            break;
-          }
-        }
-      }
-
+      setMessages((prev) => [...prev, { role: "assistant", content: assistantMessage }]);
       setIsLoading(false);
     } catch (error) {
       console.error("Error:", error);

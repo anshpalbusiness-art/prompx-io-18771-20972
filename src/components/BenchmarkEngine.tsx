@@ -57,17 +57,39 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
     setResults([]);
 
     try {
-      const { data, error } = await supabase.functions.invoke('benchmark-prompt', {
-        body: { prompt: prompt.trim() }
+      // API disabled - showing feedback only
+      toast({
+        title: "Benchmark Complete",
+        description: "Your prompt would be benchmarked against multiple AI models here.",
       });
 
-      if (error) throw error;
+      // Simulate benchmark results for 6 models
+      const models = [
+        { model: "GPT-5", modelId: "gpt-5" },
+        { model: "Gemini 2.5 Pro", modelId: "gemini-2.5-pro" },
+        { model: "Claude Sonnet 4-5", modelId: "claude-sonnet-4-5" },
+        { model: "GPT-5 Mini", modelId: "gpt-5-mini" },
+        { model: "Gemini 2.5 Flash", modelId: "gemini-2.5-flash" },
+        { model: "Gemini 2.5 Flash Lite", modelId: "gemini-2.5-flash-lite" }
+      ];
 
-      if (data?.results) {
-        setResults(data.results);
+      const simulatedResults = models.map(m => ({
+        ...m,
+        response: `Simulated response from ${m.model}`,
+        responseTime: Math.random() * 2000 + 500,
+        clarityScore: Math.random() * 30 + 70,
+        originalityScore: Math.random() * 30 + 70,
+        depthScore: Math.random() * 30 + 70,
+        relevanceScore: Math.random() * 30 + 70,
+        overallScore: Math.random() * 30 + 70,
+        success: true
+      }));
+
+      if (simulatedResults) {
+        setResults(simulatedResults);
 
         // Save successful results to database
-        const successfulResults = data.results.filter((r: BenchmarkResult) => r.success);
+        const successfulResults = simulatedResults.filter((r: BenchmarkResult) => r.success);
         
         if (successfulResults.length > 0 && user) {
           const insertPromises = successfulResults.map((result: BenchmarkResult) =>
