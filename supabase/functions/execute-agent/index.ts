@@ -42,60 +42,49 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Loaded agent: ${agent.name}, Model: ${agent.model || 'google/gemini-2.5-flash'}`);
+    console.log(`Loaded agent: ${agent.name}, using Claude Sonnet 4.5`);
 
-    // Get Lovable API key
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
+    // Get Claude API key
+    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+    if (!ANTHROPIC_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'LOVABLE_API_KEY is not configured' }),
+        JSON.stringify({ error: 'ANTHROPIC_API_KEY is not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     // Build enhanced message context with conversation history
-    const messages = [
-      { role: 'system', content: agent.system_prompt }
-    ];
+    const claudeMessages = [];
     
     // Add conversation history for context-aware responses
     if (conversationHistory && conversationHistory.length > 0) {
       console.log(`Adding ${conversationHistory.length} history messages for context`);
-      messages.push(...conversationHistory);
+      claudeMessages.push(...conversationHistory.map((msg: any) => ({
+        role: msg.role === 'system' ? 'user' : msg.role,
+        content: msg.content
+      })));
     }
     
     // Add current user input
-    messages.push({ role: 'user', content: userInput });
+    claudeMessages.push({ role: 'user', content: userInput });
 
     const startTime = Date.now();
 
-    // Call Lovable AI Gateway with streaming support
-    const modelName = agent.model || 'google/gemini-2.5-flash';
-    const isGPT5Model = modelName.includes('gpt-5') || modelName.includes('gpt-4.1');
-    
-    // Build request body based on model type
-    const requestBody: any = {
-      model: modelName,
-      messages,
-      stream: stream,
-    };
-    
-    // GPT-5 and newer models use max_completion_tokens, older models use max_tokens
-    if (isGPT5Model) {
-      requestBody.max_completion_tokens = agent.max_tokens || 2000;
-      // Note: GPT-5 models don't support temperature parameter
-    } else {
-      requestBody.max_tokens = agent.max_tokens || 2000;
-      requestBody.temperature = agent.temperature || 0.7;
-    }
-    
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    // Call Claude API with streaming support
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: agent.max_tokens || 4096,
+        system: agent.system_prompt,
+        messages: claudeMessages,
+        stream: stream,
+      }),
     });
 
     if (response.status === 429) {
@@ -106,17 +95,17 @@ serve(async (req) => {
       );
     }
 
-    if (response.status === 402) {
-      console.warn('Insufficient credits');
+    if (response.status === 402 || response.status === 400) {
+      console.warn('API error');
       return new Response(
-        JSON.stringify({ error: 'AI credits depleted. Please add credits to continue.' }),
+        JSON.stringify({ error: 'Claude API error. Please check your API key.' }),
         { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI Gateway error:', response.status, errorText);
+      console.error('Claude API error:', response.status, errorText);
       
       // Track failed analytics
       if (userId) {
@@ -126,12 +115,12 @@ serve(async (req) => {
           conversation_id: conversationId,
           success: false,
           error_message: `HTTP ${response.status}: ${errorText}`,
-          model_used: agent.model || 'google/gemini-2.5-flash',
+          model_used: 'claude-sonnet-4-5',
         });
       }
       
       return new Response(
-        JSON.stringify({ error: 'Failed to generate response from AI' }),
+        JSON.stringify({ error: 'Failed to generate response from Claude AI' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -151,9 +140,9 @@ serve(async (req) => {
 
     // Handle non-streaming response
     const data = await response.json();
-    const aiResponse = data.choices[0]?.message?.content || 'No response generated';
+    const aiResponse = data.content?.[0]?.text || 'No response generated';
     const responseTime = Date.now() - startTime;
-    const tokensUsed = data.usage?.total_tokens || 0;
+    const tokensUsed = data.usage?.input_tokens + data.usage?.output_tokens || 0;
     
     console.log(`Response generated in ${responseTime}ms, ${tokensUsed} tokens, length: ${aiResponse.length} chars`);
 
@@ -171,7 +160,7 @@ serve(async (req) => {
         conversation_id: conversationId,
         response_time_ms: responseTime,
         tokens_used: tokensUsed,
-        model_used: agent.model || 'google/gemini-2.5-flash',
+        model_used: 'claude-sonnet-4-5',
         success: true,
       });
     }
@@ -200,7 +189,7 @@ serve(async (req) => {
         response: aiResponse,
         responseTime,
         tokensUsed,
-        model: agent.model || 'google/gemini-2.5-flash',
+        model: 'claude-sonnet-4-5',
         conversationId,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
