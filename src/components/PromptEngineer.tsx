@@ -2777,30 +2777,6 @@ export const PromptEngineer = () => {
                     Workflow
                   </TabsTrigger>
                   <TabsTrigger 
-                    value="teams"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    Teams
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="marketplace"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    Marketplace
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="analytics"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    Analytics
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="abtesting"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    A/B Testing
-                  </TabsTrigger>
-                  <TabsTrigger 
                     value="compliance"
                     className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
                   >
@@ -2815,13 +2791,6 @@ export const PromptEngineer = () => {
                     className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
                   >
                     Legal Packs
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="pricing"
-                    id="pricing"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    Pricing
                   </TabsTrigger>
                   <TabsTrigger 
                     value="apikeys"
@@ -2896,21 +2865,6 @@ export const PromptEngineer = () => {
                 />
               </TabsContent>
 
-              <TabsContent value="teams">
-                <TeamManagement user={user} />
-              </TabsContent>
-
-              <TabsContent value="marketplace">
-                <PromptMarketplace user={user} />
-              </TabsContent>
-
-              <TabsContent value="analytics">
-                <AnalyticsDashboard user={user} />
-              </TabsContent>
-
-              <TabsContent value="abtesting">
-                <ABTestingPanel user={user} />
-              </TabsContent>
 
               <TabsContent value="compliance">
                 <ComplianceDashboard user={user} />
@@ -2920,9 +2874,6 @@ export const PromptEngineer = () => {
                 <LegalPromptPacks />
               </TabsContent>
 
-              <TabsContent value="pricing">
-                <PricingPlans user={user} />
-              </TabsContent>
 
               <TabsContent value="apikeys">
                 <ApiKeyManagement user={user} />
