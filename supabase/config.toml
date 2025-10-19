@@ -1,16 +1,1 @@
-project_id = "wsbfadfgfrrfakhgeumg"
-
-[functions.generate-agent-workflow]
-verify_jwt = false
-
-[functions.execute-claude]
-verify_jwt = false
-
-[functions.execute-prompt]
-verify_jwt = false
-
-[functions.ai-analytics-engine]
-verify_jwt = false
-
-[functions.predictive-insights]
-verify_jwt = false
+project_id = "tiscupohloafwbgdrbhi"
