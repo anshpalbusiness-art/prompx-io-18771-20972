@@ -2477,8 +2477,8 @@ This output will be passed to the next agent in the workflow for further refinem
                     </div>
                   </div>
                   
-                  {/* Character count and language indicator - Fixed positioning */}
-                  <div className="absolute bottom-3 sm:bottom-3.5 right-24 sm:right-28 z-10 pointer-events-none flex flex-wrap items-center gap-2">
+                  {/* Character count and language indicator - Top right positioning */}
+                  <div className="absolute top-3 sm:top-3.5 right-3 sm:right-4 z-10 pointer-events-none flex flex-wrap items-center gap-2">
                     {detectedLanguage && (
                       <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs">
                         <Globe className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
