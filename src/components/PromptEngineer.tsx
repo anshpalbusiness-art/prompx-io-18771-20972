@@ -1283,6 +1283,7 @@ export const PromptEngineer = () => {
         // Simulate generated prompts
         const generatedPrompts = [
           {
+            title: `Optimized for ${model.name}`,
             prompt: `[Optimized for ${model.name}] ${enhanced}`,
             modelId: modelId,
             model: model.name,
