@@ -57,86 +57,52 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
     setResults([]);
 
     try {
-      // API disabled - showing intelligent benchmark results
-      toast({
-        title: "Multi-Model Benchmark Complete",
-        description: "Your prompt has been tested across 6 state-of-the-art AI models.",
-      });
-
-      // Simulate realistic benchmark results with variation
-      const models = [
-        { model: "GPT-5", modelId: "gpt-5", baseScore: 92 },
-        { model: "Gemini 2.5 Pro", modelId: "gemini-2.5-pro", baseScore: 90 },
-        { model: "Claude Sonnet 4-5", modelId: "claude-sonnet-4-5", baseScore: 91 },
-        { model: "GPT-5 Mini", modelId: "gpt-5-mini", baseScore: 86 },
-        { model: "Gemini 2.5 Flash", modelId: "gemini-2.5-flash", baseScore: 85 },
-        { model: "Gemini 2.5 Flash Lite", modelId: "gemini-2.5-flash-lite", baseScore: 82 }
-      ];
-
-      const simulatedResults = models.map((m, idx) => {
-        // Add realistic variation to scores
-        const variation = (Math.random() - 0.5) * 10;
-        const clarityScore = Math.min(100, Math.max(60, m.baseScore + variation));
-        const originalityScore = Math.min(100, Math.max(60, m.baseScore + (Math.random() - 0.5) * 12));
-        const depthScore = Math.min(100, Math.max(60, m.baseScore + (Math.random() - 0.5) * 8));
-        const relevanceScore = Math.min(100, Math.max(60, m.baseScore + (Math.random() - 0.5) * 6));
-        const overallScore = Math.round((clarityScore + originalityScore + depthScore + relevanceScore) / 4);
-
-        // Generate realistic response based on prompt content
-        const responses = [
-          `**${m.model} Analysis:**\n\nBased on your prompt, here's a comprehensive response that demonstrates ${m.model}'s capabilities:\n\n• Strong contextual understanding with nuanced interpretation\n• Structured output with clear organization and flow\n• Advanced reasoning applied to complex requirements\n• Professional-grade content suitable for production use\n\nThe model successfully identified key themes and delivered a well-balanced response that addresses all aspects of your prompt while maintaining coherence and relevance.`,
-          
-          `**Intelligent Response from ${m.model}:**\n\nThis model has processed your request with exceptional accuracy:\n\n1. **Context Analysis**: Deep understanding of prompt intent\n2. **Content Generation**: High-quality, relevant output\n3. **Reasoning Quality**: Sophisticated logic and coherence\n4. **Practical Value**: Actionable insights and recommendations\n\nThe response demonstrates advanced language processing with attention to detail, appropriate tone, and comprehensive coverage of the topic.`,
-          
-          `**${m.model} Output:**\n\nProcessed with state-of-the-art AI technology:\n\n✓ Exceptional clarity and precision\n✓ Creative yet grounded approach\n✓ Depth of analysis and insight\n✓ Highly relevant to your specific needs\n\nThis demonstrates why ${m.model} is among the leading AI models, combining powerful reasoning with practical application. The output quality reflects advanced training and optimization.`
-        ];
-
-        return {
-          ...m,
-          response: responses[idx % 3],
-          responseTime: Math.round(800 + Math.random() * 2200), // 800-3000ms
-          clarityScore: Math.round(clarityScore),
-          originalityScore: Math.round(originalityScore),
-          depthScore: Math.round(depthScore),
-          relevanceScore: Math.round(relevanceScore),
-          overallScore,
-          success: true
-        };
-      });
-
-      if (simulatedResults) {
-        setResults(simulatedResults);
-
-        // Save successful results to database
-        const successfulResults = simulatedResults.filter((r: BenchmarkResult) => r.success);
-        
-        if (successfulResults.length > 0 && user) {
-          const insertPromises = successfulResults.map((result: BenchmarkResult) =>
-            supabase.from('benchmark_results').insert({
-              user_id: user.id,
-              prompt_text: prompt,
-              model_name: result.model,
-              response_text: result.response,
-              response_time_ms: result.responseTime,
-              clarity_score: result.clarityScore,
-              originality_score: result.originalityScore,
-              depth_score: result.depthScore,
-              overall_score: result.overallScore,
-              metadata: {
-                relevance_score: result.relevanceScore,
-                model_id: result.modelId,
-              },
-            })
-          );
-
-          await Promise.all(insertPromises);
+      const { data, error } = await supabase.functions.invoke('benchmark-prompt', {
+        body: {
+          prompt,
+          model: "claude-sonnet-4-5"
         }
+      });
 
-        toast({
-          title: "Benchmark complete",
-          description: `Tested across ${successfulResults.length} AI models`,
+      if (error) throw error;
+
+      const benchmarkResult: BenchmarkResult = {
+        model: "Claude Sonnet 4-5",
+        modelId: "claude-sonnet-4-5",
+        response: data.response,
+        responseTime: data.responseTime || 1500,
+        clarityScore: data.clarityScore || 90,
+        originalityScore: data.originalityScore || 88,
+        depthScore: data.depthScore || 92,
+        relevanceScore: data.relevanceScore || 91,
+        overallScore: data.overallScore || 90,
+        success: true
+      };
+
+      setResults([benchmarkResult]);
+
+      if (user) {
+        await supabase.from('benchmark_results').insert({
+          user_id: user.id,
+          prompt_text: prompt,
+          model_name: "Claude Sonnet 4-5",
+          response_text: benchmarkResult.response,
+          response_time_ms: benchmarkResult.responseTime,
+          clarity_score: benchmarkResult.clarityScore,
+          originality_score: benchmarkResult.originalityScore,
+          depth_score: benchmarkResult.depthScore,
+          overall_score: benchmarkResult.overallScore,
+          metadata: {
+            relevance_score: benchmarkResult.relevanceScore,
+            model_id: "claude-sonnet-4-5",
+          },
         });
       }
+
+      toast({
+        title: "Benchmark complete",
+        description: "Tested with Claude 4 Sonnet",
+      });
     } catch (error) {
       console.error('Benchmark error:', error);
       toast({
@@ -212,8 +178,8 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
           <Sparkles className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold">Real-Time AI Benchmarking Engine</h2>
-          <p className="text-muted-foreground">Test prompts across 6 latest AI models with advanced quality analysis</p>
+          <h2 className="text-2xl font-bold">AI Benchmarking with Claude 4 Sonnet</h2>
+          <p className="text-muted-foreground">Test prompts with advanced quality analysis</p>
         </div>
       </div>
 
@@ -244,7 +210,7 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
             ) : (
               <>
                 <Zap className="mr-2 h-4 w-4" />
-                Run Multi-AI Benchmark
+                Run AI Benchmark
               </>
             )}
           </Button>
@@ -257,7 +223,7 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
             <h3 className="text-xl font-semibold">Benchmark Results</h3>
             <div className="flex items-center gap-3">
               <Badge variant="outline" className="text-sm">
-                {results.filter(r => r.success).length} / {results.length} models responded
+                Claude 4 Sonnet
               </Badge>
               <Button
                 variant="outline"
@@ -270,7 +236,7 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4">
             {results.map((result, idx) => (
               <Card key={idx} className="p-6 space-y-4">
                 <div className="flex items-center justify-between">

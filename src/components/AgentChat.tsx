@@ -50,125 +50,35 @@ const AgentChat = ({ agent }: AgentChatProps) => {
     setLoading(true);
 
     try {
-      // Send conversation history for context-aware responses
       const conversationHistory = messages.map(msg => ({
         role: msg.role,
         content: msg.content
       }));
 
-      // API disabled - showing intelligent agent response
-      toast({
-        title: `${agent.name} Processing`,
-        description: "Agent is analyzing your message with contextual awareness.",
+      const response = await supabase.functions.invoke('execute-agent', {
+        body: {
+          agentId: agent.id,
+          message: userMessage,
+          model: "claude-sonnet-4-5",
+          context: conversationHistory
+        }
       });
 
-      // Generate intelligent, context-aware response
-      const messageLower = userMessage.toLowerCase();
-      let agentResponse = "";
-
-      if (messageLower.includes("help") || messageLower.includes("how")) {
-        agentResponse = `I'd be happy to help you with that! Based on your question, here's what I can tell you:
-
-**Understanding Your Request:**
-${userMessage}
-
-**My Analysis:**
-I've processed your message and identified the key areas where I can assist. Let me break this down:
-
-1. **Primary Concern**: I understand you need guidance on this topic
-2. **Context Considered**: I'm taking into account our conversation history
-3. **Best Approach**: Here's my recommended solution
-
-**Detailed Response:**
-${agent.description ? `As ${agent.name}, I specialize in ${agent.description.toLowerCase()}. ` : ""}Based on this expertise, I suggest the following approach:
-
-• Start by understanding the core requirements
-• Apply best practices from industry standards  
-• Consider scalability and long-term implications
-• Implement with attention to detail and quality
-
-Would you like me to elaborate on any specific aspect?`;
-      } else if (messageLower.includes("analyze") || messageLower.includes("review")) {
-        agentResponse = `**${agent.name}'s Analysis:**
-
-I've conducted a comprehensive analysis of your request:
-
-📊 **Key Findings:**
-• Strong foundation with clear objectives
-• Multiple viable approaches identified
-• Potential for optimization in several areas
-
-🎯 **Recommendations:**
-1. **Immediate Actions**: Focus on high-impact improvements
-2. **Strategic Considerations**: Plan for scalability
-3. **Quality Metrics**: Monitor performance indicators
-
-💡 **Expert Insights:**
-Drawing from my specialized knowledge, I can see opportunities for enhancement. The current approach is solid, but there's room for optimization in terms of efficiency and effectiveness.
-
-**Next Steps:**
-Would you like me to dive deeper into any particular area? I can provide more detailed analysis or specific recommendations based on your priorities.`;
-      } else if (messageLower.includes("create") || messageLower.includes("generate") || messageLower.includes("write")) {
-        agentResponse = `**${agent.name} - Content Generation:**
-
-I've created a tailored response for your request:
-
-✨ **Generated Output:**
-
-Your request for "${userMessage.substring(0, 80)}..." has been processed with attention to:
-
-- **Quality**: Professional-grade content
-- **Relevance**: Directly addresses your needs
-- **Structure**: Well-organized and logical flow
-- **Value**: Actionable and practical insights
-
-**The Result:**
-This is a sophisticated, context-aware creation that leverages my specialized capabilities. The output incorporates best practices, maintains consistent tone, and delivers on your specific requirements.
-
-**Quality Assurance:**
-✓ Clarity and precision verified
-✓ Contextual appropriateness confirmed
-✓ Professional standards met
-✓ Ready for your use or further refinement
-
-Is there anything specific you'd like me to adjust or expand upon?`;
-      } else {
-        agentResponse = `Thank you for your message! I'm ${agent.name}, ${agent.description || "here to assist you"}.
-
-**Message Received:**
-"${userMessage}"
-
-**My Response:**
-I've analyzed your message and I'm ready to help. Here's what I can offer:
-
-🔍 **Context Understanding:**
-I've reviewed our conversation history and understand the context of your request. This allows me to provide more relevant and personalized assistance.
-
-💬 **Tailored Assistance:**
-Based on my specialization, I can help you with:
-• Expert guidance and recommendations
-• Detailed analysis and insights
-• Practical solutions and strategies
-• Ongoing support throughout the process
-
-🎯 **Next Steps:**
-Please let me know if you'd like me to:
-- Provide more detailed information
-- Offer specific recommendations
-- Analyze a particular aspect
-- Generate solutions for your needs
-
-I'm here to make your work easier and more effective!`;
-      }
-
+      if (response.error) throw response.error;
+      
       setMessages((prev) => [
         ...prev,
         { 
           role: 'assistant', 
-          content: agentResponse,
+          content: response.data.response,
           timestamp: Date.now()
         }
       ]);
+
+      toast({
+        title: `${agent.name} Responded`,
+        description: "Response generated with Claude 4 Sonnet",
+      });
     } catch (error) {
       console.error('Error executing agent:', error);
       
