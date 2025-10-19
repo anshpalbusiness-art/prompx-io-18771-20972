@@ -73,6 +73,7 @@ export const Header = ({ user }: HeaderProps) => {
     { name: 'COMMUNITY', path: '/community' },
     { name: 'ENTERPRISE', path: '/enterprise' },
     { name: 'TEAM', path: '/team' },
+    { name: 'COMPLIANCE', path: '/compliance' },
     ...(isAdmin ? [{ name: 'ADMIN DASHBOARD', path: '/admin' }] : []),
   ];
 
