@@ -31,6 +31,7 @@ import PricingPlans from "./PricingPlans";
 import ApiKeyManagement from "./ApiKeyManagement";
 import UsageDashboard from "./UsageDashboard";
 import { VisualPromptBuilder } from "./VisualPromptBuilder";
+import { useLocation } from 'react-router-dom';
 
 // Language detection and translation
 const detectLanguage = async (text: string): Promise<string> => {
@@ -171,6 +172,17 @@ export const PromptEngineer = () => {
       setUser(user);
     });
   }, []);
+
+  const location = useLocation();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const t = params.get('tab');
+    if (t) {
+      const tabs = document.querySelector('[role="tablist"]');
+      const trigger = tabs?.querySelector(`[value="${t}"]`) as HTMLElement | null;
+      trigger?.click();
+    }
+  }, [location.search]);
 
   // Initialize voice recognition and audio visualization
   useEffect(() => {

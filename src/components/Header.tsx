@@ -68,12 +68,23 @@ export const Header = ({ user }: HeaderProps) => {
 
   // Additional items in "More" dropdown
   const moreNavItems = [
+    // Prompt Engineer quick actions
+    { name: 'PROFILE', path: '/dashboard?tab=profile' },
+    { name: 'VISUAL BUILDER', path: '/dashboard?tab=visual' },
+    { name: 'AI CO-PILOT', path: '/dashboard?tab=copilot' },
+    { name: 'TEMPLATES', path: '/dashboard?tab=templates' },
+    { name: 'HISTORY', path: '/dashboard?tab=history' },
+    { name: 'WORKFLOW', path: '/dashboard?tab=workflow' },
+    { name: 'LEGAL PACKS', path: '/dashboard?tab=legal' },
+    { name: 'API KEYS', path: '/dashboard?tab=apikeys' },
+    { name: 'USAGE', path: '/dashboard?tab=usage' },
+    { name: 'COMPLIANCE (DASHBOARD)', path: '/dashboard?tab=compliance' },
+    // Other sections
     { name: 'BENCHMARK', path: '/benchmark' },
     { name: 'OPTIMIZATION LAB', path: '/optimization-lab' },
     { name: 'COMMUNITY', path: '/community' },
     { name: 'ENTERPRISE', path: '/enterprise' },
     { name: 'TEAM', path: '/team' },
-    { name: 'COMPLIANCE', path: '/compliance' },
     ...(isAdmin ? [{ name: 'ADMIN DASHBOARD', path: '/admin' }] : []),
   ];
 
