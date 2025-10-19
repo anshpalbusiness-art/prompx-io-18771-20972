@@ -40,16 +40,23 @@ export const AICopilot = () => {
     setIsLoading(true);
 
     try {
-      const response = await supabase.functions.invoke('copilot-chat', {
+      const conversationContext = messages.map(msg => 
+        `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+      ).join('\n');
+      
+      const response = await supabase.functions.invoke('execute-claude', {
         body: {
-          messages: [...messages, userMessage],
-          model: "claude-sonnet-4-5"
+          prompt: `${conversationContext}\nUser: ${input}`,
+          systemPrompt: "You are an AI Prompt Co-Pilot. Help users build better prompts through conversation. Ask clarifying questions and guide them to create effective prompts.",
+          model: "claude-sonnet-4-5",
+          temperature: 0.7,
+          maxTokens: 4000
         }
       });
 
       if (response.error) throw response.error;
 
-      const assistantMessage = response.data.response;
+      const assistantMessage = response.data.result;
       
       // Check if it's a final prompt
       if (messages.length > 4) {

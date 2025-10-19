@@ -55,12 +55,17 @@ const AgentChat = ({ agent }: AgentChatProps) => {
         content: msg.content
       }));
 
-      const response = await supabase.functions.invoke('execute-agent', {
+      const contextPrompt = conversationHistory.length > 0
+        ? `Previous conversation:\n${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}\n\nUser: ${userMessage}`
+        : userMessage;
+
+      const response = await supabase.functions.invoke('execute-claude', {
         body: {
-          agentId: agent.id,
-          message: userMessage,
+          prompt: contextPrompt,
+          systemPrompt: `You are ${agent.name}. ${agent.description}`,
           model: "claude-sonnet-4-5",
-          context: conversationHistory
+          temperature: 0.7,
+          maxTokens: 4000
         }
       });
 
@@ -70,7 +75,7 @@ const AgentChat = ({ agent }: AgentChatProps) => {
         ...prev,
         { 
           role: 'assistant', 
-          content: response.data.response,
+          content: response.data.result,
           timestamp: Date.now()
         }
       ]);

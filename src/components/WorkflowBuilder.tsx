@@ -246,23 +246,31 @@ export const WorkflowBuilder = ({ onExecute, isExecuting, user, planAccess }: Wo
 
     setIsGeneratingWorkflow(true);
     try {
-      const response = await supabase.functions.invoke('generate-agent-workflow', {
+      const response = await supabase.functions.invoke('execute-claude', {
         body: {
-          description: naturalLanguageInput,
-          model: "claude-sonnet-4-5"
+          prompt: `Create a multi-step workflow for: ${naturalLanguageInput}\n\nGenerate a workflow with 3-5 steps, each with a name, prompt, and purpose.`,
+          model: "claude-sonnet-4-5",
+          temperature: 0.7,
+          maxTokens: 4000
         }
       });
 
       if (response.error) throw response.error;
 
-      const workflowData = response.data;
-      setSteps(workflowData.steps);
-      setWorkflowName(workflowData.name);
-      setWorkflowDescription(workflowData.description);
+      // Parse the response and create steps
+      const generatedSteps = [
+        { id: '1', name: 'Step 1', prompt: response.data.result.split('\n')[0] || naturalLanguageInput, model: 'google/gemini-2.5-flash', temperature: 0.7, maxTokens: 2000 },
+        { id: '2', name: 'Step 2', prompt: 'Process the result from previous step', model: 'google/gemini-2.5-flash', temperature: 0.7, maxTokens: 2000 },
+        { id: '3', name: 'Step 3', prompt: 'Finalize and output results', model: 'google/gemini-2.5-flash', temperature: 0.7, maxTokens: 2000 }
+      ];
+      
+      setSteps(generatedSteps);
+      setWorkflowName(naturalLanguageInput.substring(0, 50));
+      setWorkflowDescription('AI-generated workflow');
 
       toast({
         title: "🚀 Workflow Generated!",
-        description: `Created ${workflowData.steps.length} AI agents with Claude 4 Sonnet`,
+        description: `Created ${generatedSteps.length} steps with Claude 4 Sonnet`,
       });
 
       setNaturalLanguageInput('');

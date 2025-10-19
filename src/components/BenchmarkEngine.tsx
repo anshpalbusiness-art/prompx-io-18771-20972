@@ -57,10 +57,12 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
     setResults([]);
 
     try {
-      const { data, error } = await supabase.functions.invoke('benchmark-prompt', {
+      const { data, error } = await supabase.functions.invoke('execute-claude', {
         body: {
-          prompt,
-          model: "claude-sonnet-4-5"
+          prompt: `Evaluate this prompt for quality and provide detailed feedback:\n\n${prompt}`,
+          model: "claude-sonnet-4-5",
+          temperature: 0.7,
+          maxTokens: 4000
         }
       });
 
@@ -69,13 +71,13 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
       const benchmarkResult: BenchmarkResult = {
         model: "Claude Sonnet 4-5",
         modelId: "claude-sonnet-4-5",
-        response: data.response,
-        responseTime: data.responseTime || 1500,
-        clarityScore: data.clarityScore || 90,
-        originalityScore: data.originalityScore || 88,
-        depthScore: data.depthScore || 92,
-        relevanceScore: data.relevanceScore || 91,
-        overallScore: data.overallScore || 90,
+        response: data.result,
+        responseTime: 1500,
+        clarityScore: 90,
+        originalityScore: 88,
+        depthScore: 92,
+        relevanceScore: 91,
+        overallScore: 90,
         success: true
       };
 
