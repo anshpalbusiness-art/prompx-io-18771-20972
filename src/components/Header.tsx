@@ -4,14 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Sparkles, LogOut, Menu, ChevronDown, User as UserIcon, Palette, Brain, FileText, History, GitBranch, Scale, Briefcase, Key, BarChart } from 'lucide-react';
+import { Sparkles, LogOut, Menu, ChevronDown } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
 interface HeaderProps {
@@ -143,7 +142,7 @@ export const Header = ({ user }: HeaderProps) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="min-w-[240px] p-2 bg-background/95 backdrop-blur-xl border border-border/50 z-50"
+                  className="min-w-[220px] p-2 bg-background/95 backdrop-blur-xl border border-border/50 z-50"
                 >
                   {moreNavItems.map((link) => (
                     <DropdownMenuItem
@@ -154,102 +153,6 @@ export const Header = ({ user }: HeaderProps) => {
                       {link.name}
                     </DropdownMenuItem>
                   ))}
-
-                  {user && window.location.pathname === '/dashboard' && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => {
-                        const tabs = document.querySelector('[role="tablist"]');
-                        const el = tabs?.querySelector('[value="profile"]') as HTMLElement;
-                        el?.click();
-                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                      }}>
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        Profile
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {
-                        const tabs = document.querySelector('[role=\"tablist\"]');
-                        const el = tabs?.querySelector('[value=\"visual\"]') as HTMLElement;
-                        el?.click();
-                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                      }}>
-                        <Palette className="mr-2 h-4 w-4" />
-                        Visual Builder
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {
-                        const tabs = document.querySelector('[role=\"tablist\"]');
-                        const el = tabs?.querySelector('[value=\"copilot\"]') as HTMLElement;
-                        el?.click();
-                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                      }}>
-                        <Brain className="mr-2 h-4 w-4" />
-                        AI Co-Pilot
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {
-                        const tabs = document.querySelector('[role=\"tablist\"]');
-                        const el = tabs?.querySelector('[value=\"templates\"]') as HTMLElement;
-                        el?.click();
-                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                      }}>
-                        <FileText className="mr-2 h-4 w-4" />
-                        Templates
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {
-                        const tabs = document.querySelector('[role=\"tablist\"]');
-                        const el = tabs?.querySelector('[value=\"history\"]') as HTMLElement;
-                        el?.click();
-                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                      }}>
-                        <History className="mr-2 h-4 w-4" />
-                        History
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {
-                        const tabs = document.querySelector('[role=\"tablist\"]');
-                        const el = tabs?.querySelector('[value=\"workflow\"]') as HTMLElement;
-                        el?.click();
-                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                      }}>
-                        <GitBranch className="mr-2 h-4 w-4" />
-                        Workflow
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {
-                        const tabs = document.querySelector('[role=\"tablist\"]');
-                        const el = tabs?.querySelector('[value=\"compliance\"]') as HTMLElement;
-                        el?.click();
-                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                      }}>
-                        <Scale className="mr-2 h-4 w-4" />
-                        Compliance
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {
-                        const tabs = document.querySelector('[role=\"tablist\"]');
-                        const el = tabs?.querySelector('[value=\"legal\"]') as HTMLElement;
-                        el?.click();
-                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                      }}>
-                        <Briefcase className="mr-2 h-4 w-4" />
-                        Legal Packs
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {
-                        const tabs = document.querySelector('[role=\"tablist\"]');
-                        const el = tabs?.querySelector('[value=\"apikeys\"]') as HTMLElement;
-                        el?.click();
-                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                      }}>
-                        <Key className="mr-2 h-4 w-4" />
-                        API Keys
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {
-                        const tabs = document.querySelector('[role=\"tablist\"]');
-                        const el = tabs?.querySelector('[value=\"usage\"]') as HTMLElement;
-                        el?.click();
-                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                      }}>
-                        <BarChart className="mr-2 h-4 w-4" />
-                        Usage
-                      </DropdownMenuItem>
-                    </>
-                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </nav>
