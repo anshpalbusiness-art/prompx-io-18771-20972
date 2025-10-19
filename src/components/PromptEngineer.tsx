@@ -2010,8 +2010,8 @@ This output will be passed to the next agent in the workflow for further refinem
                     <Stars className="w-4 h-4 sm:w-5 sm:h-5 text-white/30" />
                   </div>
                 </div>
-                <span className="text-xs sm:text-sm font-bold text-white/90 tracking-wider uppercase bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-                  Professional AI Engineering
+                <span className="text-xs sm:text-sm font-bold text-white/90 tracking-wider bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+                  Professional ai engineering
                 </span>
                 <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-white to-white/60 rounded-full animate-pulse group-hover:animate-bounce-gentle" />
               </div>
