@@ -7,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { AICopilot } from "@/components/AICopilot";
-import { Copy, CheckCircle, Wand2, Sparkles, Code, Image, Music, Video, MessageSquare, Zap, Target, BookOpen, ArrowRight, Stars, Palette, Brain, Mic, MicOff, Volume2, Globe, Languages, Loader2, User, History, Briefcase, Plus, Link2 } from "lucide-react";
+import { Copy, CheckCircle, Wand2, Sparkles, Code, Image, Music, Video, MessageSquare, Zap, Target, BookOpen, ArrowRight, Stars, Palette, Brain, Mic, MicOff, Volume2, Globe, Languages, Loader2, User, History, Briefcase, Plus, Link2, MoreHorizontal, FileText, GitBranch, Scale, Key, BarChart } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { PromptGenerator, type PromptTemplate } from "@/lib/promptGenerator";
 import { supabase } from "@/integrations/supabase/client";
@@ -1986,8 +1987,10 @@ This output will be passed to the next agent in the workflow for further refinem
         </div>
         
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10 animate-fade-in">
-          {/* Premium Badge */}
-          <div className="inline-flex items-center gap-2 sm:gap-3 bg-black/40 backdrop-blur-xl border border-white/20 rounded-full px-3 sm:px-6 py-2 sm:py-3 mb-6 sm:mb-8 shadow-2xl hover:bg-black/50 transition-all duration-300 group touch-none">
+          {/* Header with More Dropdown */}
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
+            {/* Premium Badge */}
+            <div className="inline-flex items-center gap-2 sm:gap-3 bg-black/40 backdrop-blur-xl border border-white/20 rounded-full px-3 sm:px-6 py-2 sm:py-3 shadow-2xl hover:bg-black/50 transition-all duration-300 group touch-none">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="relative">
                 <Stars className="w-4 h-4 sm:w-5 sm:h-5 text-white/90 animate-pulse" style={{ animationDuration: '2s' }} />
@@ -2001,6 +2004,118 @@ This output will be passed to the next agent in the workflow for further refinem
               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-r from-white to-white/60 rounded-full animate-pulse group-hover:animate-bounce-gentle" />
             </div>
           </div>
+          
+          {/* More Options Dropdown */}
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="bg-black/40 backdrop-blur-xl border border-white/20 hover:bg-black/50 text-white rounded-full h-10 w-10 sm:h-12 sm:w-12"
+                >
+                  <MoreHorizontal className="h-5 w-5 sm:h-6 sm:w-6" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                align="end" 
+                className="w-56 bg-background/95 backdrop-blur-xl border-border/50 z-50"
+              >
+                <DropdownMenuItem onClick={() => {
+                  const tabs = document.querySelector('[role="tablist"]');
+                  const profileTab = tabs?.querySelector('[value="profile"]') as HTMLElement;
+                  profileTab?.click();
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }}>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  const tabs = document.querySelector('[role="tablist"]');
+                  const visualTab = tabs?.querySelector('[value="visual"]') as HTMLElement;
+                  visualTab?.click();
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }}>
+                  <Palette className="mr-2 h-4 w-4" />
+                  Visual Builder
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  const tabs = document.querySelector('[role="tablist"]');
+                  const copilotTab = tabs?.querySelector('[value="copilot"]') as HTMLElement;
+                  copilotTab?.click();
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }}>
+                  <Brain className="mr-2 h-4 w-4" />
+                  AI Co-Pilot
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  const tabs = document.querySelector('[role="tablist"]');
+                  const templatesTab = tabs?.querySelector('[value="templates"]') as HTMLElement;
+                  templatesTab?.click();
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Templates
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  const tabs = document.querySelector('[role="tablist"]');
+                  const historyTab = tabs?.querySelector('[value="history"]') as HTMLElement;
+                  historyTab?.click();
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }}>
+                  <History className="mr-2 h-4 w-4" />
+                  History
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  const tabs = document.querySelector('[role="tablist"]');
+                  const workflowTab = tabs?.querySelector('[value="workflow"]') as HTMLElement;
+                  workflowTab?.click();
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }}>
+                  <GitBranch className="mr-2 h-4 w-4" />
+                  Workflow
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  const tabs = document.querySelector('[role="tablist"]');
+                  const complianceTab = tabs?.querySelector('[value="compliance"]') as HTMLElement;
+                  complianceTab?.click();
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }}>
+                  <Scale className="mr-2 h-4 w-4" />
+                  Compliance
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => {
+                  const tabs = document.querySelector('[role="tablist"]');
+                  const legalTab = tabs?.querySelector('[value="legal"]') as HTMLElement;
+                  legalTab?.click();
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }}>
+                  <Briefcase className="mr-2 h-4 w-4" />
+                  Legal Packs
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  const tabs = document.querySelector('[role="tablist"]');
+                  const apiTab = tabs?.querySelector('[value="apikeys"]') as HTMLElement;
+                  apiTab?.click();
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }}>
+                  <Key className="mr-2 h-4 w-4" />
+                  API Keys
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  const tabs = document.querySelector('[role="tablist"]');
+                  const usageTab = tabs?.querySelector('[value="usage"]') as HTMLElement;
+                  usageTab?.click();
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }}>
+                  <BarChart className="mr-2 h-4 w-4" />
+                  Usage
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
           
           {/* Main Headline with Enhanced Typography */}
           <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 md:mb-8 leading-tight tracking-tight">
@@ -2843,74 +2958,10 @@ This output will be passed to the next agent in the workflow for further refinem
         <section className="py-12 sm:py-16 md:py-20 bg-background w-full overflow-x-hidden">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Tabs defaultValue="profile" className="w-full">
-              <div className="mb-8 space-y-3">
-                {/* Primary Navigation Row */}
+              <div className="mb-8 space-y-3 hidden">
+                {/* Primary Navigation Row - Hidden, controlled via dropdown */}
                 <TabsList className="inline-flex flex-wrap gap-2 bg-transparent h-auto p-0 w-full">
-                  <TabsTrigger 
-                    value="profile"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    Profile
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="visual"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    Visual Builder
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="copilot"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    AI Co-Pilot
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="templates"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    Templates
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="history"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    History
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="workflow"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    Workflow
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="compliance"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    Compliance
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* Secondary Navigation Row */}
-                <TabsList className="inline-flex flex-wrap gap-2 bg-transparent h-auto p-0 w-full">
-                  <TabsTrigger 
-                    value="legal"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    Legal Packs
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="apikeys"
-                    id="api"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    API Keys
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="usage"
-                    className="rounded-full px-6 py-2.5 data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground hover:bg-muted/80 transition-all font-medium text-sm"
-                  >
-                    Usage
-                  </TabsTrigger>
+...
                 </TabsList>
               </div>
 
