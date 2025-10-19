@@ -143,7 +143,7 @@ export const Header = ({ user }: HeaderProps) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="min-w-[220px] p-2 bg-background/95 backdrop-blur-xl border border-border/50 z-50"
+                  className="min-w-[220px] p-2 bg-black/95 backdrop-blur-xl border border-white/20 z-[9999]"
                 >
                   {moreNavItems.map((link) => (
                     <DropdownMenuItem
