@@ -2379,7 +2379,7 @@ This output will be passed to the next agent in the workflow for further refinem
                   </div>
                   
                   {/* Voice Input and Upload Buttons */}
-                  <div className="absolute bottom-12 sm:bottom-14 right-2 sm:right-3 z-10 flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded-full p-1 shadow-sm border border-border/30">
+                  <div className="absolute bottom-4 sm:bottom-14 right-2 sm:right-3 z-10 flex items-center gap-1.5 sm:gap-1 bg-background/80 backdrop-blur-sm rounded-full p-1.5 sm:p-1 shadow-lg sm:shadow-sm border border-border/30">
                     {/* Website URL Button */}
                     <Dialog open={showUrlDialog} onOpenChange={setShowUrlDialog}>
                       <DialogTrigger asChild>
