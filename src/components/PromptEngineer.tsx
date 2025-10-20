@@ -1999,8 +1999,8 @@ This output will be passed to the next agent in the workflow for further refinem
         </div>
         
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10 animate-fade-in">
-          {/* Header with More Dropdown */}
-          <div className="flex items-center justify-between mb-6 sm:mb-8">
+          {/* Header with Centered Badge */}
+          <div className="flex items-center justify-center mb-6 sm:mb-8">
             {/* Premium Badge */}
             <div className="inline-flex items-center gap-2 sm:gap-3 bg-black/40 backdrop-blur-xl border border-white/20 rounded-full px-3 sm:px-6 py-2 sm:py-3 shadow-2xl hover:bg-black/50 transition-all duration-300 group touch-none">
               <div className="flex items-center gap-2 sm:gap-3">
