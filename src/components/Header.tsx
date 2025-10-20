@@ -147,22 +147,32 @@ export const Header = ({ user }: HeaderProps) => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="relative px-3 xl:px-4 py-2.5 text-[0.8125rem] xl:text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1">
+                  <button className="relative px-3 xl:px-4 py-2.5 text-[0.8125rem] xl:text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1.5 group">
                     MORE
-                    <ChevronDown className="w-4 h-4" />
+                    <ChevronDown className="w-4 h-4 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="min-w-[220px] p-2 bg-black/95 backdrop-blur-xl border border-white/20 z-[9999]"
+                  className="min-w-[260px] max-h-[500px] overflow-y-auto"
+                  sideOffset={8}
                 >
-                  {moreNavItems.map((link) => (
+                  <div className="px-2 py-1.5 text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                    Quick Access
+                  </div>
+                  {moreNavItems.map((link, index) => (
                     <DropdownMenuItem
                       key={link.path}
-                      onClick={() => navigate(link.path)}
-                      className="cursor-pointer font-semibold text-sm py-2.5 px-3 rounded-lg"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        navigate(link.path);
+                      }}
+                      className="cursor-pointer font-medium text-sm py-2.5 px-3 rounded-lg transition-all duration-200 focus:bg-white/[0.15] data-[highlighted]:bg-white/[0.15]"
                     >
-                      {link.name}
+                      <span className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+                        {link.name}
+                      </span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
