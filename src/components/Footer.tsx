@@ -10,9 +10,7 @@ export const Footer = () => {
   };
 
   return (
-    <footer className="relative border-t border-white/[0.08] bg-black/98 backdrop-blur-xl mt-auto w-full overflow-hidden">
-      {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-black to-transparent opacity-60 pointer-events-none" />
+    <footer className="relative border-t border-white/[0.08] bg-black mt-auto w-full overflow-hidden">
       
       <div className="container-responsive max-w-7xl relative z-10 py-12 sm:py-16 lg:py-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-10 lg:mb-14">
