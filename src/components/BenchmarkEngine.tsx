@@ -9,7 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import SocialShare from "@/components/SocialShare";
-
 interface BenchmarkResult {
   model: string;
   modelId: string;
@@ -23,41 +22,42 @@ interface BenchmarkResult {
   success: boolean;
   error?: string;
 }
-
 interface BenchmarkEngineProps {
   user: User | null;
 }
-
-const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
+const BenchmarkEngine = ({
+  user
+}: BenchmarkEngineProps) => {
   const [prompt, setPrompt] = useState("");
   const [results, setResults] = useState<BenchmarkResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const runBenchmark = async () => {
     if (!prompt.trim()) {
       toast({
         title: "Prompt required",
         description: "Please enter a prompt to benchmark",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     if (!user) {
       toast({
         title: "Authentication required",
         description: "Please sign in to run benchmarks",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setLoading(true);
     setResults([]);
-
     try {
-      const { data, error } = await supabase.functions.invoke('execute-claude', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('execute-claude', {
         body: {
           prompt: `Evaluate this prompt for quality and provide detailed feedback:\n\n${prompt}`,
           model: "claude-sonnet-4-5",
@@ -65,9 +65,7 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
           maxTokens: 4000
         }
       });
-
       if (error) throw error;
-
       const benchmarkResult: BenchmarkResult = {
         model: "Claude Sonnet 4-5",
         modelId: "claude-sonnet-4-5",
@@ -80,9 +78,7 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
         overallScore: 90,
         success: true
       };
-
       setResults([benchmarkResult]);
-
       if (user) {
         await supabase.from('benchmark_results').insert({
           user_id: user.id,
@@ -96,49 +92,44 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
           overall_score: benchmarkResult.overallScore,
           metadata: {
             relevance_score: benchmarkResult.relevanceScore,
-            model_id: "claude-sonnet-4-5",
-          },
+            model_id: "claude-sonnet-4-5"
+          }
         });
       }
-
       toast({
         title: "Benchmark complete",
-        description: "Tested with Claude 4 Sonnet",
+        description: "Tested with Claude 4 Sonnet"
       });
     } catch (error) {
       console.error('Benchmark error:', error);
       toast({
         title: "Benchmark failed",
         description: error instanceof Error ? error.message : "Failed to run benchmark",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600";
     if (score >= 60) return "text-yellow-600";
     return "text-red-600";
   };
-
   const getScoreBadgeVariant = (score: number): "default" | "secondary" | "destructive" => {
     if (score >= 80) return "default";
     if (score >= 60) return "secondary";
     return "destructive";
   };
-
   const handleExportResults = () => {
     if (results.length === 0) {
       toast({
         title: "No data to export",
         description: "Run a benchmark first",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     const exportData = {
       prompt,
       timestamp: new Date().toISOString(),
@@ -156,8 +147,9 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
         response: r.response
       }))
     };
-
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: 'application/json'
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -166,21 +158,18 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-
     toast({
       title: "Exported",
-      description: "Benchmark results exported successfully",
+      description: "Benchmark results exported successfully"
     });
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="p-3 rounded-lg bg-primary/10">
           <Sparkles className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold">AI Benchmarking with Prompt</h2>
+          <h2 className="text-2xl font-bold">AI Benchmarking with PrompX</h2>
           <p className="text-muted-foreground">Test prompts with advanced quality analysis</p>
         </div>
       </div>
@@ -189,49 +178,29 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium mb-2 block">Enter Prompt to Benchmark</label>
-            <Textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Write a compelling story about a robot learning to feel emotions..."
-              className="min-h-[120px]"
-              disabled={loading}
-            />
+            <Textarea value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="Write a compelling story about a robot learning to feel emotions..." className="min-h-[120px]" disabled={loading} />
           </div>
 
-          <Button 
-            onClick={runBenchmark} 
-            disabled={loading || !prompt.trim()}
-            className="w-full"
-            size="lg"
-          >
-            {loading ? (
-              <>
+          <Button onClick={runBenchmark} disabled={loading || !prompt.trim()} className="w-full" size="lg">
+            {loading ? <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Running Benchmark...
-              </>
-            ) : (
-              <>
+              </> : <>
                 <Zap className="mr-2 h-4 w-4" />
                 Run AI Benchmark
-              </>
-            )}
+              </>}
           </Button>
         </div>
       </Card>
 
-      {results.length > 0 && (
-        <div className="space-y-4">
+      {results.length > 0 && <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold">Benchmark Results</h3>
             <div className="flex items-center gap-3">
               <Badge variant="outline" className="text-sm">
                 Claude 4 Sonnet
               </Badge>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportResults}
-              >
+              <Button variant="outline" size="sm" onClick={handleExportResults}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Results
               </Button>
@@ -239,8 +208,7 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
           </div>
 
           <div className="grid gap-4">
-            {results.map((result, idx) => (
-              <Card key={idx} className="p-6 space-y-4">
+            {results.map((result, idx) => <Card key={idx} className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-semibold text-lg">{result.model}</h4>
@@ -248,15 +216,12 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
                       {result.success ? `${result.responseTime}ms response time` : 'Failed'}
                     </p>
                   </div>
-                  {result.success && (
-                    <Badge variant={getScoreBadgeVariant(result.overallScore)} className="text-lg px-3 py-1">
+                  {result.success && <Badge variant={getScoreBadgeVariant(result.overallScore)} className="text-lg px-3 py-1">
                       {result.overallScore}
-                    </Badge>
-                  )}
+                    </Badge>}
                 </div>
 
-                {result.success ? (
-                  <>
+                {result.success ? <>
                     <div className="space-y-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
@@ -319,24 +284,14 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
                     </div>
                     
                     <div className="pt-3 border-t">
-                      <SocialShare 
-                        title={`${result.model} scored ${result.overallScore}/100 on my benchmark!`}
-                        description={`Prompt: "${prompt.substring(0, 100)}..."\n\nScores: Clarity ${result.clarityScore}, Originality ${result.originalityScore}, Depth ${result.depthScore}`}
-                      />
+                      <SocialShare title={`${result.model} scored ${result.overallScore}/100 on my benchmark!`} description={`Prompt: "${prompt.substring(0, 100)}..."\n\nScores: Clarity ${result.clarityScore}, Originality ${result.originalityScore}, Depth ${result.depthScore}`} />
                     </div>
-                  </>
-                ) : (
-                  <div className="text-sm text-red-500">
+                  </> : <div className="text-sm text-red-500">
                     Error: {result.error || 'Failed to get response'}
-                  </div>
-                )}
-              </Card>
-            ))}
+                  </div>}
+              </Card>)}
           </div>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
-
 export default BenchmarkEngine;
