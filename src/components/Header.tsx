@@ -163,8 +163,7 @@ export const Header = ({ user }: HeaderProps) => {
                   {moreNavItems.map((link, index) => (
                     <DropdownMenuItem
                       key={link.path}
-                      onSelect={(e) => {
-                        e.preventDefault();
+                      onSelect={() => {
                         navigate(link.path);
                       }}
                       className="cursor-pointer font-medium text-sm py-2.5 px-3 rounded-lg transition-all duration-200 focus:bg-white/[0.15] data-[highlighted]:bg-white/[0.15]"
