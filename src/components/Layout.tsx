@@ -15,7 +15,9 @@ export const Layout = ({ children, user }: LayoutProps) => {
       
       {/* Main Content Container with proper spacing for fixed header */}
       <main className="w-full pt-16 lg:pt-20 flex-1 relative overflow-x-hidden">
-        {children}
+        <div className="w-full max-w-full">
+          {children}
+        </div>
       </main>
 
       <Footer />

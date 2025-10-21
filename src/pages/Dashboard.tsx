@@ -32,8 +32,9 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse-subtle">
-          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-white/10 border-t-white rounded-full animate-spin" />
+          <p className="text-sm text-zinc-400 font-medium animate-pulse-subtle">Loading...</p>
         </div>
       </div>
     );
@@ -41,7 +42,7 @@ const Dashboard = () => {
 
   return (
     <Layout user={user}>
-      <div className="w-full min-h-screen">
+      <div className="w-full min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-black">
         <PromptEngineer />
       </div>
     </Layout>

@@ -112,17 +112,17 @@ export const Header = ({ user }: HeaderProps) => {
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-3 xl:gap-4 flex-1 justify-center">
+            <nav className="hidden lg:flex items-center gap-2 xl:gap-3 flex-1 justify-center">
               {primaryNavItems.map((link) => {
                 const isActive = window.location.pathname === link.path;
                 return (
                 <button
                   key={link.path}
                   onClick={() => navigate(link.path)}
-                  className={`relative px-3 xl:px-4 py-2.5 text-[0.8125rem] xl:text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap ${
+                  className={`relative px-3 xl:px-4 py-2.5 text-[0.75rem] xl:text-[0.8125rem] font-bold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap ${
                     isActive
-                      ? 'bg-white/[0.12] text-white shadow-[0_4px_16px_rgba(255,255,255,0.12)] scale-[1.02]'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100'
+                      ? 'bg-white/[0.15] text-white shadow-[0_4px_16px_rgba(255,255,255,0.12)] scale-[1.02]'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.08] hover:scale-105 active:scale-100'
                   }`}
                 >
                     {link.name}
@@ -135,7 +135,7 @@ export const Header = ({ user }: HeaderProps) => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="relative px-3 xl:px-4 py-2.5 text-[0.8125rem] xl:text-[0.875rem] font-semibold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.06] hover:scale-105 active:scale-100 flex items-center gap-1.5 group">
+                  <button className="relative px-3 xl:px-4 py-2.5 text-[0.75rem] xl:text-[0.8125rem] font-bold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.08] hover:scale-105 active:scale-100 flex items-center gap-1.5 group">
                     MORE
                     <ChevronDown className="w-4 h-4 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                   </button>
@@ -187,14 +187,14 @@ export const Header = ({ user }: HeaderProps) => {
             <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
               {user ? (
                 <>
-                  <div className="text-sm text-zinc-300 font-medium px-4 py-2.5 bg-white/[0.06] rounded-xl border border-white/[0.08] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.08] hover:border-white/[0.12] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
+                  <div className="text-sm text-zinc-300 font-semibold px-4 py-2.5 bg-white/[0.08] rounded-xl border border-white/[0.10] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.10] hover:border-white/[0.15] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
                     {user.email}
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleLogout}
-                    className="h-10 px-4 bg-transparent border-white/[0.12] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 rounded-xl font-semibold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
+                    className="h-10 px-5 bg-transparent border-white/[0.15] text-white hover:bg-white/[0.10] hover:text-white hover:border-white/25 rounded-xl font-bold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
                   >
                     <LogOut className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-12" />
                     Sign Out
@@ -204,7 +204,7 @@ export const Header = ({ user }: HeaderProps) => {
                 <Button
                   onClick={() => navigate("/auth")}
                   size="sm"
-                  className="bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-50 hover:to-white h-10 px-5 font-bold shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.35)] transition-all duration-300 rounded-xl hover:scale-105 active:scale-95"
+                  className="bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-50 hover:to-white h-11 px-6 font-bold shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.35)] transition-all duration-300 rounded-xl hover:scale-105 active:scale-95"
                 >
                   Sign In
                 </Button>
@@ -217,12 +217,12 @@ export const Header = ({ user }: HeaderProps) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="lg:hidden text-white hover:bg-white/[0.08] rounded-xl h-10 w-10 p-0 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)]"
+                  className="lg:hidden text-white hover:bg-white/[0.10] rounded-xl h-11 w-11 p-0 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)]"
                 >
                   <Menu className="w-5 h-5 transition-transform duration-300" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[320px] bg-black border-l border-white/[0.08] shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+              <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-black/98 backdrop-blur-2xl border-l border-white/[0.08] shadow-[0_0_60px_rgba(0,0,0,0.8)]">
                 <div className="flex flex-col gap-6 mt-8">
                   {/* Mobile Logo */}
                   <div className="flex items-center gap-3 px-2 mb-2">
