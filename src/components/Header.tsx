@@ -222,19 +222,20 @@ export const Header = ({ user }: HeaderProps) => {
                   <Menu className="w-5 h-5 transition-transform duration-300" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-black border-l border-white/[0.08] shadow-[0_0_60px_rgba(0,0,0,0.8)] flex flex-col">
-                <div className="flex flex-col gap-6 mt-8 overflow-y-auto flex-1 pb-6 scrollbar-hide">
-                  {/* Mobile Logo */}
-                  <div className="flex items-center gap-3 px-2 mb-2">
-                    <div className="w-11 h-11 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center shadow-[0_4px_20px_rgba(255,255,255,0.15)]">
-                      <Sparkles className="w-5 h-5 text-black" strokeWidth={2.5} />
-                    </div>
-                    <span className="text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
-                      PrompX
-                    </span>
+              <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-black border-l border-white/[0.08] shadow-[0_0_60px_rgba(0,0,0,0.8)] flex flex-col p-0">
+                {/* Header with logo - fixed */}
+                <div className="flex items-center gap-3 px-6 py-6 border-b border-white/[0.08] flex-shrink-0">
+                  <div className="w-11 h-11 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center shadow-[0_4px_20px_rgba(255,255,255,0.15)]">
+                    <Sparkles className="w-5 h-5 text-black" strokeWidth={2.5} />
                   </div>
+                  <span className="text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
+                    PrompX
+                  </span>
+                </div>
 
-                  <nav className="flex flex-col gap-2 px-1">
+                {/* Scrollable content with visible scrollbar */}
+                <div className="flex-1 overflow-y-auto px-6 py-6" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.2) transparent' }}>
+                  <nav className="flex flex-col gap-2">
                     {['Main', 'Account', 'Tools', 'Settings', 'Advanced', 'Connect'].map((category) => {
                       const categoryItems = category === 'Main' 
                         ? primaryNavItems.map(item => ({ ...item, icon: Sparkles, name: item.name }))
@@ -243,7 +244,7 @@ export const Header = ({ user }: HeaderProps) => {
                       if (categoryItems.length === 0) return null;
                       
                       return (
-                        <div key={category} className="mb-2">
+                        <div key={category} className="mb-3">
                           <div className="px-3 py-2 text-[0.6875rem] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                             <div className="w-1 h-1 rounded-full bg-white/40" />
                             {category}
@@ -279,13 +280,14 @@ export const Header = ({ user }: HeaderProps) => {
                       );
                     })}
                   </nav>
+                </div>
 
-                  {user && (
-                    <div className="pt-5 border-t border-white/[0.08] space-y-4 px-1 mt-auto">
-                      <div className="px-1">
-                        <div className="text-sm text-zinc-300 font-medium px-4 py-3 bg-white/[0.06] rounded-xl border border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
-                          {user.email}
-                        </div>
+                {/* Footer with user info - fixed at bottom */}
+                {user && (
+                  <div className="border-t border-white/[0.08] px-6 py-6 flex-shrink-0 bg-black">
+                    <div className="space-y-4">
+                      <div className="text-sm text-zinc-300 font-medium px-4 py-3 bg-white/[0.06] rounded-xl border border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.2)] truncate">
+                        {user.email}
                       </div>
                       <Button
                         variant="outline"
@@ -296,8 +298,8 @@ export const Header = ({ user }: HeaderProps) => {
                         Sign Out
                       </Button>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </SheetContent>
             </Sheet>
           </div>
