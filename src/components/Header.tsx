@@ -69,16 +69,16 @@ export const Header = ({ user }: HeaderProps) => {
   // Additional items in "More" dropdown
   const moreNavItems = [
     // Prompt Engineer quick actions
-    { name: 'PROFILE', path: '/dashboard?tab=profile' },
-    { name: 'VISUAL BUILDER', path: '/dashboard?tab=visual' },
-    { name: 'AI CO-PILOT', path: '/dashboard?tab=copilot' },
-    { name: 'TEMPLATES', path: '/dashboard?tab=templates' },
-    { name: 'HISTORY', path: '/dashboard?tab=history' },
-    { name: 'WORKFLOW', path: '/dashboard?tab=workflow' },
-    { name: 'LEGAL PACKS', path: '/dashboard?tab=legal' },
-    { name: 'API KEYS', path: '/dashboard?tab=apikeys' },
-    { name: 'USAGE', path: '/dashboard?tab=usage' },
-    { name: 'COMPLIANCE (DASHBOARD)', path: '/dashboard?tab=compliance' },
+    { name: 'PROFILE', path: '/profile' },
+    { name: 'VISUAL BUILDER', path: '/visual-builder' },
+    { name: 'AI CO-PILOT', path: '/ai-copilot' },
+    { name: 'TEMPLATES', path: '/templates' },
+    { name: 'HISTORY', path: '/history' },
+    { name: 'WORKFLOW', path: '/workflow' },
+    { name: 'LEGAL PACKS', path: '/legal-packs' },
+    { name: 'API KEYS', path: '/api-keys' },
+    { name: 'USAGE', path: '/usage' },
+    { name: 'COMPLIANCE DASHBOARD', path: '/compliance-dashboard' },
     // Other sections
     { name: 'BENCHMARK', path: '/benchmark' },
     { name: 'OPTIMIZATION LAB', path: '/optimization-lab' },

@@ -20,6 +20,16 @@ import NotFound from "./pages/NotFound";
 import OptimizationLab from "./pages/OptimizationLab";
 import Integrations from "./pages/Integrations";
 import Admin from "./pages/Admin";
+import Profile from "./pages/Profile";
+import VisualBuilder from "./pages/VisualBuilder";
+import AICopilotPage from "./pages/AICopilot";
+import Templates from "./pages/Templates";
+import History from "./pages/History";
+import Workflow from "./pages/Workflow";
+import LegalPacks from "./pages/LegalPacks";
+import ApiKeys from "./pages/ApiKeys";
+import Usage from "./pages/Usage";
+import CompliancePage from "./pages/CompliancePage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,6 +50,16 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/visual-builder" element={<VisualBuilder />} />
+            <Route path="/ai-copilot" element={<AICopilotPage />} />
+            <Route path="/templates" element={<Templates />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/workflow" element={<Workflow />} />
+            <Route path="/legal-packs" element={<LegalPacks />} />
+            <Route path="/api-keys" element={<ApiKeys />} />
+            <Route path="/usage" element={<Usage />} />
+            <Route path="/compliance-dashboard" element={<CompliancePage />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/benchmark" element={<Benchmark />} />
             <Route path="/agents" element={<Agents />} />
