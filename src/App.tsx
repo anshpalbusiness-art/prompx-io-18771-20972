@@ -30,6 +30,8 @@ import LegalPacks from "./pages/LegalPacks";
 import ApiKeys from "./pages/ApiKeys";
 import Usage from "./pages/Usage";
 import CompliancePage from "./pages/CompliancePage";
+import Pricing from "./pages/Pricing";
+import Payment from "./pages/Payment";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,6 +73,8 @@ const App = () => (
             <Route path="/compliance" element={<Compliance />} />
             <Route path="/community" element={<Community />} />
             <Route path="/enterprise" element={<Enterprise />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/payment" element={<Payment />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<Admin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

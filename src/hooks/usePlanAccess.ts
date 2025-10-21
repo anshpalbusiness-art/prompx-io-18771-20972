@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface PlanLimits {
   prompts_per_month: number;
+  prompts_per_feature: number;
   workflows: number;
   api_calls: number;
   team_members: number;
@@ -35,6 +36,7 @@ interface PlanAccess {
   canAccessWorkflows: () => boolean;
   canAccessAgents: () => boolean;
   hasProPlan: () => boolean;
+  canUseFeature: (featureName: string, userId: string) => Promise<boolean>;
   redirectToPricing: () => void;
   showUpgradeMessage: (featureName: string) => void;
 }
@@ -44,7 +46,8 @@ export const usePlanAccess = (userId: string | undefined): PlanAccess => {
   const [planName, setPlanName] = useState<string>('Free');
   const [isAdmin, setIsAdmin] = useState(false);
   const [limits, setLimits] = useState<PlanLimits>({
-    prompts_per_month: 5,
+    prompts_per_month: 1,
+    prompts_per_feature: 1,
     workflows: 0,
     api_calls: 0,
     team_members: 1,
@@ -86,6 +89,7 @@ export const usePlanAccess = (userId: string | undefined): PlanAccess => {
         setPlanName('Admin');
         setLimits({
           prompts_per_month: -1,
+          prompts_per_feature: -1,
           workflows: -1,
           api_calls: -1,
           team_members: -1,
@@ -171,13 +175,41 @@ export const usePlanAccess = (userId: string | undefined): PlanAccess => {
   };
 
   const redirectToPricing = () => {
-    navigate('/settings?tab=pricing');
+    navigate('/pricing');
+  };
+
+  const canUseFeature = async (featureName: string, userId: string): Promise<boolean> => {
+    if (isAdmin) return true;
+    if (planType !== 'free') return true; // Paid plans have unlimited access
+    
+    try {
+      // Check how many times user has used this feature today
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('usage_tracking')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('feature', featureName)
+        .gte('timestamp', `${today}T00:00:00.000Z`)
+        .lt('timestamp', `${today}T23:59:59.999Z`);
+      
+      if (error) {
+        console.error('Error checking feature usage:', error);
+        return false;
+      }
+      
+      const usageCount = data?.length || 0;
+      return usageCount < limits.prompts_per_feature;
+    } catch (error) {
+      console.error('Error in canUseFeature:', error);
+      return false;
+    }
   };
 
   const showUpgradeMessage = (featureName: string) => {
     toast({
       title: "Upgrade Required",
-      description: `${featureName} is only available on paid plans. Click to view pricing.`,
+      description: `You've reached your limit for ${featureName}. Upgrade to continue using this feature.`,
       variant: "destructive",
     });
   };
@@ -192,6 +224,7 @@ export const usePlanAccess = (userId: string | undefined): PlanAccess => {
     canAccessWorkflows,
     canAccessAgents,
     hasProPlan,
+    canUseFeature,
     redirectToPricing,
     showUpgradeMessage,
   };

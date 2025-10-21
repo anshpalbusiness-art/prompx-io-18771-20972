@@ -14,6 +14,7 @@ import { PromptGenerator, type PromptTemplate } from "@/lib/promptGenerator";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { usePlanAccess } from "@/hooks/usePlanAccess";
+import { useFeatureLimit } from "@/hooks/useFeatureLimit";
 import { UserProfile } from "./UserProfile";
 import { IndustryTemplates } from "./IndustryTemplates";
 import { PromptHistory } from "./PromptHistory";
@@ -31,7 +32,7 @@ import PricingPlans from "./PricingPlans";
 import ApiKeyManagement from "./ApiKeyManagement";
 import UsageDashboard from "./UsageDashboard";
 import { VisualPromptBuilder } from "./VisualPromptBuilder";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // Language detection and translation
 const detectLanguage = async (text: string): Promise<string> => {
@@ -119,8 +120,10 @@ const WORKFLOW_STEPS = [
 ];
 
 export const PromptEngineer = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const planAccess = usePlanAccess(user?.id);
+  const promptLimit = useFeatureLimit('prompt_generation', user?.id);
   const [selectedTool, setSelectedTool] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -1201,36 +1204,9 @@ export const PromptEngineer = () => {
       return;
     }
 
-    // Check usage limits before generating prompts
-    try {
-      const { data: usageData, error: usageError } = await supabase
-        .rpc('check_usage_limit', {
-          _user_id: user?.id,
-          _resource_type: 'prompt_optimization',
-          _period_days: 30
-        });
-
-      if (usageError) throw usageError;
-
-      if (!usageData.has_access && !usageData.is_admin) {
-        toast({
-          title: "Prompt Limit Reached",
-          description: "You've reached your monthly limit. Upgrade to continue optimizing prompts.",
-          variant: "destructive",
-        });
-        // Redirect to settings page with pricing tab after 2 seconds
-        setTimeout(() => {
-          window.location.href = '/settings?tab=pricing';
-        }, 2000);
-        return;
-      }
-    } catch (error) {
-      console.error('Error checking usage limits:', error);
-      toast({
-        title: "Error",
-        description: "Failed to check usage limits. Please try again.",
-        variant: "destructive",
-      });
+    // Check feature usage limits before generating prompts
+    if (!promptLimit.canUse && !planAccess.hasProPlan()) {
+      promptLimit.showUpgradePrompt();
       return;
     }
 
@@ -1429,12 +1405,8 @@ export const PromptEngineer = () => {
       setShowResults(true);
       
       // Track usage after successful generation
-      if (user) {
-        await supabase.rpc('track_usage', {
-          _user_id: user.id,
-          _resource_type: 'prompt_optimization',
-          _count: 1
-        });
+      if (user && !planAccess.hasProPlan()) {
+        await promptLimit.trackUsage();
       }
       
       // Save to history (first prompt only)
@@ -2678,6 +2650,90 @@ This output will be passed to the next agent in the workflow for further refinem
                     <div className="bg-white/60 dark:bg-black/20 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-green-200/50 dark:border-green-800/50">
                       <p className="text-xs sm:text-sm text-green-800 dark:text-green-200 font-medium mb-1">Enhanced Version:</p>
                       <p className="text-sm sm:text-base text-green-700 dark:text-green-300 break-words">{enhancedInput}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Usage Indicator for Free Users */}
+              {!planAccess.hasProPlan() && !promptLimit.isLoading && (
+                <div className="mb-6 group">
+                  <div className="relative overflow-hidden rounded-2xl bg-black border border-white/[0.12] backdrop-blur-xl shadow-2xl transition-all duration-500 hover:border-white/[0.2] hover:shadow-white/[0.05]">
+                    {/* Animated background */}
+                    <div className="absolute inset-0 bg-white/[0.02] animate-pulse opacity-50"></div>
+                    
+                    {/* Content */}
+                    <div className="relative p-4 sm:p-5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-white/20 rounded-full blur-sm animate-pulse"></div>
+                            <div className="relative p-2 bg-white/[0.08] rounded-full border border-white/[0.15] backdrop-blur-sm">
+                              <Zap className="w-4 h-4 text-white drop-shadow-sm" />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-light text-white/70 tracking-wide uppercase">Free Plan</span>
+                              <div className="w-1 h-1 bg-white/40 rounded-full"></div>
+                              <span className="text-xs text-white/60">Trial Mode</span>
+                            </div>
+                            <p className="text-sm font-medium text-white leading-tight">
+                              {promptLimit.canUse 
+                                ? (
+                                  <span className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-white rounded-full animate-pulse shadow-white/50 shadow-sm"></span>
+                                    1 prompt remaining today
+                                  </span>
+                                ) : (
+                                  <span className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-white/60 rounded-full animate-pulse shadow-white/30 shadow-sm"></span>
+                                    Daily limit reached
+                                  </span>
+                                )
+                              }
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {!promptLimit.canUse ? (
+                          <Button 
+                            size="sm" 
+                            onClick={() => navigate('/pricing')}
+                            className="bg-white text-black hover:bg-white/90 font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-white/20"
+                          >
+                            <span className="flex items-center gap-2">
+                              <span>Upgrade</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </span>
+                          </Button>
+                        ) : (
+                          <div className="text-right">
+                            <div className="text-xs text-white/50 font-light">Resets in</div>
+                            <div className="text-sm text-white font-medium">24 hours</div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Progress bar */}
+                      <div className="mt-4 space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-white/60">Daily Usage</span>
+                          <span className="text-white/80 font-medium">{promptLimit.usageCount}/1</span>
+                        </div>
+                        <div className="relative h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
+                          <div 
+                            className={`absolute left-0 top-0 h-full rounded-full transition-all duration-700 ease-out ${
+                              promptLimit.canUse 
+                                ? 'bg-white shadow-white/30 shadow-sm' 
+                                : 'bg-white/60 shadow-white/20 shadow-sm'
+                            }`}
+                            style={{ width: `${(promptLimit.usageCount / 1) * 100}%` }}
+                          ></div>
+                          {/* Animated shimmer effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ProFeatureGate } from "@/components/ProFeatureGate";
 
 interface PromptBlock {
   id: string;
@@ -75,73 +76,82 @@ export const VisualPromptBuilder = ({ onPromptGenerated }: VisualPromptBuilderPr
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Visual Prompt Builder</span>
-          <Button onClick={generatePrompt} size="sm" disabled={blocks.length === 0}>
-            Generate Prompt
-          </Button>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Add Block Buttons */}
-        <div className="flex flex-wrap gap-2">
-          {BLOCK_TYPES.map((bt) => (
+    <ProFeatureGate 
+      feature="Visual Prompt Builder"
+      requiredPlan="pro"
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            Visual Prompt Builder
             <Button
-              key={bt.type}
-              variant="outline"
+              onClick={generatePrompt}
+              disabled={blocks.length === 0}
               size="sm"
-              onClick={() => addBlock(bt.type, bt.label)}
             >
-              <Plus className="h-4 w-4 mr-1" />
-              {bt.label}
+              Generate Prompt
             </Button>
-          ))}
-        </div>
-
-        {/* Blocks */}
-        <div className="space-y-3">
-          {blocks.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              Add blocks above to start building your prompt
-            </p>
-          )}
-          {blocks.map((block, index) => {
-            const blockType = BLOCK_TYPES.find((bt) => bt.type === block.type);
-            return (
-              <div
-                key={block.id}
-                draggable
-                onDragStart={() => handleDragStart(index)}
-                onDragOver={(e) => handleDragOver(e, index)}
-                onDragEnd={handleDragEnd}
-                className={`p-4 border rounded-lg ${blockType?.color} cursor-move`}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Add Block Buttons */}
+          <div className="flex flex-wrap gap-2">
+            {BLOCK_TYPES.map((bt) => (
+              <Button
+                key={bt.type}
+                variant="outline"
+                size="sm"
+                onClick={() => addBlock(bt.type, bt.label)}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <GripVertical className="h-4 w-4 text-muted-foreground" />
-                    <Badge variant="secondary">{block.label}</Badge>
+                <Plus className="h-4 w-4 mr-1" />
+                {bt.label}
+              </Button>
+            ))}
+          </div>
+
+          {/* Blocks */}
+          <div className="space-y-3">
+            {blocks.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Add blocks above to start building your prompt
+              </p>
+            )}
+            {blocks.map((block, index) => {
+              const blockType = BLOCK_TYPES.find((bt) => bt.type === block.type);
+              return (
+                <div
+                  key={block.id}
+                  draggable
+                  onDragStart={() => handleDragStart(index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDragEnd={handleDragEnd}
+                  className={`p-4 border rounded-lg ${blockType?.color} cursor-move`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <GripVertical className="h-4 w-4 text-muted-foreground" />
+                      <Badge variant="secondary">{block.label}</Badge>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeBlock(block.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeBlock(block.id)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  <Input
+                    placeholder={`Enter ${block.label.toLowerCase()}...`}
+                    value={block.content}
+                    onChange={(e) => updateBlock(block.id, e.target.value)}
+                    className="bg-background"
+                  />
                 </div>
-                <Input
-                  placeholder={`Enter ${block.label.toLowerCase()}...`}
-                  value={block.content}
-                  onChange={(e) => updateBlock(block.id, e.target.value)}
-                  className="bg-background"
-                />
-              </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    </ProFeatureGate>
   );
 };

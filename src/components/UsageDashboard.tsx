@@ -3,10 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Activity, TrendingUp, Zap, Shield, RefreshCw, CreditCard } from "lucide-react";
+import { Activity, TrendingUp, Zap, Shield, RefreshCw, CreditCard, Clock, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { usePlanAccess } from "@/hooks/usePlanAccess";
+import { useFeatureLimit } from "@/hooks/useFeatureLimit";
 import type { User } from "@supabase/supabase-js";
 
 interface UsageInfo {
@@ -27,6 +29,8 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const planAccess = usePlanAccess(user?.id);
+  const promptLimit = useFeatureLimit('prompt_generation', user?.id);
 
   useEffect(() => {
     if (user) {
@@ -60,18 +64,36 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
         setCurrentPlan(freePlan);
       }
 
-      // Load usage through database function
-      const { data: usageData, error: usageError } = await supabase.rpc(
-        "check_usage_limit",
-        {
-          _user_id: user?.id,
-          _resource_type: "prompt_optimization",
-          _period_days: 30,
-        }
-      );
+      // For free users, show daily usage. For paid users, show monthly usage
+      if (planAccess.planType === 'free') {
+        // Get today's usage for prompt generation
+        const today = new Date().toISOString().split('T')[0];
+        const { data: todayUsage, error: usageError } = await supabase
+          .from('usage_tracking')
+          .select('id')
+          .eq('user_id', user?.id)
+          .eq('feature', 'prompt_generation')
+          .gte('timestamp', `${today}T00:00:00.000Z`)
+          .lt('timestamp', `${today}T23:59:59.999Z`);
 
-      if (usageError) throw usageError;
-      setPromptUsage(usageData as any as UsageInfo);
+        if (usageError) throw usageError;
+
+        const usedToday = todayUsage?.length || 0;
+        setPromptUsage({
+          limit: 1,
+          used: usedToday,
+          remaining: Math.max(0, 1 - usedToday),
+          has_access: usedToday < 1
+        });
+      } else {
+        // For paid users, set unlimited
+        setPromptUsage({
+          limit: -1,
+          used: 0,
+          remaining: -1,
+          has_access: true
+        });
+      }
     } catch (error: any) {
       console.error("Error loading usage:", error);
       toast({
@@ -100,6 +122,7 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
   const handleRefresh = async () => {
     setRefreshing(true);
     await loadUsageData();
+    await promptLimit.checkUsage();
     setRefreshing(false);
     toast({
       title: "Updated",
@@ -108,7 +131,7 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
   };
 
   const handleUpgrade = () => {
-    navigate('/settings?tab=pricing');
+    navigate('/pricing');
   };
 
   if (loading) {
@@ -160,7 +183,9 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Prompts Used</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {planAccess.planType === 'free' ? 'Daily Prompts' : 'Prompts Used'}
+            </CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -169,7 +194,12 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
               {promptUsage?.limit !== -1 && ` / ${promptUsage?.limit}`}
             </div>
             <p className="text-xs text-muted-foreground">
-              {promptUsage?.limit === -1 ? "Unlimited" : `${promptUsage?.remaining || 0} remaining`}
+              {promptUsage?.limit === -1 
+                ? "Unlimited" 
+                : planAccess.planType === 'free'
+                  ? `${promptUsage?.remaining || 0} remaining today`
+                  : `${promptUsage?.remaining || 0} remaining this month`
+              }
             </p>
           </CardContent>
         </Card>
@@ -210,24 +240,60 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
       {promptUsage && promptUsage.limit !== -1 && (
         <Card>
           <CardHeader>
-            <CardTitle>Usage This Month</CardTitle>
-            <CardDescription>Your prompt optimization usage for the current billing period</CardDescription>
+            <CardTitle>
+              {planAccess.planType === 'free' ? 'Daily Usage Limit' : 'Usage This Month'}
+            </CardTitle>
+            <CardDescription>
+              {planAccess.planType === 'free' 
+                ? 'Your daily prompt generation usage (resets every 24 hours)'
+                : 'Your prompt optimization usage for the current billing period'
+              }
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Prompt Optimizations</span>
+                <span className="text-sm font-medium">
+                  {planAccess.planType === 'free' ? 'Prompt Generations Today' : 'Prompt Optimizations'}
+                </span>
                 <span className="text-sm text-muted-foreground">
                   {promptUsage.used} / {promptUsage.limit}
                 </span>
               </div>
               <Progress value={calculatePercentage(promptUsage.used, promptUsage.limit)} />
-              {promptUsage.remaining <= 5 && promptUsage.remaining > 0 && (
+              
+              {planAccess.planType === 'free' && promptUsage.remaining === 0 && (
+                <div className="flex flex-col gap-3 p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-amber-600" />
+                    <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                      Daily Limit Reached
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    You've used your 1 free prompt for today. Your limit will reset in 24 hours, or upgrade to Pro for unlimited prompts!
+                  </p>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      onClick={handleUpgrade}
+                      className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+                    >
+                      <Target className="w-4 h-4 mr-2" />
+                      Upgrade to Pro
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {planAccess.planType !== 'free' && promptUsage.remaining <= 5 && promptUsage.remaining > 0 && (
                 <p className="text-sm text-warning">
                   You're running low on prompts. Consider upgrading your plan.
                 </p>
               )}
-              {promptUsage.remaining === 0 && (
+              
+              {planAccess.planType !== 'free' && promptUsage.remaining === 0 && (
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <Badge variant="destructive">Limit Reached</Badge>
@@ -254,59 +320,111 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
       <Card>
         <CardHeader>
           <CardTitle>Plan Features</CardTitle>
-          <CardDescription>Your current plan includes these features</CardDescription>
+          <CardDescription>
+            {planAccess.planType === 'free' 
+              ? 'Your free plan includes these trial features'
+              : 'Your current plan includes these features'
+            }
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
-            {currentPlan?.features?.prompt_optimization && (
-              <li className="flex items-center gap-2">
-                <Badge variant="outline">✓</Badge>
-                <span className="text-sm">Prompt Optimization</span>
-              </li>
-            )}
-            {currentPlan?.features?.advanced_workflows && (
-              <li className="flex items-center gap-2">
-                <Badge variant="outline">✓</Badge>
-                <span className="text-sm">Advanced Workflows</span>
-              </li>
-            )}
-            {currentPlan?.features?.compliance_checks && (
-              <li className="flex items-center gap-2">
-                <Badge variant="outline">✓</Badge>
-                <span className="text-sm">Compliance Checks</span>
-              </li>
-            )}
-            {currentPlan?.features?.team_collaboration && (
-              <li className="flex items-center gap-2">
-                <Badge variant="outline">✓</Badge>
-                <span className="text-sm">Team Collaboration</span>
-              </li>
-            )}
-            {currentPlan?.features?.priority_support && (
-              <li className="flex items-center gap-2">
-                <Badge variant="outline">✓</Badge>
-                <span className="text-sm">Priority Support</span>
-              </li>
-            )}
-            {currentPlan?.features?.dedicated_support && (
-              <li className="flex items-center gap-2">
-                <Badge variant="outline">✓</Badge>
-                <span className="text-sm">Dedicated Support</span>
-              </li>
-            )}
-            {currentPlan?.features?.custom_templates && (
-              <li className="flex items-center gap-2">
-                <Badge variant="outline">✓</Badge>
-                <span className="text-sm">Custom Templates</span>
-              </li>
-            )}
-            {currentPlan?.features?.sso && (
-              <li className="flex items-center gap-2">
-                <Badge variant="outline">✓</Badge>
-                <span className="text-sm">SSO Authentication</span>
-              </li>
+            {planAccess.planType === 'free' ? (
+              <>
+                <li className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">✓</Badge>
+                  <span className="text-sm">1 Prompt Generation per Day</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">✓</Badge>
+                  <span className="text-sm">1 AI Agent Creation</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">✓</Badge>
+                  <span className="text-sm">Basic Template Access</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">✓</Badge>
+                  <span className="text-sm">Community Support</span>
+                </li>
+                <li className="flex items-center gap-2 opacity-50">
+                  <Badge variant="outline" className="bg-gray-50 text-gray-500 border-gray-200">✗</Badge>
+                  <span className="text-sm text-gray-500">Unlimited Prompts</span>
+                </li>
+                <li className="flex items-center gap-2 opacity-50">
+                  <Badge variant="outline" className="bg-gray-50 text-gray-500 border-gray-200">✗</Badge>
+                  <span className="text-sm text-gray-500">Advanced Workflows</span>
+                </li>
+                <li className="flex items-center gap-2 opacity-50">
+                  <Badge variant="outline" className="bg-gray-50 text-gray-500 border-gray-200">✗</Badge>
+                  <span className="text-sm text-gray-500">Priority Support</span>
+                </li>
+              </>
+            ) : (
+              <>
+                {currentPlan?.features?.prompt_optimization && (
+                  <li className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
+                    <span className="text-sm">Unlimited Prompt Generation</span>
+                  </li>
+                )}
+                {currentPlan?.features?.advanced_workflows && (
+                  <li className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
+                    <span className="text-sm">Advanced Workflows</span>
+                  </li>
+                )}
+                {currentPlan?.features?.compliance_checks && (
+                  <li className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
+                    <span className="text-sm">Compliance Checks</span>
+                  </li>
+                )}
+                {currentPlan?.features?.team_collaboration && (
+                  <li className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
+                    <span className="text-sm">Team Collaboration</span>
+                  </li>
+                )}
+                {currentPlan?.features?.priority_support && (
+                  <li className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
+                    <span className="text-sm">Priority Support</span>
+                  </li>
+                )}
+                {currentPlan?.features?.dedicated_support && (
+                  <li className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
+                    <span className="text-sm">Dedicated Support</span>
+                  </li>
+                )}
+                {currentPlan?.features?.custom_templates && (
+                  <li className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
+                    <span className="text-sm">Custom Templates</span>
+                  </li>
+                )}
+                {currentPlan?.features?.sso && (
+                  <li className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
+                    <span className="text-sm">SSO Authentication</span>
+                  </li>
+                )}
+              </>
             )}
           </ul>
+          
+          {planAccess.planType === 'free' && (
+            <div className="mt-4 pt-4 border-t">
+              <Button 
+                onClick={handleUpgrade}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Upgrade for Unlimited Access
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -4,8 +4,36 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Sparkles, LogOut, Menu, ChevronDown, User as UserIcon, Layers, Bot, FileText, History, Workflow as WorkflowIcon, Scale, Key, BarChart3, ShieldCheck, Target, Beaker, Users, Building2, UsersRound } from 'lucide-react';
+import { 
+  Sparkles, 
+  LogOut, 
+  Menu, 
+  ChevronDown, 
+  User as UserIcon, 
+  Layers, 
+  Bot, 
+  FileText, 
+  History, 
+  Workflow as WorkflowIcon, 
+  Scale, 
+  Key, 
+  BarChart3, 
+  ShieldCheck, 
+  Target, 
+  Beaker, 
+  Users, 
+  Building2, 
+  UsersRound,
+  Home,
+  LayoutDashboard,
+  Zap,
+  TrendingUp,
+  Store,
+  Plug,
+  Settings
+} from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,19 +85,20 @@ export const Header = ({ user }: HeaderProps) => {
 
   // Primary nav items shown in desktop header
   const primaryNavItems = [
-    { name: 'HOME', path: '/' },
-    { name: 'DASHBOARD', path: '/dashboard' },
-    { name: 'AI AGENTS', path: '/agents' },
-    { name: 'ANALYTICS', path: '/analytics' },
-    { name: 'MARKETPLACE', path: '/marketplace' },
-    { name: 'INTEGRATIONS', path: '/integrations' },
-    { name: 'SETTINGS', path: '/settings' },
+    { name: 'HOME', path: '/', icon: Home },
+    { name: 'DASHBOARD', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'AI AGENTS', path: '/agents', icon: Zap },
+    { name: 'ANALYTICS', path: '/analytics', icon: TrendingUp },
+    { name: 'MARKETPLACE', path: '/marketplace', icon: Store },
+    { name: 'INTEGRATIONS', path: '/integrations', icon: Plug },
+    { name: 'SETTINGS', path: '/settings', icon: Settings },
   ];
 
   // Additional items in "More" dropdown with icons
   const moreNavItems = [
     // Prompt Engineer quick actions
     { name: 'Profile', path: '/profile', icon: UserIcon, category: 'Account' },
+    { name: 'Pricing', path: '/pricing', icon: TrendingUp, category: 'Account' },
     { name: 'Visual Builder', path: '/visual-builder', icon: Layers, category: 'Tools' },
     { name: 'AI Co-Pilot', path: '/ai-copilot', icon: Bot, category: 'Tools' },
     { name: 'Templates', path: '/templates', icon: FileText, category: 'Tools' },
@@ -89,15 +118,15 @@ export const Header = ({ user }: HeaderProps) => {
 
   // All nav items for mobile menu with icons
   const allMobileNavItems = [
-    ...primaryNavItems.map(item => ({ ...item, icon: Sparkles })),
+    ...primaryNavItems,
     ...moreNavItems,
   ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] w-full">
       <div className="w-full">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1600px]">
-          <div className="flex items-center justify-between h-16 lg:h-20 gap-4 lg:gap-8">
+        <div className="responsive-container">
+          <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20 gap-2 sm:gap-4 lg:gap-8">
             {/* Logo */}
             <button 
               onClick={() => navigate('/')}
@@ -222,10 +251,10 @@ export const Header = ({ user }: HeaderProps) => {
                   <Menu className="w-5 h-5 transition-transform duration-300" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-black/98 backdrop-blur-2xl border-l border-white/[0.08] shadow-[0_0_60px_rgba(0,0,0,0.8)]">
-                <div className="flex flex-col gap-6 mt-8">
+              <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-black border-l border-white/[0.08] shadow-[0_0_60px_rgba(0,0,0,0.8)] flex flex-col">
+                <div className="flex flex-col h-full">
                   {/* Mobile Logo */}
-                  <div className="flex items-center gap-3 px-2 mb-2">
+                  <div className="flex items-center gap-3 px-2 mb-6 mt-8 flex-shrink-0">
                     <div className="w-11 h-11 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center shadow-[0_4px_20px_rgba(255,255,255,0.15)]">
                       <Sparkles className="w-5 h-5 text-black" strokeWidth={2.5} />
                     </div>
@@ -234,10 +263,12 @@ export const Header = ({ user }: HeaderProps) => {
                     </span>
                   </div>
 
-                  <nav className="flex flex-col gap-2 px-1">
+                  {/* Scrollable Navigation */}
+                  <ScrollArea className="flex-1 px-1">
+                    <nav className="flex flex-col gap-2 pb-4">
                     {['Main', 'Account', 'Tools', 'Settings', 'Advanced', 'Connect'].map((category) => {
                       const categoryItems = category === 'Main' 
-                        ? primaryNavItems.map(item => ({ ...item, icon: Sparkles, name: item.name }))
+                        ? primaryNavItems
                         : moreNavItems.filter(item => item.category === category);
                       
                       if (categoryItems.length === 0) return null;
@@ -251,7 +282,7 @@ export const Header = ({ user }: HeaderProps) => {
                           <div className="space-y-1">
                             {categoryItems.map((link) => {
                               const isActive = window.location.pathname === link.path;
-                              const Icon = link.icon || Sparkles;
+                              const Icon = link.icon;
                               return (
                                 <button
                                   key={link.path}
@@ -278,14 +309,14 @@ export const Header = ({ user }: HeaderProps) => {
                         </div>
                       );
                     })}
-                  </nav>
+                    </nav>
+                  </ScrollArea>
 
+                  {/* Fixed User Section */}
                   {user && (
-                    <div className="pt-5 border-t border-white/[0.08] space-y-4 px-1">
-                      <div className="px-1">
-                        <div className="text-sm text-zinc-300 font-medium px-4 py-3 bg-white/[0.06] rounded-xl border border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
-                          {user.email}
-                        </div>
+                    <div className="pt-5 border-t border-white/[0.08] space-y-4 px-1 flex-shrink-0 mt-4">
+                      <div className="text-sm text-zinc-300 font-semibold px-4 py-2.5 bg-white/[0.08] rounded-xl border border-white/[0.10] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.10] hover:border-white/[0.15] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default overflow-hidden text-ellipsis whitespace-nowrap">
+                        {user.email}
                       </div>
                       <Button
                         variant="outline"

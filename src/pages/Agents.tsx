@@ -67,7 +67,7 @@ const Agents = () => {
                 </span>
                 <Button 
                   size="sm" 
-                  onClick={() => navigate('/settings?tab=pricing')}
+                  onClick={() => navigate('/pricing')}
                   className="ml-4"
                 >
                   <Crown className="h-4 w-4 mr-2" />

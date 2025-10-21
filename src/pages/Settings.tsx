@@ -5,7 +5,7 @@ import { UserProfile } from "@/components/UserProfile";
 import ApiKeyManagement from "@/components/ApiKeyManagement";
 import ABTestingPanel from "@/components/ABTestingPanel";
 import SDKDocumentation from "@/components/SDKDocumentation";
-import PricingPlans from "@/components/PricingPlans";
+// Removed PricingPlans import - now redirects to main pricing page
 import Layout from "@/components/Layout";
 import { User } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,10 +38,15 @@ const Settings = () => {
 
   useEffect(() => {
     const tab = searchParams.get('tab');
+    if (tab === 'pricing') {
+      // Redirect to main pricing page
+      navigate('/pricing');
+      return;
+    }
     if (tab) {
       setActiveTab(tab);
     }
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
   if (loading) {
     return (
@@ -72,7 +77,6 @@ const Settings = () => {
                 <TabsTrigger value="apikeys" className="px-3 sm:px-5 md:px-7 py-2 sm:py-2.5 md:py-3 rounded-lg text-sm sm:text-base font-semibold whitespace-nowrap">API Keys</TabsTrigger>
                 <TabsTrigger value="sdk" className="px-3 sm:px-5 md:px-7 py-2 sm:py-2.5 md:py-3 rounded-lg text-sm sm:text-base font-semibold whitespace-nowrap">SDK</TabsTrigger>
                 <TabsTrigger value="abtesting" className="px-3 sm:px-5 md:px-7 py-2 sm:py-2.5 md:py-3 rounded-lg text-sm sm:text-base font-semibold whitespace-nowrap">A/B Testing</TabsTrigger>
-                <TabsTrigger value="pricing" className="px-3 sm:px-5 md:px-7 py-2 sm:py-2.5 md:py-3 rounded-lg text-sm sm:text-base font-semibold whitespace-nowrap">Pricing</TabsTrigger>
               </TabsList>
             </div>
             <TabsContent value="profile" className="mt-0 space-y-6">
@@ -86,9 +90,6 @@ const Settings = () => {
             </TabsContent>
             <TabsContent value="abtesting" className="mt-0 space-y-6">
               <ABTestingPanel user={user} />
-            </TabsContent>
-            <TabsContent value="pricing" className="mt-0 space-y-6">
-              <PricingPlans user={user} />
             </TabsContent>
           </Tabs>
         </div>

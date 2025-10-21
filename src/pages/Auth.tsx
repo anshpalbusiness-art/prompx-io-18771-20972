@@ -8,14 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { z } from "zod";
+import { validateEmail, validatePassword, validateUsername } from "@/utils/validation";
+import { handleSupabaseError, showErrorToast } from "@/utils/errorHandling";
+import { userApi } from "@/utils/apiHelpers";
 import { Mail } from "lucide-react";
 
-const authSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  username: z.string().min(3, "Username must be at least 3 characters").optional(),
-});
+// Removed z schema in favor of our validation utilities
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -76,32 +74,39 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const validated = authSchema.parse({ email, password, username });
+      // Validate inputs using our validation utilities
+      const emailValidation = validateEmail(email);
+      const passwordValidation = validatePassword(password);
+      const usernameValidation = validateUsername(username);
+
+      const errors = [
+        ...emailValidation.errors,
+        ...passwordValidation.errors,
+        ...usernameValidation.errors
+      ];
+
+      if (errors.length > 0) {
+        toast({
+          title: "Validation Error",
+          description: errors[0],
+          variant: "destructive",
+        });
+        return;
+      }
       
       // Store signup data for later
       setPendingSignupData({
-        email: validated.email,
-        password: validated.password,
-        username: validated.username,
+        email,
+        password,
+        username,
       });
 
       // Send OTP
-      await sendOTP(validated.email);
+      await sendOTP(email);
       setShowOTPVerification(true);
     } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        toast({
-          title: "Validation Error",
-          description: error.errors[0].message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
+      const appError = handleSupabaseError(error);
+      showErrorToast(appError);
     } finally {
       setLoading(false);
     }
@@ -157,38 +162,29 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const validated = authSchema.omit({ username: true }).parse({ email, password });
+      // Validate inputs using our validation utilities
+      const emailValidation = validateEmail(email);
+      const passwordValidation = validatePassword(password);
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email: validated.email,
-        password: validated.password,
-      });
+      const errors = [
+        ...emailValidation.errors,
+        ...passwordValidation.errors
+      ];
 
-      if (error) {
-        if (error.message.includes("Invalid login credentials")) {
-          toast({
-            title: "Invalid credentials",
-            description: "Please check your email and password and try again.",
-            variant: "destructive",
-          });
-        } else {
-          throw error;
-        }
-      }
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
+      if (errors.length > 0) {
         toast({
           title: "Validation Error",
-          description: error.errors[0].message,
+          description: errors[0],
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Error",
-          description: error.message || "An error occurred during sign in",
-          variant: "destructive",
-        });
+        return;
       }
+
+      // Use API helper for sign in
+      await userApi.signIn(email, password);
+    } catch (error: any) {
+      const appError = handleSupabaseError(error);
+      showErrorToast(appError);
     } finally {
       setLoading(false);
     }

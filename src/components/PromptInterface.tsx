@@ -1,16 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2, Sparkles, CheckCircle, Shield, AlertTriangle, User, Layout } from "lucide-react";
+import { useUsageTracking } from "@/hooks/useUsageTracking";
+import { Copy, Loader2, Sparkles, CheckCircle, Shield, AlertTriangle, User, Layout, TrendingUp } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PersonaSelector } from "./PersonaSelector";
 import { VoiceInput } from "./VoiceInput";
 import { VisualPromptBuilder } from "./VisualPromptBuilder";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 export const PromptInterface = () => {
   const [prompt, setPrompt] = useState("");
@@ -25,7 +28,27 @@ export const PromptInterface = () => {
     sanitizedPrompt: string;
   } | null>(null);
   const [showVisualBuilder, setShowVisualBuilder] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const { toast } = useToast();
+  
+  // Usage tracking
+  const { 
+    usage, 
+    userPlan, 
+    trackUsage, 
+    checkUsageLimit, 
+    getUsagePercentage, 
+    getRemainingUsage 
+  } = useUsageTracking(user);
+
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+  };
 
   const handlePersonaSelect = (personaId: string | null, prefix: string) => {
     setSelectedPersonaId(personaId);
@@ -75,6 +98,16 @@ export const PromptInterface = () => {
       return;
     }
 
+    // Check usage limits before processing
+    if (!checkUsageLimit('prompt')) {
+      toast({
+        title: "Usage limit reached",
+        description: "You've reached your monthly prompt limit. Upgrade your plan to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setResponse("");
     setSafetyWarning(null);
@@ -92,6 +125,9 @@ export const PromptInterface = () => {
       });
 
       if (error) throw error;
+      
+      // Track usage after successful prompt execution
+      await trackUsage('prompt');
       
       setResponse(data.result);
       toast({
@@ -154,6 +190,73 @@ export const PromptInterface = () => {
               Persona
             </TabsTrigger>
           </TabsList>
+
+          {/* Usage Display */}
+          {user && userPlan && (
+            <div className="mt-4 p-4 bg-zinc-800/30 rounded-lg border border-zinc-700/50">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  Usage This Month
+                </h3>
+                <Badge variant="outline" className="text-xs">
+                  {userPlan.plan_type.toUpperCase()} Plan
+                </Badge>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-xs text-zinc-400 mb-1">
+                    <span>Prompts</span>
+                    <span>
+                      {usage.prompts_used} / {userPlan.limits.prompts_per_month === -1 ? '∞' : userPlan.limits.prompts_per_month}
+                    </span>
+                  </div>
+                  <Progress 
+                    value={getUsagePercentage('prompt')} 
+                    className="h-2"
+                  />
+                </div>
+                
+                {userPlan.limits.api_calls > 0 && (
+                  <div>
+                    <div className="flex justify-between text-xs text-zinc-400 mb-1">
+                      <span>API Calls</span>
+                      <span>
+                        {usage.api_calls_used} / {userPlan.limits.api_calls === -1 ? '∞' : userPlan.limits.api_calls}
+                      </span>
+                    </div>
+                    <Progress 
+                      value={getUsagePercentage('api_call')} 
+                      className="h-2"
+                    />
+                  </div>
+                )}
+                
+                <div>
+                  <div className="flex justify-between text-xs text-zinc-400 mb-1">
+                    <span>Workflows</span>
+                    <span>
+                      {usage.workflows_created} / {userPlan.limits.workflows === -1 ? '∞' : userPlan.limits.workflows}
+                    </span>
+                  </div>
+                  <Progress 
+                    value={getUsagePercentage('workflow')} 
+                    className="h-2"
+                  />
+                </div>
+              </div>
+              
+              {getUsagePercentage('prompt') > 80 && (
+                <Alert className="mt-3 border-amber-500/50 bg-amber-500/10">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <AlertDescription className="text-zinc-300 text-xs">
+                    You're approaching your monthly limit. Consider upgrading your plan.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          )}
 
           <TabsContent value="prompt" className="space-y-4 mt-4">
             {selectedPersonaId && (
