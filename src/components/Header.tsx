@@ -87,21 +87,10 @@ export const Header = ({ user }: HeaderProps) => {
     { name: 'Team', path: '/team', icon: UsersRound, category: 'Connect' },
   ];
 
-  // All nav items for mobile menu
-  const allNavItems = [
-    { name: 'HOME', path: '/' },
-    { name: 'DASHBOARD', path: '/dashboard' },
-    { name: 'BENCHMARK', path: '/benchmark' },
-    { name: 'AI AGENTS', path: '/agents' },
-    { name: 'OPTIMIZATION LAB', path: '/optimization-lab' },
-    { name: 'ANALYTICS', path: '/analytics' },
-    { name: 'COMMUNITY', path: '/community' },
-    { name: 'ENTERPRISE', path: '/enterprise' },
-    { name: 'INTEGRATIONS', path: '/integrations' },
-    { name: 'TEAM', path: '/team' },
-    { name: 'MARKETPLACE', path: '/marketplace' },
-    { name: 'SETTINGS', path: '/settings' },
-    ...(isAdmin ? [{ name: 'ADMIN DASHBOARD', path: '/admin' }] : []),
+  // All nav items for mobile menu with icons
+  const allMobileNavItems = [
+    ...primaryNavItems.map(item => ({ ...item, icon: Sparkles })),
+    ...moreNavItems,
   ];
 
   return (
@@ -153,37 +142,40 @@ export const Header = ({ user }: HeaderProps) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="min-w-[280px] max-h-[520px] overflow-y-auto"
-                  sideOffset={8}
+                  className="min-w-[320px] max-h-[600px] overflow-y-auto shadow-[0_24px_80px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)_inset]"
+                  sideOffset={12}
                 >
-                  {['Account', 'Tools', 'Settings', 'Advanced', 'Connect'].map((category) => {
+                  {['Account', 'Tools', 'Settings', 'Advanced', 'Connect'].map((category, idx) => {
                     const categoryItems = moreNavItems.filter(item => item.category === category);
                     if (categoryItems.length === 0) return null;
                     
                     return (
-                      <div key={category} className="py-1.5">
-                        <div className="px-3 py-2 text-[0.6875rem] font-bold text-zinc-500 uppercase tracking-wider">
+                      <div key={category} className={idx > 0 ? "border-t border-white/[0.08] pt-2" : "pt-1"}>
+                        <div className="px-4 pt-3 pb-2 text-[0.6875rem] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-white/40" />
                           {category}
                         </div>
-                        {categoryItems.map((link) => {
-                          const Icon = link.icon;
-                          return (
-                            <DropdownMenuItem
-                              key={link.path}
-                              onSelect={() => {
-                                navigate(link.path);
-                              }}
-                              className="cursor-pointer font-medium text-sm py-3 px-3 mx-1 rounded-lg transition-all duration-200"
-                            >
-                              <div className="flex items-center gap-3 w-full">
-                                <div className="w-9 h-9 rounded-lg bg-white/[0.08] flex items-center justify-center flex-shrink-0 transition-all duration-200 group-hover:bg-white/[0.12]">
-                                  <Icon className="w-4 h-4 text-white/80" strokeWidth={2} />
+                        <div className="px-2 pb-2 space-y-0.5">
+                          {categoryItems.map((link) => {
+                            const Icon = link.icon;
+                            return (
+                              <DropdownMenuItem
+                                key={link.path}
+                                onSelect={() => {
+                                  navigate(link.path);
+                                }}
+                                className="cursor-pointer font-medium text-sm py-3 px-3 rounded-xl transition-all duration-200 group"
+                              >
+                                <div className="flex items-center gap-3 w-full">
+                                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/[0.12] to-white/[0.06] flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:from-white/[0.18] group-hover:to-white/[0.10] group-hover:scale-110 shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+                                    <Icon className="w-[1.125rem] h-[1.125rem] text-white" strokeWidth={2.5} />
+                                  </div>
+                                  <span className="text-white font-semibold tracking-tight">{link.name}</span>
                                 </div>
-                                <span className="text-white/90 font-medium">{link.name}</span>
-                              </div>
-                            </DropdownMenuItem>
-                          );
-                        })}
+                              </DropdownMenuItem>
+                            );
+                          })}
+                        </div>
                       </div>
                     );
                   })}
@@ -242,24 +234,48 @@ export const Header = ({ user }: HeaderProps) => {
                     </span>
                   </div>
 
-                  <nav className="flex flex-col gap-1.5 px-1">
-                    {allNavItems.map((link) => {
-                      const isActive = window.location.pathname === link.path;
+                  <nav className="flex flex-col gap-2 px-1">
+                    {['Main', 'Account', 'Tools', 'Settings', 'Advanced', 'Connect'].map((category) => {
+                      const categoryItems = category === 'Main' 
+                        ? primaryNavItems.map(item => ({ ...item, icon: Sparkles, name: item.name }))
+                        : moreNavItems.filter(item => item.category === category);
+                      
+                      if (categoryItems.length === 0) return null;
+                      
                       return (
-                        <button
-                          key={link.name}
-                          onClick={() => {
-                            navigate(link.path);
-                            setMobileMenuOpen(false);
-                          }}
-                          className={`text-left px-5 py-3.5 text-sm font-semibold tracking-tight rounded-xl transition-all duration-300 ${
-                            isActive
-                              ? 'bg-white/[0.12] text-white shadow-[0_4px_12px_rgba(255,255,255,0.08)]'
-                              : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] active:scale-[0.98]'
-                          }`}
-                        >
-                          {link.name}
-                        </button>
+                        <div key={category} className="mb-2">
+                          <div className="px-3 py-2 text-[0.6875rem] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                            <div className="w-1 h-1 rounded-full bg-white/40" />
+                            {category}
+                          </div>
+                          <div className="space-y-1">
+                            {categoryItems.map((link) => {
+                              const isActive = window.location.pathname === link.path;
+                              const Icon = link.icon || Sparkles;
+                              return (
+                                <button
+                                  key={link.path}
+                                  onClick={() => {
+                                    navigate(link.path);
+                                    setMobileMenuOpen(false);
+                                  }}
+                                  className={`w-full text-left px-3 py-3 text-sm font-semibold tracking-tight rounded-xl transition-all duration-300 flex items-center gap-3 ${
+                                    isActive
+                                      ? 'bg-white/[0.12] text-white shadow-[0_4px_12px_rgba(255,255,255,0.08)]'
+                                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.06] active:scale-[0.98]'
+                                  }`}
+                                >
+                                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
+                                    isActive ? 'bg-white/[0.15]' : 'bg-white/[0.08]'
+                                  }`}>
+                                    <Icon className="w-4 h-4" strokeWidth={2.5} />
+                                  </div>
+                                  <span>{link.name}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
                       );
                     })}
                   </nav>
