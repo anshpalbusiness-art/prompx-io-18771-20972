@@ -222,7 +222,7 @@ export const Header = ({ user }: HeaderProps) => {
                   <Menu className="w-5 h-5 transition-transform duration-300" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-black/98 backdrop-blur-2xl border-l border-white/[0.08] shadow-[0_0_60px_rgba(0,0,0,0.8)]">
+              <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-black border-l border-white/[0.08] shadow-[0_0_60px_rgba(0,0,0,0.8)]">
                 <div className="flex flex-col gap-6 mt-8">
                   {/* Mobile Logo */}
                   <div className="flex items-center gap-3 px-2 mb-2">
