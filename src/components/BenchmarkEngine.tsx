@@ -180,7 +180,7 @@ const BenchmarkEngine = ({ user }: BenchmarkEngineProps) => {
           <Sparkles className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold">AI Benchmarking with Claude 4 Sonnet</h2>
+          <h2 className="text-2xl font-bold">AI Benchmarking with Prompt</h2>
           <p className="text-muted-foreground">Test prompts with advanced quality analysis</p>
         </div>
       </div>
