@@ -222,8 +222,8 @@ export const Header = ({ user }: HeaderProps) => {
                   <Menu className="w-5 h-5 transition-transform duration-300" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-black border-l border-white/[0.08] shadow-[0_0_60px_rgba(0,0,0,0.8)]">
-                <div className="flex flex-col gap-6 mt-8">
+              <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-black border-l border-white/[0.08] shadow-[0_0_60px_rgba(0,0,0,0.8)] flex flex-col">
+                <div className="flex flex-col gap-6 mt-8 overflow-y-auto flex-1 pb-6 scrollbar-hide">
                   {/* Mobile Logo */}
                   <div className="flex items-center gap-3 px-2 mb-2">
                     <div className="w-11 h-11 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center shadow-[0_4px_20px_rgba(255,255,255,0.15)]">
@@ -281,7 +281,7 @@ export const Header = ({ user }: HeaderProps) => {
                   </nav>
 
                   {user && (
-                    <div className="pt-5 border-t border-white/[0.08] space-y-4 px-1">
+                    <div className="pt-5 border-t border-white/[0.08] space-y-4 px-1 mt-auto">
                       <div className="px-1">
                         <div className="text-sm text-zinc-300 font-medium px-4 py-3 bg-white/[0.06] rounded-xl border border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
                           {user.email}
