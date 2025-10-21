@@ -123,9 +123,9 @@ const Enterprise = () => {
                 <Shield className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 text-primary-foreground" />
               </div>
               <div className="flex-1 space-y-2 sm:space-y-3 md:space-y-4">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
-                  Enterprise & Privacy
-                </h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
+              Enterprise & Privacy
+            </h1>
                 <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl leading-relaxed">
                   Privacy-first prompt engineering for regulated industries
                 </p>
