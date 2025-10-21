@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Sparkles, LogOut, Menu, ChevronDown } from 'lucide-react';
+import { Sparkles, LogOut, Menu, ChevronDown, User as UserIcon, Layers, Bot, FileText, History, Workflow as WorkflowIcon, Scale, Key, BarChart3, ShieldCheck, Target, Beaker, Users, Building2, UsersRound } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   DropdownMenu,
@@ -66,26 +66,25 @@ export const Header = ({ user }: HeaderProps) => {
     { name: 'SETTINGS', path: '/settings' },
   ];
 
-  // Additional items in "More" dropdown
+  // Additional items in "More" dropdown with icons
   const moreNavItems = [
     // Prompt Engineer quick actions
-    { name: 'PROFILE', path: '/profile' },
-    { name: 'VISUAL BUILDER', path: '/visual-builder' },
-    { name: 'AI CO-PILOT', path: '/ai-copilot' },
-    { name: 'TEMPLATES', path: '/templates' },
-    { name: 'HISTORY', path: '/history' },
-    { name: 'WORKFLOW', path: '/workflow' },
-    { name: 'LEGAL PACKS', path: '/legal-packs' },
-    { name: 'API KEYS', path: '/api-keys' },
-    { name: 'USAGE', path: '/usage' },
-    { name: 'COMPLIANCE DASHBOARD', path: '/compliance-dashboard' },
+    { name: 'Profile', path: '/profile', icon: UserIcon, category: 'Account' },
+    { name: 'Visual Builder', path: '/visual-builder', icon: Layers, category: 'Tools' },
+    { name: 'AI Co-Pilot', path: '/ai-copilot', icon: Bot, category: 'Tools' },
+    { name: 'Templates', path: '/templates', icon: FileText, category: 'Tools' },
+    { name: 'History', path: '/history', icon: History, category: 'Tools' },
+    { name: 'Workflow', path: '/workflow', icon: WorkflowIcon, category: 'Tools' },
+    { name: 'Legal Packs', path: '/legal-packs', icon: Scale, category: 'Tools' },
+    { name: 'API Keys', path: '/api-keys', icon: Key, category: 'Settings' },
+    { name: 'Usage', path: '/usage', icon: BarChart3, category: 'Settings' },
+    { name: 'Compliance', path: '/compliance-dashboard', icon: ShieldCheck, category: 'Settings' },
     // Other sections
-    { name: 'BENCHMARK', path: '/benchmark' },
-    { name: 'OPTIMIZATION LAB', path: '/optimization-lab' },
-    { name: 'COMMUNITY', path: '/community' },
-    { name: 'ENTERPRISE', path: '/enterprise' },
-    { name: 'TEAM', path: '/team' },
-    ...(isAdmin ? [{ name: 'ADMIN DASHBOARD', path: '/admin' }] : []),
+    { name: 'Benchmark', path: '/benchmark', icon: Target, category: 'Advanced' },
+    { name: 'Optimization Lab', path: '/optimization-lab', icon: Beaker, category: 'Advanced' },
+    { name: 'Community', path: '/community', icon: Users, category: 'Connect' },
+    { name: 'Enterprise', path: '/enterprise', icon: Building2, category: 'Connect' },
+    { name: 'Team', path: '/team', icon: UsersRound, category: 'Connect' },
   ];
 
   // All nav items for mobile menu
@@ -154,26 +153,40 @@ export const Header = ({ user }: HeaderProps) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="min-w-[260px] max-h-[500px] overflow-y-auto"
+                  className="min-w-[280px] max-h-[520px] overflow-y-auto"
                   sideOffset={8}
                 >
-                  <div className="px-2 py-1.5 text-xs font-bold text-zinc-500 uppercase tracking-wider">
-                    Quick Access
-                  </div>
-                  {moreNavItems.map((link, index) => (
-                    <DropdownMenuItem
-                      key={link.path}
-                      onSelect={() => {
-                        navigate(link.path);
-                      }}
-                      className="cursor-pointer font-medium text-sm py-2.5 px-3 rounded-lg transition-all duration-200 focus:bg-white/[0.15] data-[highlighted]:bg-white/[0.15]"
-                    >
-                      <span className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
-                        {link.name}
-                      </span>
-                    </DropdownMenuItem>
-                  ))}
+                  {['Account', 'Tools', 'Settings', 'Advanced', 'Connect'].map((category) => {
+                    const categoryItems = moreNavItems.filter(item => item.category === category);
+                    if (categoryItems.length === 0) return null;
+                    
+                    return (
+                      <div key={category} className="py-1.5">
+                        <div className="px-3 py-2 text-[0.6875rem] font-bold text-zinc-500 uppercase tracking-wider">
+                          {category}
+                        </div>
+                        {categoryItems.map((link) => {
+                          const Icon = link.icon;
+                          return (
+                            <DropdownMenuItem
+                              key={link.path}
+                              onSelect={() => {
+                                navigate(link.path);
+                              }}
+                              className="cursor-pointer font-medium text-sm py-3 px-3 mx-1 rounded-lg transition-all duration-200"
+                            >
+                              <div className="flex items-center gap-3 w-full">
+                                <div className="w-9 h-9 rounded-lg bg-white/[0.08] flex items-center justify-center flex-shrink-0 transition-all duration-200 group-hover:bg-white/[0.12]">
+                                  <Icon className="w-4 h-4 text-white/80" strokeWidth={2} />
+                                </div>
+                                <span className="text-white/90 font-medium">{link.name}</span>
+                              </div>
+                            </DropdownMenuItem>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
                 </DropdownMenuContent>
               </DropdownMenu>
             </nav>
