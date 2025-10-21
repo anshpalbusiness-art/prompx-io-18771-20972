@@ -206,7 +206,7 @@ const AgentLibrary = ({ userId, planAccess }: AgentLibraryProps) => {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {agents.map((agent) => (
-            <Card key={agent.id} className="hover:shadow-lg transition-shadow">
+            <Card key={agent.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <Bot className="w-8 h-8 text-primary" />
