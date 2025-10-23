@@ -155,7 +155,7 @@ export const Header = ({ user }: HeaderProps) => {
             </div>
 
             {/* Center Section: Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1 xl:gap-2 flex-1 justify-center">
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-2 flex-1 justify-start lg:pl-8 xl:pl-12">
               {primaryNavItems.map((link) => {
                 const isActive = window.location.pathname === link.path;
                 return (
@@ -227,7 +227,7 @@ export const Header = ({ user }: HeaderProps) => {
             </nav>
 
             {/* Right Section: User Info */}
-            <div className="hidden lg:flex items-center justify-end gap-3 flex-shrink-0 min-w-[200px]">
+            <div className="hidden lg:flex items-center justify-end gap-3 flex-shrink-0">
               {user ? (
                 <div className="flex items-center text-sm text-zinc-300 font-semibold px-4 py-2.5 h-10 bg-white/[0.08] rounded-xl border border-white/[0.10] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.10] hover:border-white/[0.15] cursor-default max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap">
                   {user.email}
