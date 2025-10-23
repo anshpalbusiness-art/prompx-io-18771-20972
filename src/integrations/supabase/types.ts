@@ -1826,6 +1826,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "prompt_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       prompt_metrics: {
@@ -2740,6 +2747,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -2818,6 +2832,39 @@ export type Database = {
       }
     }
     Views: {
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          avg_prompt_rating: number | null
+          created_at: string | null
+          id: string | null
+          reputation_score: number | null
+          total_prompt_ratings: number | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          avg_prompt_rating?: number | null
+          created_at?: string | null
+          id?: string | null
+          reputation_score?: number | null
+          total_prompt_ratings?: number | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          avg_prompt_rating?: number | null
+          created_at?: string | null
+          id?: string | null
+          reputation_score?: number | null
+          total_prompt_ratings?: number | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
       top_rated_prompts: {
         Row: {
           avg_rating: number | null
