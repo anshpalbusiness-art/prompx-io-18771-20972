@@ -123,7 +123,7 @@ export const Header = ({ user }: HeaderProps) => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] w-full">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-black backdrop-blur-xl border-b border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] w-full">
       <div className="w-full">
         <div className="responsive-container">
           <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20 gap-2 sm:gap-4 lg:gap-8">
@@ -171,7 +171,7 @@ export const Header = ({ user }: HeaderProps) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="min-w-[320px] max-h-[600px] overflow-y-auto shadow-[0_24px_80px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.08)_inset]"
+                  className="min-w-[320px] max-h-[600px] overflow-y-auto bg-black border border-white/[0.12] shadow-[0_24px_80px_rgba(0,0,0,0.95)] z-[100]"
                   sideOffset={12}
                 >
                   {['Account', 'Tools', 'Settings', 'Advanced', 'Connect'].map((category, idx) => {
@@ -251,7 +251,7 @@ export const Header = ({ user }: HeaderProps) => {
                   <Menu className="w-5 h-5 transition-transform duration-300" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-black border-l border-white/[0.08] shadow-[0_0_60px_rgba(0,0,0,0.8)] flex flex-col">
+              <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-black/100 border-l border-white/[0.08] shadow-[0_0_60px_rgba(0,0,0,0.8)] flex flex-col z-[100]">
                 <div className="flex flex-col h-full">
                   {/* Mobile Logo */}
                   <div className="flex items-center gap-3 px-2 mb-6 mt-8 flex-shrink-0">
