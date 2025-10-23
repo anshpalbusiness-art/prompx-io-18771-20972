@@ -127,20 +127,8 @@ export const Header = ({ user }: HeaderProps) => {
       <div className="w-full">
         <div className="responsive-container">
           <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20 gap-2 sm:gap-4 lg:gap-8">
-            {/* Logo */}
+            {/* Sign Out and Logo */}
             <div className="flex items-center gap-3">
-              <button 
-                onClick={() => navigate('/')}
-                className="flex items-center gap-3 flex-shrink-0 group relative z-10"
-              >
-                <div className="w-11 h-11 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-6 shadow-[0_4px_20px_rgba(255,255,255,0.15)] group-hover:shadow-[0_8px_30px_rgba(255,255,255,0.3)]">
-                  <Sparkles className="w-5 h-5 text-black transition-transform duration-500 group-hover:rotate-12" strokeWidth={2.5} />
-                </div>
-                <span className="text-[1.4rem] font-extrabold text-white tracking-tight group-hover:text-zinc-100 transition-all duration-300 drop-shadow-sm">
-                  PrompX
-                </span>
-              </button>
-              
               {user && (
                 <Button
                   variant="outline"
@@ -152,6 +140,18 @@ export const Header = ({ user }: HeaderProps) => {
                   Sign Out
                 </Button>
               )}
+              
+              <button 
+                onClick={() => navigate('/')}
+                className="flex items-center gap-3 flex-shrink-0 group relative z-10"
+              >
+                <div className="w-11 h-11 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-6 shadow-[0_4px_20px_rgba(255,255,255,0.15)] group-hover:shadow-[0_8px_30px_rgba(255,255,255,0.3)]">
+                  <Sparkles className="w-5 h-5 text-black transition-transform duration-500 group-hover:rotate-12" strokeWidth={2.5} />
+                </div>
+                <span className="text-[1.4rem] font-extrabold text-white tracking-tight group-hover:text-zinc-100 transition-all duration-300 drop-shadow-sm">
+                  PrompX
+                </span>
+              </button>
             </div>
 
             {/* Desktop Navigation */}
