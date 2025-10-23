@@ -128,7 +128,7 @@ export const Header = ({ user }: HeaderProps) => {
         <div className="responsive-container">
           <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20 gap-2 sm:gap-4 lg:gap-8">
             {/* Logo */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <button 
                 onClick={() => navigate('/')}
                 className="flex items-center gap-3 flex-shrink-0 group relative z-10"
@@ -146,7 +146,7 @@ export const Header = ({ user }: HeaderProps) => {
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="hidden lg:flex h-10 px-5 bg-transparent border-white/[0.15] text-white hover:bg-white/[0.10] hover:text-white hover:border-white/25 rounded-xl font-bold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
+                  className="h-10 px-5 bg-transparent border-white/[0.15] text-white hover:bg-white/[0.10] hover:text-white hover:border-white/25 rounded-xl font-bold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
                 >
                   <LogOut className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-12" />
                   Sign Out
