@@ -126,46 +126,46 @@ export const Header = ({ user }: HeaderProps) => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-black backdrop-blur-xl border-b border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] w-full">
       <div className="w-full">
         <div className="responsive-container">
-          <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20 gap-2 sm:gap-4 lg:gap-8">
-            {/* Sign Out and Logo */}
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between h-16 lg:h-20 gap-4 lg:gap-6">
+            {/* Left Section: Sign Out + Logo */}
+            <div className="flex items-center gap-4 lg:gap-6 flex-shrink-0">
               {user && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="hidden lg:flex h-10 px-5 bg-transparent border-white/[0.15] text-white hover:bg-white/[0.10] hover:text-white hover:border-white/25 rounded-xl font-bold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
+                  className="hidden lg:flex items-center h-10 px-5 bg-transparent border-white/[0.15] text-white hover:bg-white/[0.10] hover:text-white hover:border-white/25 rounded-xl font-bold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
                 >
-                  <LogOut className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-12" />
+                  <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
                 </Button>
               )}
               
               <button 
                 onClick={() => navigate('/')}
-                className="flex items-center gap-3 flex-shrink-0 group relative z-10"
+                className="flex items-center gap-3 flex-shrink-0 group"
               >
-                <div className="w-11 h-11 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-6 shadow-[0_4px_20px_rgba(255,255,255,0.15)] group-hover:shadow-[0_8px_30px_rgba(255,255,255,0.3)]">
-                  <Sparkles className="w-5 h-5 text-black transition-transform duration-500 group-hover:rotate-12" strokeWidth={2.5} />
+                <div className="w-10 h-10 lg:w-11 lg:h-11 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:rotate-3 shadow-[0_4px_20px_rgba(255,255,255,0.15)]">
+                  <Sparkles className="w-5 h-5 text-black" strokeWidth={2.5} />
                 </div>
-                <span className="text-[1.4rem] font-extrabold text-white tracking-tight group-hover:text-zinc-100 transition-all duration-300 drop-shadow-sm">
+                <span className="text-xl lg:text-[1.4rem] font-extrabold text-white tracking-tight group-hover:text-zinc-100 transition-colors duration-300">
                   PrompX
                 </span>
               </button>
             </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-2 xl:gap-3 flex-1 justify-center">
+            {/* Center Section: Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-2 flex-1 justify-center">
               {primaryNavItems.map((link) => {
                 const isActive = window.location.pathname === link.path;
                 return (
                 <button
                   key={link.path}
                   onClick={() => navigate(link.path)}
-                  className={`relative px-3 xl:px-4 py-2.5 text-[0.75rem] xl:text-[0.8125rem] font-bold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap ${
+                  className={`relative px-4 xl:px-5 py-2.5 text-[0.8125rem] xl:text-[0.875rem] font-bold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap flex items-center justify-center ${
                     isActive
-                      ? 'bg-white/[0.15] text-white shadow-[0_4px_16px_rgba(255,255,255,0.12)] scale-[1.02]'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.08] hover:scale-105 active:scale-100'
+                      ? 'bg-white/[0.15] text-white shadow-[0_4px_16px_rgba(255,255,255,0.12)]'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.08]'
                   }`}
                 >
                     {link.name}
@@ -178,15 +178,15 @@ export const Header = ({ user }: HeaderProps) => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="relative px-3 xl:px-4 py-2.5 text-[0.75rem] xl:text-[0.8125rem] font-bold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.08] hover:scale-105 active:scale-100 flex items-center gap-1.5 group">
+                  <button className="relative px-4 xl:px-5 py-2.5 text-[0.8125rem] xl:text-[0.875rem] font-bold rounded-xl transition-all duration-300 tracking-tight whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.08] flex items-center justify-center gap-1.5 group">
                     MORE
-                    <ChevronDown className="w-4 h-4 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                    <ChevronDown className="w-3.5 h-3.5 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                  align="end"
-                  className="min-w-[320px] max-h-[600px] overflow-y-auto bg-black border border-white/[0.12] shadow-[0_24px_80px_rgba(0,0,0,0.95)] z-[100]"
-                  sideOffset={12}
+                  align="center"
+                  className="min-w-[340px] max-h-[600px] overflow-y-auto bg-black/95 backdrop-blur-xl border border-white/[0.12] shadow-[0_24px_80px_rgba(0,0,0,0.95)] z-[100]"
+                  sideOffset={16}
                 >
                   {['Account', 'Tools', 'Settings', 'Advanced', 'Connect'].map((category, idx) => {
                     const categoryItems = moreNavItems.filter(item => item.category === category);
@@ -226,49 +226,49 @@ export const Header = ({ user }: HeaderProps) => {
               </DropdownMenu>
             </nav>
 
-            {/* User Section */}
-            <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
+            {/* Right Section: User Info */}
+            <div className="hidden lg:flex items-center justify-end gap-3 flex-shrink-0 min-w-[200px]">
               {user ? (
-                <div className="text-sm text-zinc-300 font-semibold px-4 py-2.5 bg-white/[0.08] rounded-xl border border-white/[0.10] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.10] hover:border-white/[0.15] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
+                <div className="flex items-center text-sm text-zinc-300 font-semibold px-4 py-2.5 h-10 bg-white/[0.08] rounded-xl border border-white/[0.10] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.10] hover:border-white/[0.15] cursor-default max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap">
                   {user.email}
                 </div>
               ) : (
                 <Button
                   onClick={() => navigate("/auth")}
                   size="sm"
-                  className="bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-50 hover:to-white h-11 px-6 font-bold shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.35)] transition-all duration-300 rounded-xl hover:scale-105 active:scale-95"
+                  className="flex items-center bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-50 hover:to-white h-10 px-6 font-bold shadow-[0_4px_20px_rgba(255,255,255,0.2)] hover:shadow-[0_8px_32px_rgba(255,255,255,0.35)] transition-all duration-300 rounded-xl hover:scale-105 active:scale-95"
                 >
                   Sign In
                 </Button>
               )}
             </div>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu Button */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="lg:hidden text-white hover:bg-white/[0.10] rounded-xl h-11 w-11 p-0 transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)]"
+                  className="lg:hidden flex items-center justify-center text-white hover:bg-white/[0.10] rounded-xl h-10 w-10 p-0 transition-all duration-300 hover:scale-105 active:scale-95"
                 >
-                  <Menu className="w-5 h-5 transition-transform duration-300" />
+                  <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-black/100 border-l border-white/[0.08] shadow-[0_0_60px_rgba(0,0,0,0.8)] flex flex-col z-[100]">
-                <div className="flex flex-col h-full">
+                <div className="flex flex-col h-full pt-6">
                   {/* Mobile Logo */}
-                  <div className="flex items-center gap-3 px-2 mb-6 mt-8 flex-shrink-0">
-                    <div className="w-11 h-11 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center shadow-[0_4px_20px_rgba(255,255,255,0.15)]">
+                  <div className="flex items-center gap-3 px-1 mb-8 flex-shrink-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center shadow-[0_4px_20px_rgba(255,255,255,0.15)]">
                       <Sparkles className="w-5 h-5 text-black" strokeWidth={2.5} />
                     </div>
-                    <span className="text-xl font-extrabold text-white tracking-tight drop-shadow-sm">
+                    <span className="text-xl font-extrabold text-white tracking-tight">
                       PrompX
                     </span>
                   </div>
 
                   {/* Scrollable Navigation */}
                   <ScrollArea className="flex-1 px-1">
-                    <nav className="flex flex-col gap-2 pb-4">
+                    <nav className="flex flex-col gap-3 pb-4">
                     {['Main', 'Account', 'Tools', 'Settings', 'Advanced', 'Connect'].map((category) => {
                       const categoryItems = category === 'Main' 
                         ? primaryNavItems
@@ -277,12 +277,12 @@ export const Header = ({ user }: HeaderProps) => {
                       if (categoryItems.length === 0) return null;
                       
                       return (
-                        <div key={category} className="mb-2">
+                        <div key={category} className="mb-3">
                           <div className="px-3 py-2 text-[0.6875rem] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                             <div className="w-1 h-1 rounded-full bg-white/40" />
                             {category}
                           </div>
-                          <div className="space-y-1">
+                          <div className="space-y-1.5">
                             {categoryItems.map((link) => {
                               const isActive = window.location.pathname === link.path;
                               const Icon = link.icon;
@@ -317,14 +317,14 @@ export const Header = ({ user }: HeaderProps) => {
 
                   {/* Fixed User Section */}
                   {user && (
-                    <div className="pt-5 border-t border-white/[0.08] space-y-4 px-1 flex-shrink-0 mt-4">
-                      <div className="text-sm text-zinc-300 font-semibold px-4 py-2.5 bg-white/[0.08] rounded-xl border border-white/[0.10] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.10] hover:border-white/[0.15] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default overflow-hidden text-ellipsis whitespace-nowrap">
+                    <div className="pt-6 border-t border-white/[0.08] space-y-3 px-1 flex-shrink-0 mt-4">
+                      <div className="flex items-center text-sm text-zinc-300 font-semibold px-4 py-3 bg-white/[0.08] rounded-xl border border-white/[0.10] backdrop-blur-sm cursor-default overflow-hidden text-ellipsis whitespace-nowrap">
                         {user.email}
                       </div>
                       <Button
                         variant="outline"
                         onClick={handleLogout}
-                        className="w-full h-11 bg-transparent border-white/[0.12] text-white hover:bg-white/[0.08] hover:border-white/20 rounded-xl font-semibold transition-all duration-300 hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] active:scale-[0.98]"
+                        className="w-full flex items-center justify-center h-11 bg-transparent border-white/[0.12] text-white hover:bg-white/[0.08] hover:border-white/20 rounded-xl font-semibold transition-all duration-300 active:scale-[0.98]"
                       >
                         <LogOut className="w-4 h-4 mr-2" />
                         Sign Out
