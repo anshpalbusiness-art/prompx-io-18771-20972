@@ -128,17 +128,31 @@ export const Header = ({ user }: HeaderProps) => {
         <div className="responsive-container">
           <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20 gap-2 sm:gap-4 lg:gap-8">
             {/* Logo */}
-            <button 
-              onClick={() => navigate('/')}
-              className="flex items-center gap-3 flex-shrink-0 group relative z-10"
-            >
-              <div className="w-11 h-11 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-6 shadow-[0_4px_20px_rgba(255,255,255,0.15)] group-hover:shadow-[0_8px_30px_rgba(255,255,255,0.3)]">
-                <Sparkles className="w-5 h-5 text-black transition-transform duration-500 group-hover:rotate-12" strokeWidth={2.5} />
-              </div>
-              <span className="text-[1.4rem] font-extrabold text-white tracking-tight group-hover:text-zinc-100 transition-all duration-300 drop-shadow-sm">
-                PrompX
-              </span>
-            </button>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => navigate('/')}
+                className="flex items-center gap-3 flex-shrink-0 group relative z-10"
+              >
+                <div className="w-11 h-11 bg-gradient-to-br from-white to-zinc-100 rounded-xl flex items-center justify-center transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-6 shadow-[0_4px_20px_rgba(255,255,255,0.15)] group-hover:shadow-[0_8px_30px_rgba(255,255,255,0.3)]">
+                  <Sparkles className="w-5 h-5 text-black transition-transform duration-500 group-hover:rotate-12" strokeWidth={2.5} />
+                </div>
+                <span className="text-[1.4rem] font-extrabold text-white tracking-tight group-hover:text-zinc-100 transition-all duration-300 drop-shadow-sm">
+                  PrompX
+                </span>
+              </button>
+              
+              {user && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="h-10 px-5 bg-transparent border-white/[0.15] text-white hover:bg-white/[0.10] hover:text-white hover:border-white/25 rounded-xl font-bold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
+                >
+                  <LogOut className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-12" />
+                  Sign Out
+                </Button>
+              )}
+            </div>
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-2 xl:gap-3 flex-1 justify-center">
@@ -215,20 +229,9 @@ export const Header = ({ user }: HeaderProps) => {
             {/* User Section */}
             <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
               {user ? (
-                <>
-                  <div className="text-sm text-zinc-300 font-semibold px-4 py-2.5 bg-white/[0.08] rounded-xl border border-white/[0.10] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.10] hover:border-white/[0.15] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
-                    {user.email}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleLogout}
-                    className="h-10 px-5 bg-transparent border-white/[0.15] text-white hover:bg-white/[0.10] hover:text-white hover:border-white/25 rounded-xl font-bold transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:scale-105 active:scale-95"
-                  >
-                    <LogOut className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:rotate-12" />
-                    Sign Out
-                  </Button>
-                </>
+                <div className="text-sm text-zinc-300 font-semibold px-4 py-2.5 bg-white/[0.08] rounded-xl border border-white/[0.10] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.10] hover:border-white/[0.15] hover:shadow-[0_4px_12px_rgba(255,255,255,0.08)] cursor-default max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
+                  {user.email}
+                </div>
               ) : (
                 <Button
                   onClick={() => navigate("/auth")}
