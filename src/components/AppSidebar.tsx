@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -103,12 +103,13 @@ const connectItems = [
   { name: 'Team', path: '/team', icon: UsersRound },
 ];
 
-export function AppSidebar({ user }: AppSidebarProps) {
+export const AppSidebar = React.memo(({ user }: AppSidebarProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const currentPath = window.location.pathname;
+  const location = useLocation();
+  const currentPath = location.pathname;
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       toast({
@@ -119,9 +120,9 @@ export function AppSidebar({ user }: AppSidebarProps) {
     } else {
       navigate('/auth');
     }
-  };
+  }, [navigate, toast]);
 
-  const isActive = (path: string) => currentPath === path;
+  const isActive = useCallback((path: string) => currentPath === path, [currentPath]);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-zinc-800/40 bg-gradient-to-b from-black via-zinc-950 to-black shadow-2xl shadow-black/50 h-screen">
@@ -485,4 +486,4 @@ export function AppSidebar({ user }: AppSidebarProps) {
       </SidebarFooter>
     </Sidebar>
   );
-}
+});

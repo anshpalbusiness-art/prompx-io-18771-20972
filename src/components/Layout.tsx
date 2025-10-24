@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Footer } from '@/components/Footer';
@@ -11,10 +11,13 @@ interface LayoutProps {
 }
 
 export const Layout = React.memo(({ children, user }: LayoutProps) => {
+  // Memoize user object to prevent unnecessary re-renders
+  const memoizedUser = useMemo(() => user, [user?.id]);
+  
   return (
     <SidebarProvider>
       <div className="h-screen w-full bg-background flex overflow-hidden">
-        <AppSidebar user={user} />
+        <AppSidebar user={memoizedUser} />
         <SidebarInset className="flex flex-col flex-1 h-screen overflow-hidden">
           {/* Header with trigger */}
           <header className="flex h-16 shrink-0 items-center gap-2 border-b border-zinc-800/50 bg-black/95 backdrop-blur-xl px-4 z-10">

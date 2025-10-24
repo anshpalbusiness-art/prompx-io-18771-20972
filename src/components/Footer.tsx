@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Github, Twitter, Linkedin, Mail, Sparkles } from 'lucide-react';
 
-export const Footer = () => {
-  const scrollToSection = (sectionId: string) => {
+export const Footer = React.memo(() => {
+  const scrollToSection = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  };
+  }, []);
 
   return (
     <footer className="relative border-t border-zinc-800/40 bg-gradient-to-b from-black via-zinc-950 to-black w-full overflow-hidden flex-shrink-0">
@@ -122,6 +122,6 @@ export const Footer = () => {
       </div>
     </footer>
   );
-};
+});
 
 export default Footer;
