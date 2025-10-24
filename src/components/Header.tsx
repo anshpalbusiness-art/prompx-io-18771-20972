@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -39,69 +39,37 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 
 interface HeaderProps {
   user?: User | null;
 }
 
-const navLinks = [
-  { name: 'HOME', path: '/' },
-  { name: 'DASHBOARD', path: '/dashboard' },
-  { name: 'AI AGENTS', path: '/agents' },
-  { name: 'ANALYTICS', path: '/analytics' },
-  { name: 'MARKETPLACE', path: '/marketplace' },
-  { name: 'INTEGRATIONS', path: '/integrations' },
-  { name: 'SETTINGS', path: '/settings' },
-];
-
-const moreItems = {
-  account: [
-    { name: 'Profile', path: '/profile', icon: UserIcon },
-    { name: 'Pricing', path: '/pricing', icon: TrendingUp },
-  ],
-  tools: [
-    { name: 'Visual Builder', path: '/visual-builder', icon: Layers },
-    { name: 'AI Co-Pilot', path: '/ai-copilot', icon: Bot },
-    { name: 'Templates', path: '/templates', icon: FileText },
-    { name: 'History', path: '/history', icon: History },
-    { name: 'Workflow', path: '/workflow', icon: WorkflowIcon },
-    { name: 'Legal Packs', path: '/legal-packs', icon: Scale },
-  ],
-  settings: [
-    { name: 'API Keys', path: '/api-keys', icon: Key },
-    { name: 'Usage', path: '/usage', icon: BarChart3 },
-    { name: 'Compliance', path: '/compliance-dashboard', icon: ShieldCheck },
-  ],
-  advanced: [
-    { name: 'Benchmark', path: '/benchmark', icon: Target },
-    { name: 'Optimization Lab', path: '/optimization-lab', icon: Beaker },
-  ],
-  connect: [
-    { name: 'Community', path: '/community', icon: Users },
-    { name: 'Enterprise', path: '/enterprise', icon: Building2 },
-    { name: 'Team', path: '/team', icon: UsersRound },
-  ],
-};
-
-const mobileNavLinks = [
-  { name: 'HOME', path: '/', icon: Home },
-  { name: 'DASHBOARD', path: '/dashboard', icon: LayoutDashboard },
-  { name: 'AI AGENTS', path: '/agents', icon: Zap },
-  { name: 'ANALYTICS', path: '/analytics', icon: TrendingUp },
-  { name: 'MARKETPLACE', path: '/marketplace', icon: Store },
-  { name: 'INTEGRATIONS', path: '/integrations', icon: Plug },
-  { name: 'SETTINGS', path: '/settings', icon: Settings },
-];
-
-export const Header = React.memo(({ user }: HeaderProps) => {
+export const Header = ({ user }: HeaderProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  const handleLogout = useCallback(async () => {
+  // Check if user is admin
+  React.useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      setIsAdmin(!!data);
+    };
+    
+    checkAdminStatus();
+  }, [user]);
+
+  const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       toast({
@@ -113,418 +81,270 @@ export const Header = React.memo(({ user }: HeaderProps) => {
       navigate("/auth");
     }
     setMobileMenuOpen(false);
-  }, [navigate, toast]);
+  };
 
-  const isActive = (path: string) => window.location.pathname === path;
+  // Primary nav items shown in desktop header
+  const primaryNavItems = [
+    { name: 'HOME', path: '/', icon: Home },
+    { name: 'DASHBOARD', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'AI AGENTS', path: '/agents', icon: Zap },
+    { name: 'ANALYTICS', path: '/analytics', icon: TrendingUp },
+    { name: 'MARKETPLACE', path: '/marketplace', icon: Store },
+    { name: 'INTEGRATIONS', path: '/integrations', icon: Plug },
+    { name: 'SETTINGS', path: '/settings', icon: Settings },
+  ];
+
+  // Additional items in "More" dropdown with icons
+  const moreNavItems = [
+    // Prompt Engineer quick actions
+    { name: 'Profile', path: '/profile', icon: UserIcon, category: 'Account' },
+    { name: 'Pricing', path: '/pricing', icon: TrendingUp, category: 'Account' },
+    { name: 'Visual Builder', path: '/visual-builder', icon: Layers, category: 'Tools' },
+    { name: 'AI Co-Pilot', path: '/ai-copilot', icon: Bot, category: 'Tools' },
+    { name: 'Templates', path: '/templates', icon: FileText, category: 'Tools' },
+    { name: 'History', path: '/history', icon: History, category: 'Tools' },
+    { name: 'Workflow', path: '/workflow', icon: WorkflowIcon, category: 'Tools' },
+    { name: 'Legal Packs', path: '/legal-packs', icon: Scale, category: 'Tools' },
+    { name: 'API Keys', path: '/api-keys', icon: Key, category: 'Settings' },
+    { name: 'Usage', path: '/usage', icon: BarChart3, category: 'Settings' },
+    { name: 'Compliance', path: '/compliance-dashboard', icon: ShieldCheck, category: 'Settings' },
+    // Other sections
+    { name: 'Benchmark', path: '/benchmark', icon: Target, category: 'Advanced' },
+    { name: 'Optimization Lab', path: '/optimization-lab', icon: Beaker, category: 'Advanced' },
+    { name: 'Community', path: '/community', icon: Users, category: 'Connect' },
+    { name: 'Enterprise', path: '/enterprise', icon: Building2, category: 'Connect' },
+    { name: 'Team', path: '/team', icon: UsersRound, category: 'Connect' },
+  ];
+
+  // All nav items for mobile menu with icons
+  const allMobileNavItems = [
+    ...primaryNavItems,
+    ...moreNavItems,
+  ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-xl border-b border-zinc-800/50 shadow-lg shadow-black/10">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
-          
-          {/* Logo */}
-          <div className="flex items-center">
-            <button 
-              onClick={() => navigate('/')}
-              className="flex items-center gap-3 group"
-            >
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-white to-zinc-100 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-white/20">
-                <Sparkles className="h-5 w-5 text-black" strokeWidth={2.5} />
-              </div>
-              <span className="text-2xl font-bold text-white tracking-tight bg-clip-text">PrompX</span>
-            </button>
-          </div>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-2">
-            {navLinks.map((link) => (
-              <button
-                key={link.path}
-                onClick={() => navigate(link.path)}
-                className={`group relative px-4 py-2.5 text-sm font-semibold tracking-wide transition-all duration-300 rounded-lg whitespace-nowrap ${
-                  isActive(link.path)
-                    ? 'text-white bg-zinc-900/50'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900/30'
-                }`}
-              >
-                <span className="relative z-10">{link.name}</span>
-                {isActive(link.path) && (
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent" />
-                )}
-              </button>
-            ))}
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold tracking-wide text-zinc-400 transition-all duration-300 hover:text-white hover:bg-zinc-900/30 rounded-lg group whitespace-nowrap">
-                  More
-                  <ChevronDown className="h-4 w-4 transition-transform duration-300 group-data-[state=open]:rotate-180" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 bg-black/95 backdrop-blur-xl border-zinc-800/50 shadow-2xl p-2">
-                <DropdownMenuLabel className="text-zinc-500 text-xs font-semibold uppercase tracking-wider px-3 py-2">Account</DropdownMenuLabel>
-                {moreItems.account.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <DropdownMenuItem
-                      key={item.path}
-                      onClick={() => navigate(item.path)}
-                      className="text-zinc-300 hover:text-white hover:bg-zinc-900/80 cursor-pointer rounded-md px-3 py-2.5 transition-all duration-200 group"
-                    >
-                      <Icon className="mr-3 h-4 w-4 text-zinc-500 group-hover:text-white transition-colors" />
-                      <span className="font-medium">{item.name}</span>
-                    </DropdownMenuItem>
-                  );
-                })}
-                
-                <DropdownMenuSeparator className="bg-zinc-800/50 my-2" />
-                <DropdownMenuLabel className="text-zinc-500 text-xs font-semibold uppercase tracking-wider px-3 py-2">Tools</DropdownMenuLabel>
-                {moreItems.tools.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <DropdownMenuItem
-                      key={item.path}
-                      onClick={() => navigate(item.path)}
-                      className="text-zinc-300 hover:text-white hover:bg-zinc-900/80 cursor-pointer rounded-md px-3 py-2.5 transition-all duration-200 group"
-                    >
-                      <Icon className="mr-3 h-4 w-4 text-zinc-500 group-hover:text-white transition-colors" />
-                      <span className="font-medium">{item.name}</span>
-                    </DropdownMenuItem>
-                  );
-                })}
-                
-                <DropdownMenuSeparator className="bg-zinc-800/50 my-2" />
-                <DropdownMenuLabel className="text-zinc-500 text-xs font-semibold uppercase tracking-wider px-3 py-2">Settings</DropdownMenuLabel>
-                {moreItems.settings.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <DropdownMenuItem
-                      key={item.path}
-                      onClick={() => navigate(item.path)}
-                      className="text-zinc-300 hover:text-white hover:bg-zinc-900/80 cursor-pointer rounded-md px-3 py-2.5 transition-all duration-200 group"
-                    >
-                      <Icon className="mr-3 h-4 w-4 text-zinc-500 group-hover:text-white transition-colors" />
-                      <span className="font-medium">{item.name}</span>
-                    </DropdownMenuItem>
-                  );
-                })}
-                
-                <DropdownMenuSeparator className="bg-zinc-800/50 my-2" />
-                <DropdownMenuLabel className="text-zinc-500 text-xs font-semibold uppercase tracking-wider px-3 py-2">Advanced</DropdownMenuLabel>
-                {moreItems.advanced.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <DropdownMenuItem
-                      key={item.path}
-                      onClick={() => navigate(item.path)}
-                      className="text-zinc-300 hover:text-white hover:bg-zinc-900/80 cursor-pointer rounded-md px-3 py-2.5 transition-all duration-200 group"
-                    >
-                      <Icon className="mr-3 h-4 w-4 text-zinc-500 group-hover:text-white transition-colors" />
-                      <span className="font-medium">{item.name}</span>
-                    </DropdownMenuItem>
-                  );
-                })}
-                
-                <DropdownMenuSeparator className="bg-zinc-800/50 my-2" />
-                <DropdownMenuLabel className="text-zinc-500 text-xs font-semibold uppercase tracking-wider px-3 py-2">Connect</DropdownMenuLabel>
-                {moreItems.connect.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <DropdownMenuItem
-                      key={item.path}
-                      onClick={() => navigate(item.path)}
-                      className="text-zinc-300 hover:text-white hover:bg-zinc-900/80 cursor-pointer rounded-md px-3 py-2.5 transition-all duration-200 group"
-                    >
-                      <Icon className="mr-3 h-4 w-4 text-zinc-500 group-hover:text-white transition-colors" />
-                      <span className="font-medium">{item.name}</span>
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </nav>
-
-          {/* User Section */}
-          <div className="flex items-center gap-4">
-            {user ? (
-              <>
-                <div className="hidden lg:flex items-center gap-3 px-3 py-2 rounded-lg bg-zinc-900/30 border border-zinc-800/50">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-700 to-zinc-800">
-                    <UserIcon className="h-4 w-4 text-zinc-300" />
-                  </div>
-                  <span className="text-sm font-medium text-zinc-300 max-w-[150px] truncate">
-                    {user.email}
-                  </span>
-                </div>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-black via-zinc-950 to-black backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.5)] w-full">
+      <div className="w-full">
+        <div className="responsive-container">
+          <div className="flex items-center justify-between h-16 lg:h-[4.5rem] gap-4 lg:gap-8">
+            {/* Left Section: Sign Out + Logo */}
+            <div className="flex items-center gap-3 lg:gap-5 flex-shrink-0">
+              {user && (
                 <Button
-                  onClick={handleLogout}
                   variant="ghost"
                   size="sm"
-                  className="hidden lg:flex text-zinc-300 hover:text-white hover:bg-zinc-900/50 transition-all duration-300 font-semibold"
+                  onClick={handleLogout}
+                  className="hidden lg:flex items-center justify-center h-9 px-4 bg-white/5 border border-white/10 text-white/90 hover:bg-white/10 hover:text-white hover:border-white/20 rounded-lg font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-white/5"
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
                 </Button>
-              </>
-            ) : (
-              <Button
-                onClick={() => navigate("/auth")}
-                size="sm"
-                className="hidden lg:flex bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-100 hover:to-zinc-200 font-semibold shadow-lg shadow-white/10 transition-all duration-300 hover:shadow-white/20"
+              )}
+              
+              <button 
+                onClick={() => navigate('/')}
+                className="flex items-center gap-2.5 flex-shrink-0 group"
               >
-                Sign In
-              </Button>
-            )}
+                <div className="relative w-9 h-9 lg:w-10 lg:h-10">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white via-zinc-100 to-zinc-200 rounded-lg rotate-0 group-hover:rotate-6 transition-transform duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white to-zinc-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <Sparkles className="w-[1.125rem] h-[1.125rem] lg:w-5 lg:h-5 text-black" strokeWidth={2.5} />
+                  </div>
+                </div>
+                <span className="text-lg lg:text-xl font-black text-white tracking-tight group-hover:tracking-wide transition-all duration-300">
+                  PrompX
+                </span>
+              </button>
+            </div>
 
-            {/* Mobile Menu */}
+            {/* Center Section: Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-1 flex-1 justify-start lg:pl-6 xl:pl-10">
+              {primaryNavItems.map((link) => {
+                const isActive = window.location.pathname === link.path;
+                return (
+                <button
+                  key={link.path}
+                  onClick={() => navigate(link.path)}
+                  className={`relative group/btn px-3.5 xl:px-4 py-2 text-[0.8125rem] font-semibold rounded-lg transition-all duration-200 tracking-tight whitespace-nowrap flex items-center justify-center ${
+                    isActive
+                      ? 'bg-white/10 text-white border border-white/20'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10'
+                  }`}
+                >
+                    {link.name}
+                    {isActive && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-lg -z-10" />
+                    )}
+                  </button>
+                );
+              })}
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="relative px-3.5 xl:px-4 py-2 text-[0.8125rem] font-semibold rounded-lg transition-all duration-200 tracking-tight whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 flex items-center justify-center gap-1.5 group">
+                    MORE
+                    <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="center"
+                  className="min-w-[340px] max-h-[600px] overflow-y-auto bg-zinc-950/98 backdrop-blur-2xl border border-white/15 shadow-[0_20px_70px_rgba(0,0,0,0.9)] z-[100] rounded-xl"
+                  sideOffset={12}
+                >
+                  {['Account', 'Tools', 'Settings', 'Advanced', 'Connect'].map((category, idx) => {
+                    const categoryItems = moreNavItems.filter(item => item.category === category);
+                    if (categoryItems.length === 0) return null;
+                    
+                    return (
+                      <div key={category} className={idx > 0 ? "border-t border-white/10 pt-2" : "pt-1"}>
+                        <div className="px-4 pt-3 pb-2 text-[0.6875rem] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-zinc-600" />
+                          {category}
+                        </div>
+                        <div className="px-2 pb-2 space-y-0.5">
+                          {categoryItems.map((link) => {
+                            const Icon = link.icon;
+                            return (
+                              <DropdownMenuItem
+                                key={link.path}
+                                onSelect={() => {
+                                  navigate(link.path);
+                                }}
+                                className="cursor-pointer font-medium text-sm py-2.5 px-3 rounded-lg transition-all duration-200 group hover:bg-white/5"
+                              >
+                                <div className="flex items-center gap-3 w-full">
+                                  <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 transition-all duration-200 group-hover:bg-white/10 group-hover:border-white/20">
+                                    <Icon className="w-4 h-4 text-zinc-300 group-hover:text-white" strokeWidth={2} />
+                                  </div>
+                                  <span className="text-zinc-300 group-hover:text-white font-medium tracking-tight">{link.name}</span>
+                                </div>
+                              </DropdownMenuItem>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </nav>
+
+            {/* Right Section: User Info */}
+            <div className="hidden lg:flex items-center justify-end gap-3 flex-shrink-0">
+              {user ? (
+                <div className="flex items-center text-sm text-zinc-300 font-medium px-4 py-2 h-9 bg-white/5 rounded-lg border border-white/10 backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:border-white/20 cursor-default max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
+                  {user.email}
+                </div>
+              ) : (
+                <Button
+                  onClick={() => navigate("/auth")}
+                  size="sm"
+                  className="flex items-center bg-gradient-to-r from-white via-zinc-50 to-white text-black hover:from-zinc-100 hover:via-white hover:to-zinc-100 h-9 px-5 font-bold shadow-[0_8px_24px_rgba(255,255,255,0.15)] hover:shadow-[0_12px_32px_rgba(255,255,255,0.25)] transition-all duration-200 rounded-lg hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Sign In
+                </Button>
+              )}
+            </div>
+
+            {/* Mobile Menu Button */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="lg:hidden text-white hover:bg-zinc-900/50 transition-all duration-300 rounded-lg"
+                  size="sm"
+                  className="lg:hidden flex items-center justify-center text-white hover:bg-white/10 rounded-lg h-9 w-9 p-0 transition-all duration-200 border border-white/10 hover:border-white/20"
                 >
-                  <Menu className="h-5 w-5" />
+                  <Menu className="w-[1.125rem] h-[1.125rem]" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80 bg-black/95 backdrop-blur-xl border-zinc-800/50 p-0">
-                <div className="flex h-full flex-col">
-                  
-                  {/* Mobile Header */}
-                  <div className="flex items-center gap-3 border-b border-zinc-800/50 px-6 py-5 bg-zinc-900/20">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-white to-zinc-100 shadow-lg shadow-white/10">
-                      <Sparkles className="h-5 w-5 text-black" strokeWidth={2.5} />
+              <SheetContent side="right" className="w-[90vw] max-w-[380px] bg-gradient-to-b from-zinc-950 to-black border-l border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.9)] flex flex-col z-[100]">
+                <div className="flex flex-col h-full pt-6">
+                  {/* Mobile Logo */}
+                  <div className="flex items-center gap-2.5 px-1 mb-8 flex-shrink-0">
+                    <div className="relative w-10 h-10">
+                      <div className="absolute inset-0 bg-gradient-to-br from-white to-zinc-100 rounded-lg" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Sparkles className="w-5 h-5 text-black" strokeWidth={2.5} />
+                      </div>
                     </div>
-                    <span className="text-xl font-bold text-white tracking-tight">PrompX</span>
+                    <span className="text-xl font-black text-white tracking-tight">
+                      PrompX
+                    </span>
                   </div>
 
-                  {/* Mobile Navigation */}
-                  <ScrollArea className="flex-1">
-                    <nav className="space-y-2 p-4">
+                  {/* Scrollable Navigation */}
+                  <ScrollArea className="flex-1 px-1">
+                    <nav className="flex flex-col gap-3 pb-4">
+                    {['Main', 'Account', 'Tools', 'Settings', 'Advanced', 'Connect'].map((category) => {
+                      const categoryItems = category === 'Main' 
+                        ? primaryNavItems
+                        : moreNavItems.filter(item => item.category === category);
                       
-                      {/* Main Navigation */}
-                      <div className="mb-6">
-                        <p className="mb-3 px-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                          Main
-                        </p>
-                        <div className="space-y-1">
-                          {mobileNavLinks.map((link) => {
-                            const Icon = link.icon;
-                            return (
-                              <button
-                                key={link.path}
-                                onClick={() => {
-                                  navigate(link.path);
-                                  setMobileMenuOpen(false);
-                                }}
-                                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-200 group ${
-                                  isActive(link.path)
-                                    ? 'bg-zinc-900/80 text-white shadow-lg shadow-zinc-900/50'
-                                    : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-white'
-                                }`}
-                              >
-                                <Icon className={`h-5 w-5 transition-colors ${isActive(link.path) ? 'text-white' : 'text-zinc-500 group-hover:text-white'}`} />
-                                <span>{link.name}</span>
-                              </button>
-                            );
-                          })}
+                      if (categoryItems.length === 0) return null;
+                      
+                      return (
+                        <div key={category} className="mb-4">
+                          <div className="px-3 py-2 text-[0.6875rem] font-bold text-zinc-600 uppercase tracking-widest flex items-center gap-2">
+                            <div className="w-1 h-1 rounded-full bg-zinc-700" />
+                            {category}
+                          </div>
+                          <div className="space-y-1">
+                            {categoryItems.map((link) => {
+                              const isActive = window.location.pathname === link.path;
+                              const Icon = link.icon;
+                              return (
+                                <button
+                                  key={link.path}
+                                  onClick={() => {
+                                    navigate(link.path);
+                                    setMobileMenuOpen(false);
+                                  }}
+                                  className={`w-full text-left px-3 py-2.5 text-sm font-medium tracking-tight rounded-lg transition-all duration-200 flex items-center gap-3 border ${
+                                    isActive
+                                      ? 'bg-white/10 text-white border-white/20'
+                                      : 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent hover:border-white/10'
+                                  }`}
+                                >
+                                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200 border ${
+                                    isActive ? 'bg-white/10 border-white/20' : 'bg-white/5 border-white/10'
+                                  }`}>
+                                    <Icon className="w-4 h-4" strokeWidth={2} />
+                                  </div>
+                                  <span>{link.name}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-
-                      {/* Account */}
-                      <div className="mb-6">
-                        <p className="mb-3 px-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                          Account
-                        </p>
-                        <div className="space-y-1">
-                          {moreItems.account.map((link) => {
-                            const Icon = link.icon;
-                            return (
-                              <button
-                                key={link.path}
-                                onClick={() => {
-                                  navigate(link.path);
-                                  setMobileMenuOpen(false);
-                                }}
-                                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-200 group ${
-                                  isActive(link.path)
-                                    ? 'bg-zinc-900/80 text-white shadow-lg shadow-zinc-900/50'
-                                    : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-white'
-                                }`}
-                              >
-                                <Icon className={`h-5 w-5 transition-colors ${isActive(link.path) ? 'text-white' : 'text-zinc-500 group-hover:text-white'}`} />
-                                <span>{link.name}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Tools */}
-                      <div className="mb-6">
-                        <p className="mb-3 px-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                          Tools
-                        </p>
-                        <div className="space-y-1">
-                          {moreItems.tools.map((link) => {
-                            const Icon = link.icon;
-                            return (
-                              <button
-                                key={link.path}
-                                onClick={() => {
-                                  navigate(link.path);
-                                  setMobileMenuOpen(false);
-                                }}
-                                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-200 group ${
-                                  isActive(link.path)
-                                    ? 'bg-zinc-900/80 text-white shadow-lg shadow-zinc-900/50'
-                                    : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-white'
-                                }`}
-                              >
-                                <Icon className={`h-5 w-5 transition-colors ${isActive(link.path) ? 'text-white' : 'text-zinc-500 group-hover:text-white'}`} />
-                                <span>{link.name}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Settings */}
-                      <div className="mb-6">
-                        <p className="mb-3 px-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                          Settings
-                        </p>
-                        <div className="space-y-1">
-                          {moreItems.settings.map((link) => {
-                            const Icon = link.icon;
-                            return (
-                              <button
-                                key={link.path}
-                                onClick={() => {
-                                  navigate(link.path);
-                                  setMobileMenuOpen(false);
-                                }}
-                                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-200 group ${
-                                  isActive(link.path)
-                                    ? 'bg-zinc-900/80 text-white shadow-lg shadow-zinc-900/50'
-                                    : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-white'
-                                }`}
-                              >
-                                <Icon className={`h-5 w-5 transition-colors ${isActive(link.path) ? 'text-white' : 'text-zinc-500 group-hover:text-white'}`} />
-                                <span>{link.name}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Advanced */}
-                      <div className="mb-6">
-                        <p className="mb-3 px-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                          Advanced
-                        </p>
-                        <div className="space-y-1">
-                          {moreItems.advanced.map((link) => {
-                            const Icon = link.icon;
-                            return (
-                              <button
-                                key={link.path}
-                                onClick={() => {
-                                  navigate(link.path);
-                                  setMobileMenuOpen(false);
-                                }}
-                                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-200 group ${
-                                  isActive(link.path)
-                                    ? 'bg-zinc-900/80 text-white shadow-lg shadow-zinc-900/50'
-                                    : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-white'
-                                }`}
-                              >
-                                <Icon className={`h-5 w-5 transition-colors ${isActive(link.path) ? 'text-white' : 'text-zinc-500 group-hover:text-white'}`} />
-                                <span>{link.name}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Connect */}
-                      <div className="mb-6">
-                        <p className="mb-3 px-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                          Connect
-                        </p>
-                        <div className="space-y-1">
-                          {moreItems.connect.map((link) => {
-                            const Icon = link.icon;
-                            return (
-                              <button
-                                key={link.path}
-                                onClick={() => {
-                                  navigate(link.path);
-                                  setMobileMenuOpen(false);
-                                }}
-                                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-200 group ${
-                                  isActive(link.path)
-                                    ? 'bg-zinc-900/80 text-white shadow-lg shadow-zinc-900/50'
-                                    : 'text-zinc-400 hover:bg-zinc-900/50 hover:text-white'
-                                }`}
-                              >
-                                <Icon className={`h-5 w-5 transition-colors ${isActive(link.path) ? 'text-white' : 'text-zinc-500 group-hover:text-white'}`} />
-                                <span>{link.name}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
+                      );
+                    })}
                     </nav>
                   </ScrollArea>
 
-                  {/* Mobile User Section */}
-                  {user ? (
-                    <div className="border-t border-zinc-800/50 p-6 bg-zinc-900/20">
-                      <div className="mb-4 flex items-center gap-3 px-3 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800/50">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-700 to-zinc-800 shadow-lg">
-                          <UserIcon className="h-5 w-5 text-zinc-300" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-white truncate">{user.email}</p>
-                          <p className="text-xs text-zinc-500 font-medium">Signed in</p>
-                        </div>
+                  {/* Fixed User Section */}
+                  {user && (
+                    <div className="pt-5 border-t border-white/10 space-y-3 px-1 flex-shrink-0 mt-4">
+                      <div className="flex items-center text-sm text-zinc-300 font-medium px-4 py-2.5 bg-white/5 rounded-lg border border-white/10 cursor-default overflow-hidden text-ellipsis whitespace-nowrap">
+                        {user.email}
                       </div>
                       <Button
-                        onClick={handleLogout}
                         variant="outline"
-                        className="w-full border-zinc-700/50 text-zinc-300 hover:bg-zinc-900/80 hover:text-white hover:border-zinc-600 transition-all duration-300 font-semibold shadow-lg"
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center h-10 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20 rounded-lg font-semibold transition-all duration-200"
                       >
-                        <LogOut className="mr-2 h-4 w-4" />
+                        <LogOut className="w-4 h-4 mr-2" />
                         Sign Out
                       </Button>
                     </div>
-                  ) : (
-                    <div className="border-t border-zinc-800/50 p-6 bg-zinc-900/20">
-                      <Button
-                        onClick={() => {
-                          navigate("/auth");
-                          setMobileMenuOpen(false);
-                        }}
-                        className="w-full bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-100 hover:to-zinc-200 font-semibold shadow-lg shadow-white/10 transition-all duration-300 hover:shadow-white/20"
-                      >
-                        Sign In
-                      </Button>
-                    </div>
                   )}
-
                 </div>
               </SheetContent>
             </Sheet>
           </div>
-
         </div>
       </div>
     </header>
   );
-});
-
-Header.displayName = 'Header';
+};
 
 export default Header;
