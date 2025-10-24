@@ -1,43 +1,58 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
-import Analytics from "./pages/Analytics";
-import Benchmark from "./pages/Benchmark";
-import Agents from "./pages/Agents";
-import Team from "./pages/Team";
-import Marketplace from "./pages/Marketplace";
-import Settings from "./pages/Settings";
-import Compliance from "./pages/Compliance";
-import Community from "./pages/Community";
-import Enterprise from "./pages/Enterprise";
-import Auth from "./pages/Auth";
-import NotFound from "./pages/NotFound";
-import OptimizationLab from "./pages/OptimizationLab";
-import Integrations from "./pages/Integrations";
-import Admin from "./pages/Admin";
-import Profile from "./pages/Profile";
-import VisualBuilder from "./pages/VisualBuilder";
-import AICopilotPage from "./pages/AICopilot";
-import Templates from "./pages/Templates";
-import History from "./pages/History";
-import Workflow from "./pages/Workflow";
-import LegalPacks from "./pages/LegalPacks";
-import ApiKeys from "./pages/ApiKeys";
-import Usage from "./pages/Usage";
-import CompliancePage from "./pages/CompliancePage";
-import Pricing from "./pages/Pricing";
-import Payment from "./pages/Payment";
+
+// Lazy load all pages for code splitting and better performance
+const Home = lazy(() => import("./pages/Home"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const Benchmark = lazy(() => import("./pages/Benchmark"));
+const Agents = lazy(() => import("./pages/Agents"));
+const Team = lazy(() => import("./pages/Team"));
+const Marketplace = lazy(() => import("./pages/Marketplace"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Compliance = lazy(() => import("./pages/Compliance"));
+const Community = lazy(() => import("./pages/Community"));
+const Enterprise = lazy(() => import("./pages/Enterprise"));
+const Auth = lazy(() => import("./pages/Auth"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const OptimizationLab = lazy(() => import("./pages/OptimizationLab"));
+const Integrations = lazy(() => import("./pages/Integrations"));
+const Admin = lazy(() => import("./pages/Admin"));
+const Profile = lazy(() => import("./pages/Profile"));
+const VisualBuilder = lazy(() => import("./pages/VisualBuilder"));
+const AICopilotPage = lazy(() => import("./pages/AICopilot"));
+const Templates = lazy(() => import("./pages/Templates"));
+const History = lazy(() => import("./pages/History"));
+const Workflow = lazy(() => import("./pages/Workflow"));
+const LegalPacks = lazy(() => import("./pages/LegalPacks"));
+const ApiKeys = lazy(() => import("./pages/ApiKeys"));
+const Usage = lazy(() => import("./pages/Usage"));
+const CompliancePage = lazy(() => import("./pages/CompliancePage"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const Payment = lazy(() => import("./pages/Payment"));
+
+// Loading component for Suspense fallback
+const PageLoader = () => (
+  <div className="min-h-screen w-full bg-black flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto"></div>
+      <p className="mt-4 text-white text-sm font-medium">Loading...</p>
+    </div>
+  </div>
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
     },
   },
 });
@@ -49,7 +64,8 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
@@ -80,6 +96,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

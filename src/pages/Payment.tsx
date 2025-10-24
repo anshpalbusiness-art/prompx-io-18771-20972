@@ -177,7 +177,7 @@ export default function Payment() {
   };
 
   return (
-    <Layout>
+    <Layout user={user}>
       <div className="min-h-screen bg-black py-16 relative overflow-hidden smooth-page">
         {/* Large Background Text */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
