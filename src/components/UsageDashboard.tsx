@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,7 @@ interface UsageDashboardProps {
   user: User | null;
 }
 
-export default function UsageDashboard({ user }: UsageDashboardProps) {
+const UsageDashboard = React.memo(({ user }: UsageDashboardProps) => {
   const [promptUsage, setPromptUsage] = useState<UsageInfo | null>(null);
   const [currentPlan, setCurrentPlan] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -135,15 +135,22 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
   };
 
   if (loading) {
-    return <div className="text-center py-8">Loading usage data...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="inline-flex h-12 w-12 animate-spin rounded-full border-4 border-zinc-800 border-t-white"></div>
+          <p className="mt-4 text-sm font-medium text-zinc-400">Loading usage data...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Usage Dashboard</h2>
-          <p className="text-sm text-muted-foreground">Track your subscription and usage</p>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">Usage Dashboard</h2>
+          <p className="text-sm text-zinc-400">Track your subscription and usage</p>
         </div>
         <div className="flex gap-2">
           <Button 
@@ -168,32 +175,36 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="border-zinc-800/40 bg-gradient-to-br from-zinc-900/60 via-black to-zinc-950 backdrop-blur-xl hover:border-zinc-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-white/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Plan</CardTitle>
-            <Zap className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold text-zinc-300">Current Plan</CardTitle>
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10">
+              <Zap className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{currentPlan?.plan_name || "Free"}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">{currentPlan?.plan_name || "Free"}</div>
+            <p className="text-xs text-zinc-500 font-medium">
               ${currentPlan?.price_monthly || 0}/month
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-zinc-800/40 bg-gradient-to-br from-zinc-900/60 via-black to-zinc-950 backdrop-blur-xl hover:border-zinc-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-white/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-semibold text-zinc-300">
               {planAccess.planType === 'free' ? 'Daily Prompts' : 'Prompts Used'}
             </CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10">
+              <Activity className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${getUsageColor(promptUsage?.used || 0, promptUsage?.limit || 0)}`}>
+            <div className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">
               {promptUsage?.used || 0}
               {promptUsage?.limit !== -1 && ` / ${promptUsage?.limit}`}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-zinc-500 font-medium">
               {promptUsage?.limit === -1 
                 ? "Unlimited" 
                 : planAccess.planType === 'free'
@@ -204,46 +215,50 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-zinc-800/40 bg-gradient-to-br from-zinc-900/60 via-black to-zinc-950 backdrop-blur-xl hover:border-zinc-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-white/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Workflows</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold text-zinc-300">Workflows</CardTitle>
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10">
+              <TrendingUp className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">
               {currentPlan?.limits?.workflows === -1
                 ? "Unlimited"
                 : currentPlan?.limits?.workflows || 0}
             </div>
-            <p className="text-xs text-muted-foreground">Available workflows</p>
+            <p className="text-xs text-zinc-500 font-medium">Available workflows</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-zinc-800/40 bg-gradient-to-br from-zinc-900/60 via-black to-zinc-950 backdrop-blur-xl hover:border-zinc-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-white/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">API Calls</CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-semibold text-zinc-300">API Calls</CardTitle>
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10">
+              <Shield className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">
               {currentPlan?.limits?.api_calls === -1
                 ? "Unlimited"
                 : currentPlan?.limits?.api_calls === 0
                 ? "Not Available"
                 : `${currentPlan?.limits?.api_calls || 0}/mo`}
             </div>
-            <p className="text-xs text-muted-foreground">Monthly API limit</p>
+            <p className="text-xs text-zinc-500 font-medium">Monthly API limit</p>
           </CardContent>
         </Card>
       </div>
 
       {promptUsage && promptUsage.limit !== -1 && (
-        <Card>
+        <Card className="border-zinc-800/40 bg-gradient-to-br from-zinc-900/60 via-black to-zinc-950 backdrop-blur-xl">
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="text-white font-bold">
               {planAccess.planType === 'free' ? 'Daily Usage Limit' : 'Usage This Month'}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-zinc-400">
               {planAccess.planType === 'free' 
                 ? 'Your daily prompt generation usage (resets every 24 hours)'
                 : 'Your prompt optimization usage for the current billing period'
@@ -253,24 +268,26 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">
+                <span className="text-sm font-semibold text-zinc-300">
                   {planAccess.planType === 'free' ? 'Prompt Generations Today' : 'Prompt Optimizations'}
                 </span>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-zinc-400 font-medium">
                   {promptUsage.used} / {promptUsage.limit}
                 </span>
               </div>
               <Progress value={calculatePercentage(promptUsage.used, promptUsage.limit)} />
               
               {planAccess.planType === 'free' && promptUsage.remaining === 0 && (
-                <div className="flex flex-col gap-3 p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex flex-col gap-3 p-4 bg-gradient-to-r from-orange-900/20 via-amber-900/20 to-yellow-900/20 border border-orange-800/40 rounded-xl backdrop-blur-sm">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-amber-600" />
-                    <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                    <div className="p-1.5 rounded-lg bg-orange-500/20 border border-orange-500/40">
+                      <Clock className="w-4 h-4 text-orange-300" />
+                    </div>
+                    <Badge className="bg-gradient-to-r from-orange-900/60 to-amber-900/60 text-orange-200 border-orange-700/50 font-semibold">
                       Daily Limit Reached
                     </Badge>
                   </div>
-                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                  <p className="text-sm text-orange-200/90 font-medium leading-relaxed">
                     You've used your 1 free prompt for today. Your limit will reset in 24 hours, or upgrade to Pro for unlimited prompts!
                   </p>
                   <div className="flex gap-2">
@@ -278,7 +295,7 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
                       variant="default" 
                       size="sm" 
                       onClick={handleUpgrade}
-                      className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white"
+                      className="bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-100 hover:to-white font-bold shadow-lg shadow-white/10 transition-all duration-300 hover:shadow-white/20 hover:scale-105"
                     >
                       <Target className="w-4 h-4 mr-2" />
                       Upgrade to Pro
@@ -317,10 +334,10 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
         </Card>
       )}
 
-      <Card>
+      <Card className="border-zinc-800/40 bg-gradient-to-br from-zinc-900/60 via-black to-zinc-950 backdrop-blur-xl">
         <CardHeader>
-          <CardTitle>Plan Features</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white font-bold">Plan Features</CardTitle>
+          <CardDescription className="text-zinc-400">
             {planAccess.planType === 'free' 
               ? 'Your free plan includes these trial features'
               : 'Your current plan includes these features'
@@ -331,83 +348,113 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
           <ul className="space-y-2">
             {planAccess.planType === 'free' ? (
               <>
-                <li className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">✓</Badge>
-                  <span className="text-sm">1 Prompt Generation per Day</span>
+                <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-700/40">
+                    <span className="text-xs font-bold text-green-300">✓</span>
+                  </div>
+                  <span className="text-sm text-zinc-300 font-medium">1 Prompt Generation per Day</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">✓</Badge>
-                  <span className="text-sm">1 AI Agent Creation</span>
+                <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-700/40">
+                    <span className="text-xs font-bold text-green-300">✓</span>
+                  </div>
+                  <span className="text-sm text-zinc-300 font-medium">1 AI Agent Creation</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">✓</Badge>
-                  <span className="text-sm">Basic Template Access</span>
+                <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-700/40">
+                    <span className="text-xs font-bold text-green-300">✓</span>
+                  </div>
+                  <span className="text-sm text-zinc-300 font-medium">Basic Template Access</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">✓</Badge>
-                  <span className="text-sm">Community Support</span>
+                <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-700/40">
+                    <span className="text-xs font-bold text-green-300">✓</span>
+                  </div>
+                  <span className="text-sm text-zinc-300 font-medium">Community Support</span>
                 </li>
-                <li className="flex items-center gap-2 opacity-50">
-                  <Badge variant="outline" className="bg-gray-50 text-gray-500 border-gray-200">✗</Badge>
-                  <span className="text-sm text-gray-500">Unlimited Prompts</span>
+                <li className="flex items-center gap-3 p-2 rounded-lg opacity-50">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-800/40 border border-zinc-700/40">
+                    <span className="text-xs font-bold text-zinc-500">✗</span>
+                  </div>
+                  <span className="text-sm text-zinc-500 font-medium">Unlimited Prompts</span>
                 </li>
-                <li className="flex items-center gap-2 opacity-50">
-                  <Badge variant="outline" className="bg-gray-50 text-gray-500 border-gray-200">✗</Badge>
-                  <span className="text-sm text-gray-500">Advanced Workflows</span>
+                <li className="flex items-center gap-3 p-2 rounded-lg opacity-50">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-800/40 border border-zinc-700/40">
+                    <span className="text-xs font-bold text-zinc-500">✗</span>
+                  </div>
+                  <span className="text-sm text-zinc-500 font-medium">Advanced Workflows</span>
                 </li>
-                <li className="flex items-center gap-2 opacity-50">
-                  <Badge variant="outline" className="bg-gray-50 text-gray-500 border-gray-200">✗</Badge>
-                  <span className="text-sm text-gray-500">Priority Support</span>
+                <li className="flex items-center gap-3 p-2 rounded-lg opacity-50">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-800/40 border border-zinc-700/40">
+                    <span className="text-xs font-bold text-zinc-500">✗</span>
+                  </div>
+                  <span className="text-sm text-zinc-500 font-medium">Priority Support</span>
                 </li>
               </>
             ) : (
               <>
                 {currentPlan?.features?.prompt_optimization && (
-                  <li className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
-                    <span className="text-sm">Unlimited Prompt Generation</span>
+                  <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-700/40">
+                      <span className="text-xs font-bold text-green-300">✓</span>
+                    </div>
+                    <span className="text-sm text-zinc-300 font-medium">Unlimited Prompt Generation</span>
                   </li>
                 )}
                 {currentPlan?.features?.advanced_workflows && (
-                  <li className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
-                    <span className="text-sm">Advanced Workflows</span>
+                  <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-700/40">
+                      <span className="text-xs font-bold text-green-300">✓</span>
+                    </div>
+                    <span className="text-sm text-zinc-300 font-medium">Advanced Workflows</span>
                   </li>
                 )}
                 {currentPlan?.features?.compliance_checks && (
-                  <li className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
-                    <span className="text-sm">Compliance Checks</span>
+                  <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-700/40">
+                      <span className="text-xs font-bold text-green-300">✓</span>
+                    </div>
+                    <span className="text-sm text-zinc-300 font-medium">Compliance Checks</span>
                   </li>
                 )}
                 {currentPlan?.features?.team_collaboration && (
-                  <li className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
-                    <span className="text-sm">Team Collaboration</span>
+                  <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-700/40">
+                      <span className="text-xs font-bold text-green-300">✓</span>
+                    </div>
+                    <span className="text-sm text-zinc-300 font-medium">Team Collaboration</span>
                   </li>
                 )}
                 {currentPlan?.features?.priority_support && (
-                  <li className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
-                    <span className="text-sm">Priority Support</span>
+                  <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-700/40">
+                      <span className="text-xs font-bold text-green-300">✓</span>
+                    </div>
+                    <span className="text-sm text-zinc-300 font-medium">Priority Support</span>
                   </li>
                 )}
                 {currentPlan?.features?.dedicated_support && (
-                  <li className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
-                    <span className="text-sm">Dedicated Support</span>
+                  <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-700/40">
+                      <span className="text-xs font-bold text-green-300">✓</span>
+                    </div>
+                    <span className="text-sm text-zinc-300 font-medium">Dedicated Support</span>
                   </li>
                 )}
                 {currentPlan?.features?.custom_templates && (
-                  <li className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
-                    <span className="text-sm">Custom Templates</span>
+                  <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-700/40">
+                      <span className="text-xs font-bold text-green-300">✓</span>
+                    </div>
+                    <span className="text-sm text-zinc-300 font-medium">Custom Templates</span>
                   </li>
                 )}
                 {currentPlan?.features?.sso && (
-                  <li className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">✓</Badge>
-                    <span className="text-sm">SSO Authentication</span>
+                  <li className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-700/40">
+                      <span className="text-xs font-bold text-green-300">✓</span>
+                    </div>
+                    <span className="text-sm text-zinc-300 font-medium">SSO Authentication</span>
                   </li>
                 )}
               </>
@@ -415,10 +462,10 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
           </ul>
           
           {planAccess.planType === 'free' && (
-            <div className="mt-4 pt-4 border-t">
+            <div className="mt-4 pt-4 border-t border-zinc-800/40">
               <Button 
                 onClick={handleUpgrade}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                className="w-full bg-gradient-to-r from-white to-zinc-100 text-black hover:from-zinc-100 hover:to-white font-bold shadow-lg shadow-white/10 transition-all duration-300 hover:shadow-white/20 hover:scale-[1.02]"
               >
                 <Zap className="w-4 h-4 mr-2" />
                 Upgrade for Unlimited Access
@@ -429,4 +476,6 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
       </Card>
     </div>
   );
-}
+});
+
+export default UsageDashboard;
