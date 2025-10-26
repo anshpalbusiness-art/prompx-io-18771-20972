@@ -1,10 +1,24 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+
+// Component to prevent scroll restoration on navigation
+const ScrollRestoration = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Prevent browser from restoring scroll position on navigation
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, [location]);
+  
+  return null;
+};
 
 // Lazy load all pages for code splitting and better performance
 const Home = lazy(() => import("./pages/Home"));
@@ -64,6 +78,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollRestoration />
           <Suspense fallback={<PageLoader />}>
             <Routes>
             <Route path="/" element={<Home />} />

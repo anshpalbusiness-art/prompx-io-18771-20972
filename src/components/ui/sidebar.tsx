@@ -326,9 +326,79 @@ const SidebarSeparator = React.forwardRef<React.ElementRef<typeof Separator>, Re
 SidebarSeparator.displayName = "SidebarSeparator";
 
 const SidebarContent = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(({ className, ...props }, ref) => {
+  const contentRef = React.useRef<HTMLDivElement>(null);
+  const scrollPositionRef = React.useRef(0);
+  const isRestoringRef = React.useRef(false);
+
+  // Save scroll position continuously
+  React.useEffect(() => {
+    const element = contentRef.current;
+    if (!element) return;
+
+    const handleScroll = () => {
+      if (!isRestoringRef.current) {
+        scrollPositionRef.current = element.scrollTop;
+        sessionStorage.setItem('sidebar-scroll-position', element.scrollTop.toString());
+      }
+    };
+
+    element.addEventListener('scroll', handleScroll, { passive: true });
+    return () => element.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Restore scroll position immediately on mount and continuously after renders
+  React.useLayoutEffect(() => {
+    const element = contentRef.current;
+    if (!element) return;
+
+    const savedPosition = sessionStorage.getItem('sidebar-scroll-position');
+    const targetPosition = savedPosition ? parseInt(savedPosition, 10) : scrollPositionRef.current;
+    
+    if (targetPosition > 0 && element.scrollTop !== targetPosition) {
+      isRestoringRef.current = true;
+      element.scrollTop = targetPosition;
+      
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        isRestoringRef.current = false;
+      }, 100);
+    }
+  });
+
+  // Additional effect to prevent scroll reset on any re-render
+  React.useEffect(() => {
+    const element = contentRef.current;
+    if (!element) return;
+
+    // Create a MutationObserver to watch for DOM changes that might reset scroll
+    const observer = new MutationObserver(() => {
+      const savedPosition = sessionStorage.getItem('sidebar-scroll-position');
+      if (savedPosition && element.scrollTop === 0) {
+        const targetPosition = parseInt(savedPosition, 10);
+        if (targetPosition > 0) {
+          isRestoringRef.current = true;
+          element.scrollTop = targetPosition;
+          setTimeout(() => {
+            isRestoringRef.current = false;
+          }, 100);
+        }
+      }
+    });
+
+    observer.observe(element, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
-      ref={ref}
+      ref={(node) => {
+        contentRef.current = node;
+        if (typeof ref === 'function') {
+          ref(node);
+        } else if (ref) {
+          ref.current = node;
+        }
+      }}
       data-sidebar="content"
       className={cn(
         "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",

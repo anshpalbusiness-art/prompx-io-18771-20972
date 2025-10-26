@@ -415,12 +415,12 @@ export default function UsageDashboard({ user }: UsageDashboardProps) {
           </ul>
           
           {planAccess.planType === 'free' && (
-            <div className="mt-4 pt-4 border-t">
+            <div className="mt-4 pt-4 border-t border-zinc-800/40">
               <Button 
                 onClick={handleUpgrade}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                className="w-full bg-black text-white hover:bg-zinc-900 font-bold border border-zinc-800 hover:border-zinc-700 transition-all duration-300"
               >
-                <Zap className="w-4 h-4 mr-2" />
+                <Zap className="w-4 h-4 mr-2" strokeWidth={2.5} />
                 Upgrade for Unlimited Access
               </Button>
             </div>

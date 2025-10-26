@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
 import AgentTemplates from "@/components/AgentTemplates";
 import { User } from "@supabase/supabase-js";
+import { AIAssistant } from "@/components/AIAssistant";
 
 const Templates = () => {
   const navigate = useNavigate();
@@ -56,6 +57,10 @@ const Templates = () => {
           </div>
         </div>
       </div>
+      <AIAssistant 
+        featureName="Templates"
+        context="User is browsing and selecting prompt templates for various use cases"
+      />
     </Layout>
   );
 };
