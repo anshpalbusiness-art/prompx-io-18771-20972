@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, model = "claude-sonnet-4-5", systemPrompt, temperature = 1.0, maxTokens = 4096 } = await req.json();
+    const { prompt, systemPrompt, temperature = 0.7, maxTokens = 4096 } = await req.json();
 
     if (!prompt) {
       return new Response(
@@ -20,45 +20,40 @@ serve(async (req) => {
       );
     }
 
-    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
-    if (!ANTHROPIC_API_KEY) {
-      console.error('ANTHROPIC_API_KEY is not configured');
+    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
+    if (!GROK_API_KEY) {
+      console.error('GROK_API_KEY is not configured');
       return new Response(
-        JSON.stringify({ error: 'Claude API not configured' }),
+        JSON.stringify({ error: 'Grok API not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Executing prompt with Claude model:', model);
+    console.log('Executing prompt with Grok');
 
-    const messages = [
-      { role: 'user', content: prompt }
-    ];
-
-    const requestBody: any = {
-      model,
-      messages,
-      max_tokens: maxTokens,
-      temperature,
-    };
-
+    const messages: Array<{ role: 'system' | 'user'; content: string }> = [];
     if (systemPrompt) {
-      requestBody.system = systemPrompt;
+      messages.push({ role: 'system', content: systemPrompt });
     }
+    messages.push({ role: 'user', content: prompt });
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${GROK_API_KEY}`,
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        model: 'grok-2-1212',
+        messages,
+        max_tokens: maxTokens,
+        temperature,
+      }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Claude API error:', response.status, errorText);
+      console.error('Grok API error:', response.status, errorText);
       
       if (response.status === 429) {
         return new Response(
@@ -67,25 +62,25 @@ serve(async (req) => {
         );
       }
       
-      if (response.status === 402 || response.status === 400) {
+      if (response.status === 401) {
         return new Response(
-          JSON.stringify({ error: 'Credits exhausted or invalid request. Please check your API key and credits.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Invalid Grok API key.' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
       return new Response(
-        JSON.stringify({ error: 'Failed to execute prompt with Claude' }),
+        JSON.stringify({ error: 'Failed to execute prompt with Grok' }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await response.json();
-    const result = data.content?.[0]?.text;
+    const result = data.choices?.[0]?.message?.content;
 
     if (!result) {
       return new Response(
-        JSON.stringify({ error: 'No result from Claude' }),
+        JSON.stringify({ error: 'No result from Grok' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

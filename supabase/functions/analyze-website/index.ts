@@ -82,24 +82,21 @@ serve(async (req) => {
       .trim()
       .slice(0, 8000);
 
-    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
-    if (!ANTHROPIC_API_KEY) {
-      throw new Error('ANTHROPIC_API_KEY is not configured');
+    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
+    if (!GROK_API_KEY) {
+      throw new Error('GROK_API_KEY is not configured');
     }
 
-    console.log('Analyzing website with Claude AI...');
+    console.log('Analyzing website with Grok AI...');
     
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${GROK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 4096,
-        temperature: 0.7,
+        model: 'grok-2-1212',
         messages: [
           {
             role: 'user',
@@ -142,7 +139,9 @@ Content: ${textContent}
 
 Generate a detailed, actionable prompt that an AI could use to build a functionally equivalent website. Be specific about design choices, user flows, technical requirements, and business logic.`
           }
-        ]
+        ],
+        max_tokens: 4096,
+        temperature: 0.7,
       }),
     });
 
@@ -153,19 +152,19 @@ Generate a detailed, actionable prompt that an AI could use to build a functiona
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      if (response.status === 402 || response.status === 400) {
+      if (response.status === 401) {
         return new Response(
-          JSON.stringify({ error: 'API error. Please check your Anthropic API key in Secrets.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Invalid Grok API key in Secrets.' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       const errorText = await response.text();
-      console.error('Claude API error:', response.status, errorText);
-      throw new Error(`Claude API error: ${response.status}`);
+      console.error('Grok API error:', response.status, errorText);
+      throw new Error(`Grok API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const analysis = data.content[0].text;
+    const analysis = data.choices[0].message.content;
     
     console.log('Website analysis completed successfully');
 

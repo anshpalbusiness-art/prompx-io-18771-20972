@@ -141,36 +141,37 @@ Provide:
 
 Format as JSON with: optimized, alternatives (array), improvements (array), impact, testing, notes`;
 
-    // Use Claude for superior optimization
-    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+    // Use Grok for superior optimization
+    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
     
-    if (!ANTHROPIC_API_KEY) {
-      throw new Error('ANTHROPIC_API_KEY is not configured');
+    if (!GROK_API_KEY) {
+      throw new Error('GROK_API_KEY is not configured');
     }
     
-    const aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
+    const aiResponse = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${GROK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'grok-2-1212',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
         max_tokens: 4096,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }]
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('Claude API Error:', errorText);
-      throw new Error(`Claude API error: ${aiResponse.status}`);
+      console.error('Grok API Error:', errorText);
+      throw new Error(`Grok API error: ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
-    const responseText = aiData.content[0].text;
+    const responseText = aiData.choices[0].message.content;
     
     // Parse JSON response
     let optimization;

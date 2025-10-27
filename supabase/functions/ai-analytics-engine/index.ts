@@ -22,10 +22,10 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
+    const grokApiKey = Deno.env.get('GROK_API_KEY');
     
-    if (!anthropicApiKey) {
-      throw new Error('ANTHROPIC_API_KEY is not configured');
+    if (!grokApiKey) {
+      throw new Error('GROK_API_KEY is not configured');
     }
     
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -142,28 +142,28 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
         break;
     }
 
-    // Call Anthropic Claude for intelligent analysis
-    const aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
+    // Call Grok for intelligent analysis
+    const aiResponse = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${grokApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'grok-2-1212',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
         max_tokens: 4096,
         temperature: 0.7,
-        messages: [
-          { role: 'user', content: systemPrompt + '\n\n' + userPrompt }
-        ]
       }),
     });
 
     if (!aiResponse.ok) {
       const status = aiResponse.status;
       const bodyText = await aiResponse.text();
-      console.error('Claude API Error:', status, bodyText);
+      console.error('Grok API Error:', status, bodyText);
 
       if (status === 429) {
         return new Response(
@@ -171,10 +171,10 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      if (status === 402 || status === 400) {
+      if (status === 401) {
         return new Response(
-          JSON.stringify({ error: 'API error. Please check your Anthropic API key in Secrets.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Invalid Grok API key in Secrets.' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
@@ -185,7 +185,7 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
     let analysis;
 
     try {
-      const content = aiData.content?.[0]?.text as string | undefined;
+      const content = aiData.choices?.[0]?.message?.content as string | undefined;
       const jsonMatch = content?.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         analysis = JSON.parse(jsonMatch[0]);
@@ -200,7 +200,7 @@ Format as JSON with: patterns, anomalies, comparisons, discoveries, trends`;
       }
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
-      const content = aiData.content?.[0]?.text || 'No analysis available';
+      const content = aiData.choices?.[0]?.message?.content || 'No analysis available';
       analysis = {
         insights: [{
           title: 'Data Analysis',

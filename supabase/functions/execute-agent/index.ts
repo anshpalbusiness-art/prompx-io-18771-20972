@@ -42,47 +42,47 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Loaded agent: ${agent.name}, using Claude Sonnet 4.5`);
+    console.log(`Loaded agent: ${agent.name}, using Grok`);
 
-    // Get Claude API key
-    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
-    if (!ANTHROPIC_API_KEY) {
+    // Get Grok API key
+    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
+    if (!GROK_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'ANTHROPIC_API_KEY is not configured' }),
+        JSON.stringify({ error: 'GROK_API_KEY is not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     // Build enhanced message context with conversation history
-    const claudeMessages = [];
+    const grokMessages = [];
+    
+    // Add system prompt
+    if (agent.system_prompt) {
+      grokMessages.push({ role: 'system', content: agent.system_prompt });
+    }
     
     // Add conversation history for context-aware responses
     if (conversationHistory && conversationHistory.length > 0) {
       console.log(`Adding ${conversationHistory.length} history messages for context`);
-      claudeMessages.push(...conversationHistory.map((msg: any) => ({
-        role: msg.role === 'system' ? 'user' : msg.role,
-        content: msg.content
-      })));
+      grokMessages.push(...conversationHistory.filter((msg: any) => msg.role !== 'system'));
     }
     
     // Add current user input
-    claudeMessages.push({ role: 'user', content: userInput });
+    grokMessages.push({ role: 'user', content: userInput });
 
     const startTime = Date.now();
 
-    // Call Claude API with streaming support
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Call Grok API with streaming support
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${GROK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'grok-2-1212',
+        messages: grokMessages,
         max_tokens: agent.max_tokens || 4096,
-        system: agent.system_prompt,
-        messages: claudeMessages,
         stream: stream,
       }),
     });
@@ -95,17 +95,17 @@ serve(async (req) => {
       );
     }
 
-    if (response.status === 402 || response.status === 400) {
+    if (response.status === 401) {
       console.warn('API error');
       return new Response(
-        JSON.stringify({ error: 'Claude API error. Please check your API key.' }),
-        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Invalid Grok API key.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Claude API error:', response.status, errorText);
+      console.error('Grok API error:', response.status, errorText);
       
       // Track failed analytics
       if (userId) {
@@ -115,12 +115,12 @@ serve(async (req) => {
           conversation_id: conversationId,
           success: false,
           error_message: `HTTP ${response.status}: ${errorText}`,
-          model_used: 'claude-sonnet-4-5',
+          model_used: 'grok-2-1212',
         });
       }
       
       return new Response(
-        JSON.stringify({ error: 'Failed to generate response from Claude AI' }),
+        JSON.stringify({ error: 'Failed to generate response from Grok AI' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -140,9 +140,9 @@ serve(async (req) => {
 
     // Handle non-streaming response
     const data = await response.json();
-    const aiResponse = data.content?.[0]?.text || 'No response generated';
+    const aiResponse = data.choices?.[0]?.message?.content || 'No response generated';
     const responseTime = Date.now() - startTime;
-    const tokensUsed = data.usage?.input_tokens + data.usage?.output_tokens || 0;
+    const tokensUsed = (data.usage?.prompt_tokens || 0) + (data.usage?.completion_tokens || 0);
     
     console.log(`Response generated in ${responseTime}ms, ${tokensUsed} tokens, length: ${aiResponse.length} chars`);
 
@@ -160,7 +160,7 @@ serve(async (req) => {
         conversation_id: conversationId,
         response_time_ms: responseTime,
         tokens_used: tokensUsed,
-        model_used: 'claude-sonnet-4-5',
+        model_used: 'grok-2-1212',
         success: true,
       });
     }
@@ -189,7 +189,7 @@ serve(async (req) => {
         response: aiResponse,
         responseTime,
         tokensUsed,
-        model: 'claude-sonnet-4-5',
+        model: 'grok-2-1212',
         conversationId,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
