@@ -25,9 +25,9 @@ serve(async (req) => {
       );
     }
 
-    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!ANTHROPIC_API_KEY) {
-      throw new Error("ANTHROPIC_API_KEY is not configured");
+    const GROK_API_KEY = Deno.env.get("GROK_API_KEY");
+    if (!GROK_API_KEY) {
+      throw new Error("GROK_API_KEY is not configured");
     }
 
     const prompt = `You are an expert proofreading AI. Your job is to correct spelling mistakes, grammar errors, and improve sentence structure while preserving the original meaning and intent. Return ONLY the corrected text without any explanations or additional commentary. Fix:
@@ -41,20 +41,19 @@ Important: If the text is already correct, return it unchanged. Always maintain 
 
 Text to proofread: ${text}`;
 
-    // Call Claude API
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Call Grok API
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${GROK_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5",
-        max_tokens: 1024,
+        model: "grok-2-1212",
         messages: [
           { role: 'user', content: prompt }
-        ]
+        ],
+        max_tokens: 1024,
       }),
     });
 
@@ -65,14 +64,14 @@ Text to proofread: ${text}`;
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 402 || response.status === 401) {
+      if (response.status === 401) {
         return new Response(
-          JSON.stringify({ error: "Invalid or missing ANTHROPIC_API_KEY. Please check your Anthropic API key in Secrets." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "Invalid or missing GROK_API_KEY. Please check your Grok API key in Secrets." }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       const errorText = await response.text();
-      console.error("Claude API error:", response.status, errorText);
+      console.error("Grok API error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "AI proofreading failed" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -80,7 +79,7 @@ Text to proofread: ${text}`;
     }
 
     const data = await response.json();
-    const correctedText = data.content?.[0]?.text?.trim() || text;
+    const correctedText = data.choices?.[0]?.message?.content?.trim() || text;
 
     console.log(`Proofread: "${text}" → "${correctedText}"`);
 

@@ -19,10 +19,10 @@ serve(async (req) => {
 
     console.log('Sanitizing prompt...');
 
-    const GOOGLE_AI_KEY = Deno.env.get('GOOGLE_AI_STUDIO_API_KEY');
-    if (!GOOGLE_AI_KEY) {
+    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
+    if (!GROK_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'GOOGLE_AI_STUDIO_API_KEY is not configured' }),
+        JSON.stringify({ error: 'GROK_API_KEY is not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -50,21 +50,20 @@ If the prompt needs reframing, respond with JSON:
 
 Respond ONLY with valid JSON, no other text.`;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GOOGLE_AI_KEY}`, {
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${GROK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `You are a prompt safety expert. Always respond with valid JSON only.\n\n${sanitizationPrompt}`
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 1000
-        }
+        model: 'grok-2-1212',
+        messages: [
+          { role: 'system', content: 'You are a prompt safety expert. Always respond with valid JSON only.' },
+          { role: 'user', content: sanitizationPrompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 1000,
       }),
     });
 
@@ -92,7 +91,7 @@ Respond ONLY with valid JSON, no other text.`;
     }
 
     const data = await response.json();
-    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const aiResponse = data.choices?.[0]?.message?.content || '';
     
     console.log('AI response:', aiResponse);
 

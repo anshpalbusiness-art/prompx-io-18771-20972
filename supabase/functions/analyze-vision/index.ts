@@ -20,12 +20,12 @@ serve(async (req) => {
       );
     }
 
-    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
-    if (!ANTHROPIC_API_KEY) {
-      throw new Error('ANTHROPIC_API_KEY is not configured');
+    const GROK_API_KEY = Deno.env.get('GROK_API_KEY');
+    if (!GROK_API_KEY) {
+      throw new Error('GROK_API_KEY is not configured');
     }
 
-    console.log('Analyzing image with Claude Vision...');
+    console.log('Analyzing image with Grok Vision...');
     
     // Extract base64 image data if it's a data URL
     let imageData = image;
@@ -39,28 +39,23 @@ serve(async (req) => {
       }
     }
     
-    // Use Claude's vision capabilities for superior image analysis
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Use Grok's vision capabilities for image analysis
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${GROK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 4096,
-        temperature: 0.7,
+        model: 'grok-2-vision-1212',
         messages: [
           {
             role: 'user',
             content: [
               {
-                type: 'image',
-                source: {
-                  type: 'base64',
-                  media_type: mediaType,
-                  data: imageData
+                type: 'image_url',
+                image_url: {
+                  url: `data:${mediaType};base64,${imageData}`
                 }
               },
               {
@@ -104,7 +99,9 @@ Provide a detailed, actionable analysis that would help someone recreate or buil
               }
             ]
           }
-        ]
+        ],
+        max_tokens: 4096,
+        temperature: 0.7,
       }),
     });
 
@@ -127,7 +124,7 @@ Provide a detailed, actionable analysis that would help someone recreate or buil
     }
 
     const data = await response.json();
-    const analysis = data.content[0].text;
+    const analysis = data.choices[0].message.content;
     
     console.log('Image analysis completed successfully');
 
